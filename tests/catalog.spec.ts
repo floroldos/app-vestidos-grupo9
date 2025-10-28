@@ -4,9 +4,9 @@ import { HomePage } from './pages/HomePage';
 
 test.use({ baseURL: 'http://localhost:3000' });
 
-test.describe('Navegación y Catálogo (Shop)', () => {
+test.describe('Navegacion y catalogo', () => {
     
-    test('Debe navegar al Catálogo desde la Home y verificar que el formulario está visible', async ({ page }) => {
+    test('navega al catalogo desde la Home y verificar que el formulario esta visible', async ({ page }) => {
         const homePage = new HomePage(page);
         const catalogPage = new CatalogPage(page);
 
@@ -20,21 +20,18 @@ test.describe('Navegación y Catálogo (Shop)', () => {
         await expect(page.getByRole('button', { name: 'Search' })).toBeVisible();
     });
 
-    test('Debe abrir la página de detalles de un producto desde el Catálogo', async ({ page }) => {
+    test('abre la página de detalles de un producto desde el catalogo', async ({ page }) => {
         const catalogPage = new CatalogPage(page);
 
         await catalogPage.goto(); 
-        
-        // 1. Asegurarse de que el catálogo está cargado (y hay resultados)
         await catalogPage.assertCatalogLoaded();
-
         await catalogPage.openFirstProduct();
         
         await expect(page).toHaveURL(/.*items\/[a-zA-Z0-9-]+/); 
         await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     });
     
-    test('Debe abrir la página de detalles de un producto directamente desde la Home (si hay productos destacados)', async ({ page }) => {
+    test('Debe abrir la pagina de detalles de un producto directamente desde la Home ', async ({ page }) => {
         const homePage = new HomePage(page);
 
         await homePage.goto();
@@ -44,7 +41,7 @@ test.describe('Navegación y Catálogo (Shop)', () => {
         if (productOpened) {
             await expect(page).toHaveURL(/.*items\/[a-zA-Z0-9-]+/); 
         } else {
-            console.log("Advertencia: No se encontraron productos destacados en la Home para probar la apertura de detalles.");
+            console.log("no se encontraron productos destacados en la Home para probar la apertura de detalles.");
         }
     });
 });

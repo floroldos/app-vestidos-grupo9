@@ -3,7 +3,6 @@ import { Page, Locator, expect } from '@playwright/test';
 export class CatalogPage {
     constructor(private page: Page) { }
 
-    // Cambiado de 'button' a 'link' para que coincida con el elemento "View details" en tu código.
     private firstViewDetails = this.page.getByRole('link', { name: /view details|ver detalles/i }).first();
     
     private searchInput = this.page.getByPlaceholder('Search…');
@@ -26,10 +25,6 @@ export class CatalogPage {
         await this.firstViewDetails.click();
     }
     
-    /**
-     * Realiza una búsqueda por palabra clave y ejecuta el filtro.
-     * @param query Palabra o frase a buscar.
-     */
     async searchByQuery(query: string) {
         await this.searchInput.fill(query);
         await this.searchButton.click();
