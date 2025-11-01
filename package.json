@@ -14,6 +14,7 @@
     "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
+    "jsonwebtoken": "^9.0.2",
     "next": "15.4.6",
     "react": "19.1.0",
     "react-dom": "19.1.0"
@@ -22,6 +23,7 @@
     "@eslint/eslintrc": "^3",
     "@playwright/test": "^1.56.1",
     "@tailwindcss/postcss": "^4",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

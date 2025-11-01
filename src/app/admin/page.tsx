@@ -11,7 +11,8 @@ type AdminItem = {
 };
 
 export default async function Page() {
-  if (!isAdmin()) redirect("/admin/login");
+  const admin = await isAdmin();
+  if (!admin) redirect("/admin/login"); //redirigir si no es admin
   const csrf = await getOrCreateCsrfToken();
 
   const items = listItems();
@@ -41,7 +42,7 @@ export default async function Page() {
               </tr>
             </thead>
             <tbody>
-            {items.map((i: AdminItem) => (
+              {items.map((i: AdminItem) => (
                 <tr key={i.id} className="border-t">
                   <td className="py-2 pr-4">{i.id}</td>
                   <td className="py-2 pr-4">{i.name}</td>
