@@ -6,6 +6,8 @@ test.use({ baseURL: 'http://localhost:3000' });
 
 test.describe('Navegación y catálogo', () => {
 
+    // --- TESTS DE NAVEGACIÓN BÁSICA ---
+
     test('navega al catálogo desde la Home y verifica que el formulario está visible', async ({ page }) => {
         const homePage = new HomePage(page);
         const catalogPage = new CatalogPage(page);
@@ -45,8 +47,10 @@ test.describe('Navegación y catálogo', () => {
         }
     });
 
-    // 🧪 --- TESTS DE FILTROS DEL CATÁLOGO ---
-    test.describe('Filtros de catálogo', () => {
+    // --- TESTS DE FILTROS (RF-001) ---
+
+    test.describe('Filtros de catálogo (RF-001)', () => {
+
         test.beforeEach(async ({ catalog }) => {
             await catalog.goto();
             await catalog.assertCatalogLoaded();
@@ -67,13 +71,55 @@ test.describe('Navegación y catálogo', () => {
             await catalog.assertNoResults();
         });
 
-        test('combina varios filtros (query, categoría, estilo)', async ({ catalog }) => {
-            await catalog.applyComplexFilter({
-                query: 'red',
-                category: 'dress',
-                style: 'cocktail',
-            });
+        test('filtra vestidos por talla y color', async ({ catalog }) => {
+            await catalog.applyComplexFilter({ category: 'dress' });
+            await catalog.Page.getByPlaceholder('Size').fill('M');
+            await catalog.Page.getByPlaceholder('Color').fill('black');
+            await catalog.Page.getByRole('button', { name: 'Search' }).click();
+
             await catalog.assertResultsAreVisible();
+
+            // Validar que todos los resultados pertenecen a "dress"
+            const categories = await catalog.Page.locator('.text-xs.uppercase').allInnerTexts();
+            for (const cat of categories) {
+                expect(cat.toLowerCase()).toContain('dress');
+            }
+        });
+
+        test('combina filtros de vestidos correctamente (talla, color, estilo)', async ({ catalog }) => {
+            await catalog.applyComplexFilter({
+                category: 'dress',
+                style: 'gala',
+            });
+
+            await catalog.Page.getByPlaceholder('Size').fill('M');
+            await catalog.Page.getByPlaceholder('Color').fill('black');
+            await catalog.Page.getByRole('button', { name: 'Search' }).click();
+
+            await catalog.assertResultsAreVisible();
+
+            const categories = await catalog.Page.locator('.text-xs.uppercase').allInnerTexts();
+            for (const cat of categories) {
+                expect(cat.toLowerCase()).toContain('dress');
+            }
+        });
+
+        test('actualiza resultados dinámicamente al cambiar filtros', async ({ catalog }) => {
+            await catalog.goto();
+            await catalog.assertCatalogLoaded();
+
+            // Buscar un vestido
+            await catalog.Page.getByPlaceholder('Search…').fill('dress');
+            await catalog.Page.getByRole('button', { name: 'Search' }).click();
+            await catalog.assertResultsAreVisible();
+
+            // Cambiar color
+            await catalog.Page.getByPlaceholder('Color').fill('red');
+            await catalog.Page.getByRole('button', { name: 'Search' }).click();
+
+            // Verificar que los resultados cambian 
+            const hasRedItems = await catalog.Page.locator('.grid').innerText();
+            expect(hasRedItems.toLowerCase()).toContain('red');
         });
     });
 });
