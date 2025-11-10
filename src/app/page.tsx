@@ -123,8 +123,8 @@ export default function Home() {
                     className="object-cover"
                     priority={item.id === 1}
                   />
-                  <div className="absolute inset-0 flex items:end p-4">
-                    <span className="inline-flex items-center rounded-full bg-white/85 dark:bg-slate-800/80 backdrop-blur px-2.5 py-1 text-xs font-medium text-slate-800 dark:text-slate-100">
+                  <div className="absolute top-4 left-4">
+                    <span className="inline-flex items-center rounded-full bg-white/85 dark:bg-slate-800/80 px-2.5 py-1 text-xs font-medium text-slate-800 dark:text-slate-100 shadow-sm">
                       From ${item.price}/day
                     </span>
                   </div>
