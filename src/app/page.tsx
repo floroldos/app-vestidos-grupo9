@@ -63,7 +63,7 @@ export default function Home() {
                     id="start"
                     name="start"
                     type="date"
-                    className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-fuchsia-500"
+                    className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-3 text-sm outline-none focus:ring-2 focus:ring-fuchsia-500"
                   />
                 </div>
                 <div>
@@ -72,7 +72,7 @@ export default function Home() {
                     id="end"
                     name="end"
                     type="date"
-                    className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-fuchsia-500"
+                    className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-3 text-sm outline-none focus:ring-2 focus:ring-fuchsia-500"
                   />
                 </div>
                 <div>
