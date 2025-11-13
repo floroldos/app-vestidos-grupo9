@@ -1,14 +1,14 @@
 import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
 
 const CSRF_COOKIE = "gr_csrf";
 const SESSION_COOKIE = "gr_admin";
+const SECRET = process.env.SESSION_SECRET || "default_secret_key";
 
 export async function getOrCreateCsrfToken() {
     const c = await cookies();
     let token = c.get(CSRF_COOKIE)?.value;
     if (!token) {
-        // In RSC render we cannot write cookies; generate a token so the form has one.
-        // The actual cookie will be ensured via middleware.
         token = crypto.randomUUID();
     }
     return token;
@@ -20,26 +20,38 @@ export async function verifyCsrfToken(formToken: string | null | undefined) {
     return !!cookieToken && cookieToken === formToken;
 }
 
-
 export async function setAdminSession() {
-    const token = crypto.randomUUID();
+    const token = jwt.sign({ role: "admin" }, SECRET, { expiresIn: "1h" });
     const c = await cookies();
     c.set(SESSION_COOKIE, token, {
         httpOnly: true,
         sameSite: "lax",
         secure: process.env.NODE_ENV === "production",
         path: "/",
+        maxAge: 60 * 60,
     });
     return token;
 }
 
-
 export async function clearAdminSession() {
     const c = await cookies();
-    c.set(SESSION_COOKIE, "", { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: 0 });
+    c.set(SESSION_COOKIE, "", {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: 0,
+    });
 }
 
 export async function isAdmin() {
-    return !!(await cookies()).get(SESSION_COOKIE)?.value;
-}
+    const token = (await cookies()).get(SESSION_COOKIE)?.value;
+    if (!token) return false;
 
+    try {
+        const decoded = jwt.verify(token, SECRET) as { role?: string };
+        return decoded?.role === "admin";
+    } catch {
+        return false;
+    }
+}
