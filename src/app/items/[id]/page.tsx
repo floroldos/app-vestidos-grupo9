@@ -1,33 +1,33 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import {getItem, getItemRentals} from "../../../../lib/RentalManagementSystem";
+import { getItem, getItemRentals } from "../../../../lib/RentalManagementSystem";
 import ItemCalendar from "./ItemCalendar";
-import {getOrCreateCsrfToken} from "../../../../lib/CsrfSessionManagement";
+import { getOrCreateCsrfToken } from "../../../../lib/CsrfSessionManagement";
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
 import { Key } from "react";
 
-export default async function ItemDetail({params}: { params: { id: string } }) {
-    const id = Number(params.id);
-    const item = getItem(id);
-    if (!item) return notFound();
+export default async function ItemDetail({ params }: { params: { id: string } }) {
+  const id = Number(params.id);
+  const item = getItem(id);
+  if (!item) return notFound();
 
-    // Generate CSRF token; cookie will be set if missing
-    const csrf = await getOrCreateCsrfToken();
+  // Generate CSRF token; cookie will be set if missing
+  const csrf = await getOrCreateCsrfToken();
 
-    const booked = await getItemRentals(id);
+  const booked = await getItemRentals(id);
 
-    return (
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div>
-                    <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800">
-                        <Image src={item.images[0]} alt={item.alt} fill className="object-cover" priority/>
-                    </div>
-                    <div className="mt-4 grid grid-cols-3 gap-3">
-                        {item.images.slice(1).map((src: Key | StaticImport | null | undefined) => (
-                            <div key={`${src}-${item.id}`}
-                                 className="relative aspect-[3/4] rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800">
-                                <Image src={src as StaticImport} alt={item.alt} fill className="object-cover"/>
+  return (
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div>
+          <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800">
+            <Image src={item.images[0]} alt={item.alt} fill className="object-cover" priority />
+          </div>
+          <div className="mt-4 grid grid-cols-3 gap-3">
+            {item.images.slice(1).map((src: Key | StaticImport | null | undefined) => (
+              <div key={`${src}-${item.id}`}
+                className="relative aspect-[3/4] rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800">
+                <Image src={src as StaticImport} alt={item.alt} fill className="object-cover" />
               </div>
             ))}
           </div>
@@ -64,7 +64,8 @@ export default async function ItemDetail({params}: { params: { id: string } }) {
               </div>
               <div>
                 <label className="sr-only" htmlFor="phone">Phone</label>
-                <input id="phone" name="phone" required placeholder="Phone" className="w-full rounded-xl border px-4 py-3 text-sm" />
+                <input id="phone" name="phone" type="tel" inputMode="numeric" pattern="[0-9]{7,15}" required placeholder="Phone" className="w-full rounded-xl border px-4 py-3 text-sm" />
+
               </div>
               <div>
                 <label className="sr-only" htmlFor="start">Start date</label>
