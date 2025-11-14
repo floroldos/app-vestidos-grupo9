@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
-import {listItems, type Category} from "../../../lib/RentalManagementSystem";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { listItems, type Category } from "../../../lib/RentalManagementSystem";
 
 type SearchParams = {
   q?: string;
@@ -8,15 +12,33 @@ type SearchParams = {
   size?: string;
   color?: string;
   style?: string;
-  start?: string;
-  end?: string;
 };
 
 export default function Page({ searchParams }: { searchParams: SearchParams }) {
-  const { q = "", category = "", size = "", color = "", style = "" } = searchParams;
+  const router = useRouter();
+
+  const [q, setQ] = useState(searchParams.q || "");
+  const [category, setCategory] = useState<Category | "">(
+    (searchParams.category as Category) || ""
+  );
+  const [size, setSize] = useState(searchParams.size || "");
+  const [color, setColor] = useState(searchParams.color || "");
+  const [style, setStyle] = useState(searchParams.style || "");
+
+  const updateSearch = () => {
+    const params = new URLSearchParams();
+    if (q) params.set("q", q);
+    if (category) params.set("category", category);
+    if (size) params.set("size", size);
+    if (color) params.set("color", color);
+    if (style) params.set("style", style);
+
+    router.push("?" + params.toString());
+  };
+
   const items = listItems({
     q,
-    category: category || undefined,
+    category: category === "" ? undefined : category,
     size: size || undefined,
     color: color || undefined,
     style: style || undefined,
@@ -25,20 +47,52 @@ export default function Page({ searchParams }: { searchParams: SearchParams }) {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
       <h1 className="text-2xl sm:text-3xl font-bold">Browse catalog</h1>
-      <form method="GET" className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
-        <input name="q" defaultValue={q} placeholder="Search…" className="rounded-xl border px-3 py-2 text-sm" />
-        <select name="category" defaultValue={category} className="rounded-xl border px-3 py-2 text-sm">
+
+      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+        <input
+          value={q}
+          onChange={(e) => { setQ(e.target.value); updateSearch(); }}
+          placeholder="Search…"
+          className="rounded-xl border px-3 py-2 text-sm"
+        />
+
+        <select
+          value={category}
+          onChange={(e) => {
+            setCategory(e.target.value as Category | "");
+            updateSearch();
+          }}
+          className="rounded-xl border px-3 py-2 text-sm"
+        >
           <option value="">All categories</option>
           <option value="dress">Dresses</option>
           <option value="shoes">Shoes</option>
           <option value="bag">Bags</option>
           <option value="jacket">Jackets</option>
         </select>
-        <input name="size" defaultValue={size} placeholder="Size" className="rounded-xl border px-3 py-2 text-sm" />
-        <input name="color" defaultValue={color} placeholder="Color" className="rounded-xl border px-3 py-2 text-sm" />
-        <input name="style" defaultValue={style} placeholder="Style (e.g., cocktail)" className="rounded-xl border px-3 py-2 text-sm" />
-        <button className="rounded-xl bg-fuchsia-600 text-white px-4 py-2 text-sm">Search</button>
-      </form>
+
+
+        <input
+          value={size}
+          onChange={(e) => { setSize(e.target.value); updateSearch(); }}
+          placeholder="Size"
+          className="rounded-xl border px-3 py-2 text-sm"
+        />
+
+        <input
+          value={color}
+          onChange={(e) => { setColor(e.target.value); updateSearch(); }}
+          placeholder="Color"
+          className="rounded-xl border px-3 py-2 text-sm"
+        />
+
+        <input
+          value={style}
+          onChange={(e) => { setStyle(e.target.value); updateSearch(); }}
+          placeholder="Style (e.g., cocktail)"
+          className="rounded-xl border px-3 py-2 text-sm"
+        />
+      </div>
 
       <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {items.map((it) => (
@@ -54,7 +108,9 @@ export default function Page({ searchParams }: { searchParams: SearchParams }) {
             <div className="p-4">
               <p className="text-xs uppercase tracking-wide text-slate-500">{it.category}</p>
               <p className="font-medium">{it.name}</p>
-              <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Sizes: {it.sizes.join(", ")}</p>
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                Sizes: {it.sizes.join(", ")}
+              </p>
               <div className="mt-3">
                 <Link href={`/items/${it.id}`} className="text-sm rounded-lg border px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800">
                   View details
