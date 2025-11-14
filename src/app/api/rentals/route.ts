@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import {createRental, isItemAvailable, getItem} from "../../../../lib/RentalManagementSystem";
-import {verifyCsrfToken} from "../../../../lib/CsrfSessionManagement";
+import { createRental, isItemAvailable, getItem } from "../../../../lib/RentalManagementSystem";
+import { verifyCsrfToken } from "../../../../lib/CsrfSessionManagement";
 
 function normalizeDate(s: string | null) {
   if (!s) return null;
@@ -19,8 +19,13 @@ export async function POST(req: Request) {
   const name = (form.get("name") || "").toString().trim();
   const email = (form.get("email") || "").toString().trim();
   const phone = (form.get("phone") || "").toString().trim();
+  const phoneRegex = /^[0-9]{7,15}$/;
+  if (!phoneRegex.test(phone)) {
+    return NextResponse.json({ error: "Invalid phone number" }, { status: 400 });
+  }
   const start = normalizeDate((form.get("start") || "").toString());
   const end = normalizeDate((form.get("end") || "").toString());
+
 
   if (!itemId || !name || !email || !phone || !start || !end) {
     return NextResponse.json({ error: "Missing or invalid fields" }, { status: 400 });

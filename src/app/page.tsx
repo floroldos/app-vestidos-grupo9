@@ -63,7 +63,7 @@ export default function Home() {
                     id="start"
                     name="start"
                     type="date"
-                    className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-fuchsia-500"
+                    className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-3 text-sm outline-none focus:ring-2 focus:ring-fuchsia-500"
                   />
                 </div>
                 <div>
@@ -72,7 +72,7 @@ export default function Home() {
                     id="end"
                     name="end"
                     type="date"
-                    className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-fuchsia-500"
+                    className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-3 text-sm outline-none focus:ring-2 focus:ring-fuchsia-500"
                   />
                 </div>
                 <div>
@@ -123,8 +123,8 @@ export default function Home() {
                     className="object-cover"
                     priority={item.id === 1}
                   />
-                  <div className="absolute inset-0 flex items:end p-4">
-                    <span className="inline-flex items-center rounded-full bg-white/85 dark:bg-slate-800/80 backdrop-blur px-2.5 py-1 text-xs font-medium text-slate-800 dark:text-slate-100">
+                  <div className="absolute top-4 left-4">
+                    <span className="inline-flex items-center rounded-full bg-white/85 dark:bg-slate-800/80 px-2.5 py-1 text-xs font-medium text-slate-800 dark:text-slate-100 shadow-sm">
                       From ${item.price}/day
                     </span>
                   </div>
@@ -161,40 +161,8 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
-            <div className="lg:col-span-2">
-              <h2 className="text-2xl sm:text-3xl font-bold">Join our newsletter</h2>
-              <p className="mt-2 text-slate-600 dark:text-slate-400">Get style tips, drops, and exclusive offers.</p>
-            </div>
-            <form action="/api/newsletter" method="POST" className="flex w-full gap-3">
-              <label htmlFor="email" className="sr-only">Email</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                placeholder="you@example.com"
-                className="flex-1 rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-fuchsia-500"
-              />
-              <button className="inline-flex items-center rounded-xl bg-fuchsia-600 px-5 py-3 text-sm font-semibold text-white hover:bg-fuchsia-500">
-                Subscribe
-              </button>
-            </form>
-          </div>
-        </section>
+        
       </main>
-
-      <footer className="border-t border-slate-200 dark:border-slate-800">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 flex flex-col sm:flex-row items-center justify-between gap-6">
-          <p className="text-sm text-slate-600 dark:text-slate-400">© {new Date().getFullYear()} GlamRent. All rights reserved.</p>
-          <div className="flex gap-6 text-sm">
-            <Link href="/terms" className="hover:text-fuchsia-600">Terms</Link>
-            <Link href="/privacy" className="hover:text-fuchsia-600">Privacy</Link>
-            <Link href="/contact" className="hover:text-fuchsia-600">Contact</Link>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

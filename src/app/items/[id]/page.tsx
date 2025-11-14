@@ -13,7 +13,6 @@ export default async function ItemDetail({ params }: { params: { id: string } })
   const item = getItem(id);
   if (!item) return notFound();
 
-  // Generate CSRF token; cookie will be set if missing
   const csrf = await getOrCreateCsrfToken();
   const booked = await getItemRentals(id);
 
@@ -26,6 +25,7 @@ export default async function ItemDetail({ params }: { params: { id: string } })
           <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800">
             <Image src={item.images[0]} alt={item.alt} fill className="object-cover" priority />
           </div>
+
           <div className="mt-4 grid grid-cols-3 gap-3">
             {item.images.slice(1).map((src: Key | StaticImport | null | undefined) => (
               <div
@@ -92,11 +92,15 @@ export default async function ItemDetail({ params }: { params: { id: string } })
                   className="w-full rounded-xl border px-4 py-3 text-sm"
                 />
               </div>
+
               <div>
                 <label className="sr-only" htmlFor="phone">Phone</label>
                 <input
                   id="phone"
                   name="phone"
+                  type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]{7,15}"
                   required
                   placeholder="Phone"
                   className="w-full rounded-xl border px-4 py-3 text-sm"
@@ -113,6 +117,7 @@ export default async function ItemDetail({ params }: { params: { id: string } })
                   className="w-full rounded-xl border px-4 py-3 text-sm"
                 />
               </div>
+
               <div>
                 <label className="sr-only" htmlFor="end">End date</label>
                 <input
@@ -162,7 +167,7 @@ export default async function ItemDetail({ params }: { params: { id: string } })
                     })}
                   </div>
                   <p className="mt-2 text-xs text-slate-500">
-                    This size is not available. Please select another size.
+                    Please select an available size to continue.
                   </p>
                 </fieldset>
               </div>
