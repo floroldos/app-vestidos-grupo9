@@ -1,5 +1,5 @@
-import { isAdmin, getOrCreateCsrfToken } from "@/lib/CsrfSessionManagement";
-import { listItems, listRentals } from "@/lib/RentalManagementSystem";
+import { isAdmin, getOrCreateCsrfToken } from "../../../lib/CsrfSessionManagement";
+import { listItems, listRentals } from "../../../lib/RentalManagementSystem";
 import { redirect } from "next/navigation";
 
 type AdminItem = {

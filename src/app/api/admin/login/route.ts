@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { setAdminSession, verifyCsrfToken } from "@/lib/CsrfSessionManagement";
+import { setAdminSession, verifyCsrfToken } from "../../../../../lib/CsrfSessionManagement";
 
 export async function POST(req: Request) {
   const form = await req.formData();

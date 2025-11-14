@@ -1,4 +1,4 @@
-import {getOrCreateCsrfToken} from "@/lib/CsrfSessionManagement";
+import { getOrCreateCsrfToken } from "../../../../lib/CsrfSessionManagement";
 export default async function AdminLogin() {
   const csrf = await getOrCreateCsrfToken();
   return (

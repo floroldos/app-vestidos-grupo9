@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import {getItem, getItemRentals} from "@/lib/RentalManagementSystem";
+import { getItem, getItemRentals } from "../../../../../../lib/RentalManagementSystem";
 export function GET(_: Request, { params }: { params: { id: string } }) {
   const id = Number(params.id);
   const item = getItem(id);
