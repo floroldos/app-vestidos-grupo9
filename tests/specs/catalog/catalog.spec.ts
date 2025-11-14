@@ -1,6 +1,6 @@
-import { test, expect } from './fixtures/base';
-import { CatalogPage } from './pages/CatalogPage';
-import { HomePage } from './pages/HomePage';
+import { test, expect } from '../../fixtures/base';
+import { CatalogPage } from '../../pages/CatalogPage';
+import { HomePage } from '../../pages/HomePage';
 
 test.use({ baseURL: 'http://localhost:3000' });
 

@@ -4,7 +4,7 @@ import { CatalogPage } from '../pages/CatalogPage';
 import { ProductDetailPage } from '../pages/ProductDetailPage';
 import { LoginPage } from '../pages/LoginPage';
 import { AdminDashboardPage } from '../pages/AdminDashboardPage';
-import { users } from '../testData/users';
+import { users } from '../config/testData/users';
 
 type Fixtures = {
     home: HomePage;
