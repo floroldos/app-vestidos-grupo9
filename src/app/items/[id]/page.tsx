@@ -7,22 +7,37 @@ import { StaticImport } from "next/dist/shared/lib/get-img-props";
 import { Key } from "react";
 import { RentalForm } from "@/components/RentalForm";
 
-export default async function ItemDetail({ params }: { params: { id: string } }) {
-  const id = Number(params.id);
-  const item = getItem(id);
+export default async function ItemDetail({
+  params,
+}: {
+  params: Promise<{ id: string }>; // ✔ Next 15: params es Promise
+}) {
+  const { id } = await params; // ✔ Se debe hacer await
+
+  const numericId = Number(id);
+
+  const item = getItem(numericId);
   if (!item) return notFound();
 
   const csrf = await getOrCreateCsrfToken();
-  const booked = await getItemRentals(id);
+  const booked = await getItemRentals(numericId);
 
-  const available = new Set((item.sizes ?? []).map((s: string) => s.toUpperCase()));
+  const available = new Set(
+    (item.sizes ?? []).map((s: string) => s.toUpperCase())
+  );
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
           <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800">
-            <Image src={item.images[0]} alt={item.alt} fill className="object-cover" priority />
+            <Image
+              src={item.images[0]}
+              alt={item.alt}
+              fill
+              className="object-cover"
+              priority
+            />
           </div>
 
           <div className="mt-4 grid grid-cols-3 gap-3">
@@ -31,7 +46,12 @@ export default async function ItemDetail({ params }: { params: { id: string } })
                 key={`${src}-${item.id}`}
                 className="relative aspect-[3/4] rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800"
               >
-                <Image src={src as StaticImport} alt={item.alt} fill className="object-cover" />
+                <Image
+                  src={src as StaticImport}
+                  alt={item.alt}
+                  fill
+                  className="object-cover"
+                />
               </div>
             ))}
           </div>
@@ -39,7 +59,9 @@ export default async function ItemDetail({ params }: { params: { id: string } })
 
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">{item.name}</h1>
-          <p className="mt-1 text-slate-600 dark:text-slate-400 capitalize">{item.category}</p>
+          <p className="mt-1 text-slate-600 dark:text-slate-400 capitalize">
+            {item.category}
+          </p>
           <p className="mt-4">{item.description}</p>
           <p className="mt-4 font-semibold">From ${item.pricePerDay}/day</p>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
@@ -52,15 +74,17 @@ export default async function ItemDetail({ params }: { params: { id: string } })
 
           <div className="mt-8">
             <h2 className="font-semibold mb-3">Availability</h2>
-            <ItemCalendar itemId={id} />
+            <ItemCalendar itemId={numericId} />
             {booked.length > 0 && (
-              <p className="mt-2 text-xs text-slate-500">Dates marked are already booked.</p>
+              <p className="mt-2 text-xs text-slate-500">
+                Dates marked are already booked.
+              </p>
             )}
           </div>
 
           <div className="mt-10">
             <h2 className="font-semibold mb-3">Schedule a rental</h2>
-            <RentalForm itemId={id} csrf={csrf} availableSizes={item.sizes} />
+            <RentalForm itemId={numericId} csrf={csrf} availableSizes={item.sizes} />
             <p className="mt-2 text-xs text-slate-500">
               No account required. We'll confirm availability via email.
             </p>
@@ -70,3 +94,4 @@ export default async function ItemDetail({ params }: { params: { id: string } })
     </div>
   );
 }
+

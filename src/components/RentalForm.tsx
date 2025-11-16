@@ -18,6 +18,12 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
 
   const available = new Set(availableSizes.map((s: string) => s.toUpperCase()));
 
+  function validateDates(start: string, end: string) {
+    const s = new Date(start);
+    const e = new Date(end);
+    return s < e;
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
@@ -25,29 +31,44 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
 
     const formData = new FormData(e.currentTarget);
 
+    const start = formData.get("start") as string;
+    const end = formData.get("end") as string;
+
+    if (!validateDates(start, end)) {
+      setError("The end date must be later than the start date.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch("/api/rentals", {
         method: "POST",
         body: formData,
       });
 
-      const data = await response.json();
+      let data: any = null;
 
       if (!response.ok) {
-        // Set user-friendly error message based on status
+        try {
+          data = await response.json();
+        } catch (_) {}
+
         if (response.status === 409) {
           setError("The selected dates are already booked. Please choose a different date range.");
-        } else if (data.error) {
+        } else if (data?.error) {
           setError(data.error);
         } else {
           setError("An error occurred. Please try again.");
         }
-        setLoading(false);
-        return;
-      }
 
-      // Success - redirect to item page with success message
-      router.push(`/items/${itemId}?success=1`);
+        setLoading(false);
+        e.currentTarget.reset();
+        alert("Rental request submitted successfully!");
+        router.push(`/items/${itemId}?success=1`);
+        router.refresh();
+        return;
+      }      
+
     } catch (err) {
       setError("An error occurred. Please try again.");
       setLoading(false);
@@ -57,8 +78,8 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
   return (
     <>
       {error && (
-        <div className="mb-4 rounded-xl border border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-900/20 p-4">
-          <p className="text-sm font-medium text-red-800 dark:text-red-200">{error}</p>
+        <div className="mb-4 rounded-xl border border-red-300 bg-red-50 p-4">
+          <p className="text-sm font-medium text-red-800">{error}</p>
         </div>
       )}
 
@@ -67,9 +88,6 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
         <input type="hidden" name="csrf" value={csrf} />
 
         <div className="sm:col-span-2">
-          <label className="sr-only" htmlFor="name">
-            Full name
-          </label>
           <input
             id="name"
             name="name"
@@ -80,9 +98,6 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
         </div>
 
         <div>
-          <label className="sr-only" htmlFor="email">
-            Email
-          </label>
           <input
             id="email"
             name="email"
@@ -94,15 +109,13 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
         </div>
 
         <div>
-          <label className="sr-only" htmlFor="phone">
-            Phone
-          </label>
           <input
             id="phone"
             name="phone"
             type="tel"
             inputMode="numeric"
             pattern="[0-9]{7,15}"
+            title="Phone number must contain between 7 and 15 digits."
             required
             placeholder="Phone"
             className="w-full rounded-xl border px-4 py-3 text-sm"
@@ -110,9 +123,6 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
         </div>
 
         <div>
-          <label className="sr-only" htmlFor="start">
-            Start date
-          </label>
           <input
             id="start"
             name="start"
@@ -123,9 +133,6 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
         </div>
 
         <div>
-          <label className="sr-only" htmlFor="end">
-            End date
-          </label>
           <input
             id="end"
             name="end"
@@ -145,7 +152,9 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
                   <label
                     key={size}
                     className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm ${
-                      inStock ? "cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800" : "opacity-50 cursor-not-allowed"
+                      inStock
+                        ? "cursor-pointer hover:bg-slate-50"
+                        : "opacity-50 cursor-not-allowed"
                     }`}
                   >
                     <input
@@ -155,22 +164,12 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
                       disabled={!inStock}
                       required
                       className="h-4 w-4"
-                      aria-describedby={!inStock ? `size-${size}-hint` : undefined}
                     />
                     <span>{size}</span>
-                    {!inStock && (
-                      <span
-                        id={`size-${size}-hint`}
-                        className="ml-1 rounded bg-slate-200 px-2 py-0.5 text-xs text-slate-700 dark:bg-slate-700 dark:text-slate-100"
-                      >
-                        Not available
-                      </span>
-                    )}
                   </label>
                 );
               })}
             </div>
-            <p className="mt-2 text-xs text-slate-500">Please select an available size to continue.</p>
           </fieldset>
         </div>
 
@@ -178,7 +177,7 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
           <button
             type="submit"
             disabled={loading}
-            className="w-full sm:w-auto rounded-xl bg-fuchsia-600 text-white px-6 py-3 text-sm font-semibold hover:bg-fuchsia-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full sm:w-auto rounded-xl bg-fuchsia-600 text-white px-6 py-3 text-sm font-semibold"
           >
             {loading ? "Processing..." : "Request rental"}
           </button>
