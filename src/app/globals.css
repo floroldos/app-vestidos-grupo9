@@ -63,8 +63,23 @@ a:hover { color: var(--link-hover); text-decoration: underline; }
 
 /* Reduce motion */
 @media (prefers-reduced-motion: reduce) {
-  * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+  * {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Contenedor utilitario opcional */
-.container-fluid { max-width: 80rem; margin-inline: auto; padding-inline: clamp(1rem, 2vw, 2rem); }
+.container-fluid {
+  max-width: 80rem;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 2vw, 2rem);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 1;
+}
+
