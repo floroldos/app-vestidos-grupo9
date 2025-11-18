@@ -6,7 +6,7 @@ export default function ContactPage() {
             <div className="prose dark:prose-invert mb-8">
                 <p>
                     Have questions about our rental service? We are here to help! Fill out the form below
-                    and we'll get back to you as soon as possible.
+                    and we&apos;ll get back to you as soon as possible.
                 </p>
             </div>
 

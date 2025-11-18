@@ -17,7 +17,7 @@ export default async function ItemDetail({ params }: { params: { id: string } })
   const csrf = await getOrCreateCsrfToken();
   const booked = await getItemRentals(id);
 
-  const available = new Set((item.sizes ?? []).map((s: string) => s.toUpperCase()));
+  const _available = new Set((item.sizes ?? []).map((s: string) => s.toUpperCase()));
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
