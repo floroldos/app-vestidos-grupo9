@@ -83,74 +83,40 @@ test.describe('Test Cases from Requirements (Formato 1)', () => {
     });
 
     /**
-     * CT-RF004-01: Programación de alquiler válida
-     * Objetivo: Validar que se pueda crear una solicitud con datos correctos
+     * CT-RF003-01: Validación de campos obligatorios del formulario
+     * Objetivo: Validar que el sistema requiera todos los campos obligatorios antes de enviar
      * Prioridad: Alta
      */
-    test('CT-RF004-01: Valid rental request submission with correct data', async ({ page }) => {
+    test('CT-RF003-01: Form validation requires all mandatory fields', async ({ page }) => {
         const catalogPage = new CatalogPage(page);
         
-        // Navegar al catálogo y abrir un producto
+        // Paso 1: Navegar al catálogo y abrir un producto
         await catalogPage.goto();
         await catalogPage.assertCatalogLoaded();
         await catalogPage.openFirstProduct();
         
         await expect(page).toHaveURL(/.*items\/\d+/);
         
-        // Paso 1: Completar formulario de reserva con datos válidos
-        
-        const today = new Date();
-        const startDate = new Date(today);
-        startDate.setDate(today.getDate() + 7);
-        const endDate = new Date(startDate);
-        endDate.setDate(startDate.getDate() + 3);
-        
-        await page.locator('[name="start"]').fill(startDate.toISOString().split('T')[0]);
-        await page.locator('[name="end"]').fill(endDate.toISOString().split('T')[0]);
-        
-        // Nombre
-        await page.locator('[name="name"]').fill('Ana Pérez');
-        
-        // Email válido
-        await page.locator('[name="email"]').fill('ana.perez@example.com');
-        
-        // Teléfono (formato válido: 7-15 dígitos)
-        await page.locator('[name="phone"]').fill('099123456');
-        
-        // Seleccionar primera talla disponible (que no esté deshabilitada)
-        const enabledSizeRadio = page.locator('[name="size"]:not([disabled])').first();
-        await enabledSizeRadio.check();
-        
-        // Paso 3: Enviar formulario
+        // Paso 2: Intentar enviar formulario vacío
         const submitButton = page.getByRole('button', { name: /request rental/i });
         await submitButton.click();
         
-        // Resultado esperado: Confirmación visible o URL cambia con success=1
-        // Esperar con más tiempo y ser flexible con la URL
-        try {
-            await page.waitForURL(/.*success=1/, { timeout: 15000 });
-        } catch (e) {
-            // Si no redirige con success, verificar que no hay error visible
-            const errorMessage = page.getByText(/error|occurred/i);
-            await expect(errorMessage).not.toBeVisible();
-        }
+        // Resultado esperado: El formulario no se envía y los campos requeridos están marcados
         
-        // Verificar que aparece el mensaje de confirmación o que estamos en la página correcta
-        const successIndicators = [
-            page.getByText(/reservation completed/i),
-            page.getByText(/completed/i),
-            page.locator('[class*="green"]').filter({ hasText: /reservation|completed/i })
-        ];
+        // Verificar que los campos tienen el atributo required
+        await expect(page.locator('[name="name"]')).toHaveAttribute('required', '');
+        await expect(page.locator('[name="email"]')).toHaveAttribute('required', '');
+        await expect(page.locator('[name="phone"]')).toHaveAttribute('required', '');
+        await expect(page.locator('[name="start"]')).toHaveAttribute('required', '');
+        await expect(page.locator('[name="end"]')).toHaveAttribute('required', '');
         
-        let found = false;
-        for (const indicator of successIndicators) {
-            if (await indicator.isVisible().catch(() => false)) {
-                found = true;
-                break;
-            }
-        }
+        // Verificar que al menos un radio de size tiene required
+        const sizeRadios = page.locator('[name="size"]');
+        await expect(sizeRadios.first()).toHaveAttribute('required', '');
         
-        expect(found).toBe(true);
+        // Verificar que la URL no cambió (no hubo envío)
+        await expect(page).toHaveURL(/.*items\/\d+$/);
+        await expect(page).not.toHaveURL(/.*success=1/);
     });
 
 });

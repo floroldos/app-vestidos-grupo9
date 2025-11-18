@@ -25,9 +25,10 @@ export async function POST(req: Request) {
   }
   const start = normalizeDate((form.get("start") || "").toString());
   const end = normalizeDate((form.get("end") || "").toString());
+  const size = (form.get("size") || "").toString().trim();
 
 
-  if (!itemId || !name || !email || !phone || !start || !end) {
+  if (!itemId || !name || !email || !phone || !start || !end || !size) {
     return NextResponse.json({ error: "Missing or invalid fields" }, { status: 400 });
   }
 
