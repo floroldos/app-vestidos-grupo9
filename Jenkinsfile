@@ -46,12 +46,13 @@ pipeline {
                     if (isUnix()) {
                         sh '''
                             npx playwright install chromium
-                            npm run test:e2e -- --reporter=list
+                            PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=true npm run test:e2e -- --project=chromium --reporter=list
                         '''
                     } else {
                         bat '''
                             npx playwright install chromium
-                            npm run test:e2e -- --reporter=list
+                            set PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=true
+                            npm run test:e2e -- --project=chromium --reporter=list
                         '''
                     }
                 }
