@@ -6,7 +6,7 @@ export default function PrivacyPage() {
 
                 <div className="space-y-8">
                     <h2>1. Information We Collect</h2>
-                    <p>We collect information you provide directly to us when using GlamRent's services, including:</p>
+                    <p>We collect information you provide directly to us when using GlamRent&apos;s services, including:</p>
                     <ul>
                         <li>Name and contact information</li>
                         <li>Payment details</li>

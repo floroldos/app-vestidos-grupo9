@@ -31,9 +31,9 @@ pipeline {
                 echo 'Building application...'
                 script {
                     if (isUnix()) {
-                        sh 'ESLINT_NO_DEV_ERRORS=true npm run build'
+                        sh 'npm run build'
                     } else {
-                        bat 'set ESLINT_NO_DEV_ERRORS=true && npm run build'
+                        bat 'npm run build'
                     }
                 }
             }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 const ALL_SIZES = ["XS", "S", "M", "L", "XL"];
 
@@ -12,7 +11,6 @@ interface RentalFormProps {
 }
 
 export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProps) {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -33,10 +31,10 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
 
       if (!response.ok) {
         // Try to parse JSON error body; fallback to generic message
-        let data: any = {};
+        let data: { error?: string } = {};
         try {
           data = await response.json();
-        } catch (e) {
+        } catch {
           // ignore parse errors
         }
 
@@ -57,7 +55,7 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
       setTimeout(() => {
         window.location.href = `/items/${itemId}?success=1`;
       }, 300);
-    } catch (err) {
+    } catch {
       setError("An error occurred. Please try again.");
       setLoading(false);
     }

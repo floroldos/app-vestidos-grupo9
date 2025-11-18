@@ -68,7 +68,7 @@ export default async function ItemDetail({ params }: { params: { id: string } })
             <h2 className="font-semibold mb-3">Schedule a rental</h2>
             <RentalForm itemId={id} csrf={csrf} availableSizes={item.sizes} />
             <p className="mt-2 text-xs text-slate-500">
-              No account required. We'll confirm availability via email.
+              No account required. We will confirm availability via email.
             </p>
           </div>
         </div>

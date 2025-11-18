@@ -6,7 +6,7 @@ export default function TermsPage() {
         
         <div className="space-y-8">
         <h2>1. Acceptance of Terms</h2>
-        <p>By accessing and using GlamRent's services, you agree to be bound by these Terms and Conditions.</p>
+        <p>By accessing and using GlamRent&apos;s services, you agree to be bound by these Terms and Conditions.</p>
 
         <h2>2. Rental Service</h2>
         <p>GlamRent provides a platform for renting designer dresses and accessories. All rentals are subject to availability and approval.</p>
@@ -27,7 +27,7 @@ export default function TermsPage() {
         <p>GlamRent is not liable for any indirect, incidental, or consequential damages arising from the use of our services.</p>
 
         <h2>8. Privacy</h2>
-        <p>Your use of GlamRent's services is also governed by our Privacy Policy.</p>
+        <p>Your use of GlamRent&apos;s services is also governed by our Privacy Policy.</p>
 
         <h2>9. Modifications</h2>
         <p>We reserve the right to modify these terms at any time. Changes will be effective immediately upon posting to our website.</p>
