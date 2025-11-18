@@ -44,10 +44,12 @@ export default function Page({ searchParams }: { searchParams: SearchParams }) {
     style: style || undefined,
   });
 
+  const fieldClass =
+    "rounded-xl border px-3 py-2 text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-fuchsia-500";
+
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
       <h1 className="text-2xl sm:text-3xl font-bold">Browse catalog</h1>
-
       <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
         <input
           value={q}
@@ -62,8 +64,7 @@ export default function Page({ searchParams }: { searchParams: SearchParams }) {
             setCategory(e.target.value as Category | "");
             updateSearch();
           }}
-          className="rounded-xl border px-3 py-2 text-sm"
-        >
+          className="rounded-xl border px-3 py-2 text-sm">
           <option value="">All categories</option>
           <option value="dress">Dresses</option>
           <option value="shoes">Shoes</option>
@@ -96,7 +97,10 @@ export default function Page({ searchParams }: { searchParams: SearchParams }) {
 
       <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {items.map((it) => (
-          <div key={it.id} className="rounded-2xl border bg-white dark:bg-slate-900 overflow-hidden">
+          <div
+            key={it.id}
+            className="rounded-2xl border bg-white dark:bg-slate-900 overflow-hidden"
+          >
             <div className="relative aspect-[3/4] bg-slate-100 dark:bg-slate-800">
               <Image src={it.images[0]} alt={it.alt} fill className="object-cover" />
               <div className="absolute top-3 left-3">
@@ -112,17 +116,24 @@ export default function Page({ searchParams }: { searchParams: SearchParams }) {
                 Sizes: {it.sizes.join(", ")}
               </p>
               <div className="mt-3">
-                <Link href={`/items/${it.id}`} className="text-sm rounded-lg border px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800">
+                <Link
+                  href={`/items/${it.id}`}
+                  className="text-sm rounded-lg border px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800"
+                >
                   View details
                 </Link>
               </div>
             </div>
           </div>
         ))}
+
         {items.length === 0 && (
-          <p className="text-sm text-slate-600 dark:text-slate-400">No items match your filters.</p>
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            No items match your filters.
+          </p>
         )}
       </div>
     </div>
   );
 }
+
