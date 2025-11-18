@@ -18,16 +18,22 @@ test.describe('Test Cases from Requirements (Formato 1)', () => {
         await catalogPage.goto();
         await catalogPage.assertCatalogLoaded();
 
-        // Paso 2 y 3: Buscar por palabra clave "dress" (vestido en inglés)
-        await catalogPage.searchByQuery('dress');
+        // Paso 2 y 3: Buscar por palabra clave "Silk"
+        await catalogPage.searchByQuery('Silk');
 
         // Resultado esperado: Se muestran artículos que coincidan con la palabra clave
-        // Los resultados se actualizan dinámicamente
-        await catalogPage.assertResultsAreVisible();
+        // Los resultados se actualizan dinámicamente sin recargar
         
-        // Verificar que hay al menos un resultado
-        const firstProduct = page.getByRole('link', { name: /view details/i }).first();
-        await expect(firstProduct).toBeVisible();
+        // Esperar a que se actualicen los resultados
+        await page.waitForTimeout(1000);
+        
+        // Verificar que hay al menos un resultado visible
+        const viewDetailsLinks = page.getByRole('link', { name: /view details/i });
+        const count = await viewDetailsLinks.count();
+        expect(count).toBeGreaterThan(0);
+        
+        // Verificar que el primer resultado es visible
+        await expect(viewDetailsLinks.first()).toBeVisible();
     });
 
     /**
