@@ -1,7 +1,14 @@
+"use client";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 export default function Home() {
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+
   const featured = [
     { id: 1, name: "Silk Evening Gown", price: 79, image: "/images/dresses/silk-evening-gown.jpg", alt: "Model wearing a champagne silk evening gown" },
     { id: 2, name: "Black Tie Dress", price: 99, image: "/images/dresses/black-tie-dress.jpg", alt: "Elegant black tie dress" },
@@ -47,6 +54,7 @@ export default function Home() {
               </p>
 
               <form action="/search" method="GET" className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 p-4 shadow-sm">
+
                 <div className="col-span-1 lg:col-span-2">
                   <label htmlFor="query" className="sr-only">Search</label>
                   <input
@@ -57,24 +65,29 @@ export default function Home() {
                     className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-fuchsia-500"
                   />
                 </div>
-                <div>
-                  <label htmlFor="start" className="sr-only">Start date</label>
-                  <input
-                    id="start"
+
+                <div className="w-full">
+                  <DatePicker
+                    selected={startDate}
+                    onChange={setStartDate}
+                    dateFormat="yyyy-MM-dd"
+                    placeholderText="Start date"
+                    className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-slate-900 dark:text-slate-100"
                     name="start"
-                    type="date"
-                    className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-3 text-sm outline-none focus:ring-2 focus:ring-fuchsia-500"
                   />
                 </div>
-                <div>
-                  <label htmlFor="end" className="sr-only">End date</label>
-                  <input
-                    id="end"
+
+                <div className="w-full">
+                  <DatePicker
+                    selected={endDate}
+                    onChange={setEndDate}
+                    dateFormat="yyyy-MM-dd"
+                    placeholderText="End date"
+                    className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-slate-900 dark:text-slate-100"
                     name="end"
-                    type="date"
-                    className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-3 text-sm outline-none focus:ring-2 focus:ring-fuchsia-500"
                   />
                 </div>
+
                 <div>
                   <label htmlFor="size" className="sr-only">Size</label>
                   <select
@@ -90,6 +103,7 @@ export default function Home() {
                     <option>XL</option>
                   </select>
                 </div>
+
                 <div className="lg:col-span-5">
                   <button
                     type="submit"
@@ -108,6 +122,7 @@ export default function Home() {
             <h2 className="text-2xl sm:text-3xl font-bold">Featured picks</h2>
             <Link href="/search" className="text-sm text-fuchsia-600 hover:underline">Browse all →</Link>
           </div>
+
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {featured.map((item) => (
               <div
@@ -151,8 +166,13 @@ export default function Home() {
             <h2 className="text-2xl sm:text-3xl font-bold text-center">How it works</h2>
             <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-6">
               {steps.map((s, i) => (
-                <div key={i} className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 text-center">
-                  <div className="mx-auto h-12 w-12 rounded-full bg-fuchsia-600/10 flex items-center justify-center text-2xl">{s.emoji}</div>
+                <div
+                  key={i}
+                  className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 text-center"
+                >
+                  <div className="mx-auto h-12 w-12 rounded-full bg-fuchsia-600/10 flex items-center justify-center text-2xl">
+                    {s.emoji}
+                  </div>
                   <h3 className="mt-4 font-semibold">{s.title}</h3>
                   <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{s.text}</p>
                 </div>
@@ -160,9 +180,9 @@ export default function Home() {
             </div>
           </div>
         </section>
-
-        
       </main>
     </div>
   );
 }
+
+

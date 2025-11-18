@@ -68,3 +68,32 @@ a:hover { color: var(--link-hover); text-decoration: underline; }
 
 /* Contenedor utilitario opcional */
 .container-fluid { max-width: 80rem; margin-inline: auto; padding-inline: clamp(1rem, 2vw, 2rem); }
+
+/* === react-datepicker dark mode === */
+.react-datepicker {
+  background-color: #0f172a !important; /* slate-900 */
+  border: 1px solid #334155 !important; /* slate-700 */
+  color: #f1f5f9 !important; /* slate-100 */
+}
+
+.react-datepicker__header {
+  background-color: #1e293b !important; /* slate-800 */
+  border-bottom: 1px solid #334155 !important;
+}
+
+.react-datepicker__current-month,
+.react-datepicker__day-name,
+.react-datepicker__day,
+.react-datepicker-time__header {
+  color: #f1f5f9 !important;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background-color: #d946ef !important; /* fuchsia-500 */
+  color: white !important;
+}
+
+.react-datepicker__day:hover {
+  background-color: #64748b !important; /* slate-500 */
+}
