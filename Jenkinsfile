@@ -45,12 +45,12 @@ pipeline {
                 script {
                     if (isUnix()) {
                         sh '''
-                            npx playwright install --with-deps chromium
+                            npx playwright install chromium
                             npm run test:e2e -- --reporter=list
                         '''
                     } else {
                         bat '''
-                            npx playwright install --with-deps chromium
+                            npx playwright install chromium
                             npm run test:e2e -- --reporter=list
                         '''
                     }
