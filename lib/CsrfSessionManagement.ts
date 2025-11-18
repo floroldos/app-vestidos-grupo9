@@ -33,6 +33,10 @@ export async function setAdminSession() {
     return token;
 }
 
+export function createAdminToken() {
+    return jwt.sign({ role: "admin" }, SECRET, { expiresIn: "1h" });
+}
+
 export async function clearAdminSession() {
     const c = await cookies();
     c.set(SESSION_COOKIE, "", {

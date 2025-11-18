@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { setAdminSession, verifyCsrfToken } from "../../../../../lib/CsrfSessionManagement";
+import { verifyCsrfToken, createAdminToken } from "../../../../../lib/CsrfSessionManagement";
 
 export async function POST(req: Request) {
   const form = await req.formData();
@@ -15,6 +15,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
   }
 
-  setAdminSession();
-  return NextResponse.redirect(new URL("/admin", req.url));
+  const token = createAdminToken();
+  const response = NextResponse.redirect(new URL("/admin", req.url));
+  response.cookies.set("gr_admin", token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60,
+  });
+  return response;
 }
