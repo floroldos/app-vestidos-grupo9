@@ -1,3 +1,4 @@
 Testing automatic CI/CD trigger - this file tests that Jenkins detects changes automatically.
 Second test - triggering another build.
 Third test - now on main branch with polling enabled.
+Fourth test - forcing polling to work.
