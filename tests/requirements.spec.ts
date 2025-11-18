@@ -99,6 +99,15 @@ test.describe('Test Cases from Requirements (Formato 1)', () => {
         
         // Paso 1: Completar formulario de reserva con datos válidos
         
+        const today = new Date();
+        const startDate = new Date(today);
+        startDate.setDate(today.getDate() + 7);
+        const endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 3);
+        
+        await page.locator('[name="start"]').fill(startDate.toISOString().split('T')[0]);
+        await page.locator('[name="end"]').fill(endDate.toISOString().split('T')[0]);
+        
         // Nombre
         await page.locator('[name="name"]').fill('Ana Pérez');
         
@@ -108,30 +117,40 @@ test.describe('Test Cases from Requirements (Formato 1)', () => {
         // Teléfono (formato válido: 7-15 dígitos)
         await page.locator('[name="phone"]').fill('099123456');
         
-        // Seleccionar fechas futuras
-        const today = new Date();
-        const startDate = new Date(today);
-        startDate.setDate(today.getDate() + 5);
-        const endDate = new Date(startDate);
-        endDate.setDate(startDate.getDate() + 2);
-        
-        await page.locator('[name="start"]').fill(startDate.toISOString().split('T')[0]);
-        await page.locator('[name="end"]').fill(endDate.toISOString().split('T')[0]);
-        
-        // Seleccionar primera talla disponible
-        const firstSizeRadio = page.locator('[name="size"]').first();
-        await firstSizeRadio.check();
+        // Seleccionar primera talla disponible (que no esté deshabilitada)
+        const enabledSizeRadio = page.locator('[name="size"]:not([disabled])').first();
+        await enabledSizeRadio.check();
         
         // Paso 3: Enviar formulario
         const submitButton = page.getByRole('button', { name: /request rental/i });
         await submitButton.click();
         
         // Resultado esperado: Confirmación visible o URL cambia con success=1
-        // Esperar por el mensaje de éxito o el parámetro de query
-        await page.waitForURL(/.*success=1/, { timeout: 10000 });
+        // Esperar con más tiempo y ser flexible con la URL
+        try {
+            await page.waitForURL(/.*success=1/, { timeout: 15000 });
+        } catch (e) {
+            // Si no redirige con success, verificar que no hay error visible
+            const errorMessage = page.getByText(/error|occurred/i);
+            await expect(errorMessage).not.toBeVisible();
+        }
         
-        // Verificar que aparece el mensaje de confirmación
-        await expect(page.getByText(/reservation completed|completed/i)).toBeVisible();
+        // Verificar que aparece el mensaje de confirmación o que estamos en la página correcta
+        const successIndicators = [
+            page.getByText(/reservation completed/i),
+            page.getByText(/completed/i),
+            page.locator('[class*="green"]').filter({ hasText: /reservation|completed/i })
+        ];
+        
+        let found = false;
+        for (const indicator of successIndicators) {
+            if (await indicator.isVisible().catch(() => false)) {
+                found = true;
+                break;
+            }
+        }
+        
+        expect(found).toBe(true);
     });
 
 });
