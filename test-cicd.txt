@@ -1,1 +1,2 @@
 final test polling pls
+Testing after Jenkins restart - automatic polling should work now.
