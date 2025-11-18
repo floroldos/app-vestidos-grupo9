@@ -1,9 +1,5 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { listItems, type Category } from "../../../lib/RentalManagementSystem";
 
 type SearchParams = {
@@ -12,33 +8,15 @@ type SearchParams = {
   size?: string;
   color?: string;
   style?: string;
+  start?: string;
+  end?: string;
 };
 
 export default function Page({ searchParams }: { searchParams: SearchParams }) {
-  const router = useRouter();
-
-  const [q, setQ] = useState(searchParams.q || "");
-  const [category, setCategory] = useState<Category | "">(
-    (searchParams.category as Category) || ""
-  );
-  const [size, setSize] = useState(searchParams.size || "");
-  const [color, setColor] = useState(searchParams.color || "");
-  const [style, setStyle] = useState(searchParams.style || "");
-
-  const updateSearch = () => {
-    const params = new URLSearchParams();
-    if (q) params.set("q", q);
-    if (category) params.set("category", category);
-    if (size) params.set("size", size);
-    if (color) params.set("color", color);
-    if (style) params.set("style", style);
-
-    router.push("?" + params.toString());
-  };
-
+  const { q = "", category = "", size = "", color = "", style = "" } = searchParams;
   const items = listItems({
     q,
-    category: category === "" ? undefined : category,
+    category: category || undefined,
     size: size || undefined,
     color: color || undefined,
     style: style || undefined,
@@ -50,21 +28,21 @@ export default function Page({ searchParams }: { searchParams: SearchParams }) {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
       <h1 className="text-2xl sm:text-3xl font-bold">Browse catalog</h1>
-      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+
+      <form method="GET" className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+
         <input
-          value={q}
-          onChange={(e) => { setQ(e.target.value); updateSearch(); }}
+          name="q"
+          defaultValue={q}
           placeholder="Search…"
-          className="rounded-xl border px-3 py-2 text-sm"
+          className={fieldClass}
         />
 
         <select
-          value={category}
-          onChange={(e) => {
-            setCategory(e.target.value as Category | "");
-            updateSearch();
-          }}
-          className="rounded-xl border px-3 py-2 text-sm">
+          name="category"
+          defaultValue={category}
+          className={fieldClass}
+        >
           <option value="">All categories</option>
           <option value="dress">Dresses</option>
           <option value="shoes">Shoes</option>
@@ -72,28 +50,33 @@ export default function Page({ searchParams }: { searchParams: SearchParams }) {
           <option value="jacket">Jackets</option>
         </select>
 
-
         <input
-          value={size}
-          onChange={(e) => { setSize(e.target.value); updateSearch(); }}
+          name="size"
+          defaultValue={size}
           placeholder="Size"
-          className="rounded-xl border px-3 py-2 text-sm"
+          className={fieldClass}
         />
 
         <input
-          value={color}
-          onChange={(e) => { setColor(e.target.value); updateSearch(); }}
+          name="color"
+          defaultValue={color}
           placeholder="Color"
-          className="rounded-xl border px-3 py-2 text-sm"
+          className={fieldClass}
         />
 
         <input
-          value={style}
-          onChange={(e) => { setStyle(e.target.value); updateSearch(); }}
+          name="style"
+          defaultValue={style}
           placeholder="Style (e.g., cocktail)"
-          className="rounded-xl border px-3 py-2 text-sm"
+          className={fieldClass}
         />
-      </div>
+
+        <button
+          className="rounded-xl bg-fuchsia-600 text-white px-4 py-2 text-sm hover:bg-fuchsia-500"
+        >
+          Search
+        </button>
+      </form>
 
       <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {items.map((it) => (
@@ -136,4 +119,3 @@ export default function Page({ searchParams }: { searchParams: SearchParams }) {
     </div>
   );
 }
-
