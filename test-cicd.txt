@@ -1,0 +1,1 @@
+Testing automatic CI/CD trigger - this file tests that Jenkins detects changes automatically
