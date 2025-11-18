@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'node:18-alpine'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
 
     stages {
         stage('Checkout') {
@@ -12,28 +17,21 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 echo 'Installing dependencies...'
-                bat 'npm ci'
+                sh 'npm ci'
             }
         }
 
         stage('Build') {
             steps {
                 echo 'Building application...'
-                bat 'npm run build'
+                sh 'npm run build'
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                bat 'npm run test || exit 0'
-            }
-        }
-
-        stage('Docker Build') {
-            steps {
-                echo 'Building Docker image...'
-                bat 'docker build -t app-vestidos:latest .'
+                sh 'npm test || true'
             }
         }
     }
