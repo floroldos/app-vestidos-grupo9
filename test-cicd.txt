@@ -1,1 +1,2 @@
-Testing automatic CI/CD trigger - this file tests that Jenkins detects changes automatically
+Testing automatic CI/CD trigger - this file tests that Jenkins detects changes automatically.
+Second test - triggering another build.
