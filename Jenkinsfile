@@ -13,14 +13,27 @@ pipeline {
             }
         }
 
+        stage('Install Dependencies') {
+            steps {
+                echo 'Installing project dependencies...'
+                script {
+                    if (isUnix()) {
+                        sh 'npm ci'
+                    } else {
+                        bat 'npm ci'
+                    }
+                }
+            }
+        }
+
         stage('Build') {
             steps {
                 echo 'Building application...'
                 script {
                     if (isUnix()) {
-                        sh 'echo "Build stage completed on Unix"'
+                        sh 'npm run build'
                     } else {
-                        bat 'echo Build stage completed on Windows'
+                        bat 'npm run build'
                     }
                 }
             }
@@ -28,12 +41,18 @@ pipeline {
 
         stage('Test') {
             steps {
-                echo 'Running tests...'
+                echo 'Running Playwright E2E tests...'
                 script {
                     if (isUnix()) {
-                        sh 'echo "Test stage completed on Unix"'
+                        sh '''
+                            npx playwright install --with-deps chromium
+                            npm run test:e2e -- --reporter=list
+                        '''
                     } else {
-                        bat 'echo Test stage completed on Windows'
+                        bat '''
+                            npx playwright install --with-deps chromium
+                            npm run test:e2e -- --reporter=list
+                        '''
                     }
                 }
             }
@@ -45,10 +64,10 @@ pipeline {
             echo 'Pipeline execution completed.'
         }
         success {
-            echo 'Build successful! All stages passed.'
+            echo 'Build successful! All tests passed.'
         }
         failure {
-            echo 'Build failed!'
+            echo 'Build or tests failed! Check logs for details.'
         }
     }
 }
