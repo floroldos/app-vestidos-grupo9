@@ -31,13 +31,18 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
         body: formData,
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        // Set user-friendly error message based on status
+        // Try to parse JSON error body; fallback to generic message
+        let data: any = {};
+        try {
+          data = await response.json();
+        } catch (e) {
+          // ignore parse errors
+        }
+
         if (response.status === 409) {
           setError("The selected dates are already booked. Please choose a different date range.");
-        } else if (data.error) {
+        } else if (data?.error) {
           setError(data.error);
         } else {
           setError("An error occurred. Please try again.");
@@ -46,8 +51,12 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
         return;
       }
 
-      // Success - redirect to item page with success message
-      router.push(`/items/${itemId}?success=1`);
+      // Success - clear loading and trigger a hard refresh to reload server data
+      setLoading(false);
+      // Use a small delay to ensure the backend state is updated, then do a full page reload
+      setTimeout(() => {
+        window.location.href = `/items/${itemId}?success=1`;
+      }, 300);
     } catch (err) {
       setError("An error occurred. Please try again.");
       setLoading(false);

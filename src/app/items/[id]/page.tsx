@@ -1,14 +1,16 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { getItem, getItemRentals } from "../../../../lib/RentalManagementSystem";
 import ItemCalendar from "./ItemCalendar";
 import { getOrCreateCsrfToken } from "../../../../lib/CsrfSessionManagement";
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
 import { Key } from "react";
 import { RentalForm } from "@/components/RentalForm";
+import { SuccessBanner } from "./SuccessBanner";
 
 export default async function ItemDetail({ params }: { params: { id: string } }) {
-  const id = Number(params.id);
+  const id = Number((await params).id);
   const item = getItem(id);
   if (!item) return notFound();
 
@@ -19,6 +21,10 @@ export default async function ItemDetail({ params }: { params: { id: string } })
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+      <Link href="/" className="inline-flex items-center gap-2 text-sm text-fuchsia-600 hover:text-fuchsia-700 mb-6">
+        ← Back to home
+      </Link>
+      <SuccessBanner />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
           <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800">

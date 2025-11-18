@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { getItem, getItemRentals } from "../../../../../../lib/RentalManagementSystem";
-export function GET(_: Request, { params }: { params: { id: string } }) {
-  const id = Number(params.id);
+export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id: idStr } = await params;
+  const id = Number(idStr);
   const item = getItem(id);
   if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 type Props = { itemId: number };
 
@@ -12,13 +13,15 @@ function toISO(d: Date) {
 
 export default function ItemCalendar({ itemId }: Props) {
   const [busy, setBusy] = useState<Range[]>([]);
+  const searchParams = useSearchParams();
+  const success = searchParams.get("success");
 
   useEffect(() => {
     fetch(`/api/items/${itemId}/availability`)
       .then((r) => r.json())
       .then((data) => setBusy(data.rentals ?? []))
       .catch(() => setBusy([]));
-  }, [itemId]);
+  }, [itemId, success]);
 
   // Show next 30 days
   const today = new Date();
