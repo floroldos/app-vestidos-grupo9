@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { clearAdminSession } from "@/lib/CsrfSessionManagement";
+import { clearAdminSession } from "../../../../../lib/CsrfSessionManagement";
 
 export async function POST(req: Request) {
   clearAdminSession();
