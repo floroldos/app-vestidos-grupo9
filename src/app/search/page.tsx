@@ -43,6 +43,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
           name="category"
           defaultValue={category}
           className={fieldClass}
+          aria-label="category"
         >
           <option value="">All categories</option>
           <option value="dress">Dresses</option>

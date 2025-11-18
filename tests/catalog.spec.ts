@@ -118,7 +118,8 @@ test.describe('Navegación y catálogo', () => {
             await catalog.Page.getByRole('button', { name: 'Search' }).click();
 
             // Verificar que los resultados cambian 
-            const hasRedItems = await catalog.Page.locator('.grid').innerText();
+            const resultsGrid = catalog.Page.locator('.grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-4');
+            const hasRedItems = await resultsGrid.innerText();
             expect(hasRedItems.toLowerCase()).toContain('red');
         });
     });
