@@ -5,6 +5,7 @@ import { ProductDetailPage } from '../pages/ProductDetailPage';
 import { LoginPage } from '../pages/LoginPage';
 import { AdminDashboardPage } from '../pages/AdminDashboardPage';
 import { users } from '../config/testData/users';
+import { RentalFormPage } from '../pages/RentalFormPage';
 
 type Fixtures = {
     home: HomePage;
@@ -13,6 +14,7 @@ type Fixtures = {
     login: LoginPage;
     admin: AdminDashboardPage;
     users: typeof users;
+    rentalForm: RentalFormPage;
 };
 
 export const test = base.extend<Fixtures>({
@@ -22,6 +24,7 @@ export const test = base.extend<Fixtures>({
     login: async ({ page }, use) => use(new LoginPage(page)),
     admin: async ({ page }, use) => use(new AdminDashboardPage(page)),
     users: async ({ }, use) => use(users),
+    rentalForm: async ({ page }, use) => use(new RentalFormPage(page)),
 });
 
 export const expect = test.expect;
