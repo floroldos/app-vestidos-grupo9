@@ -3,6 +3,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 export default function Home() {
   const [startDate, setStartDate] = useState<Date | null>(null);
@@ -183,5 +184,3 @@ export default function Home() {
     </div>
   );
 }
-
-
