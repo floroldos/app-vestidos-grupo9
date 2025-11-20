@@ -134,3 +134,53 @@ export function cancelRental(id: string) {
   r.status = "canceled";
   return { ok: true as const };
 }
+
+export function addItem(data: {
+  name: string;
+  category: Category;
+  pricePerDay: number;
+  sizes: string[];
+  color?: string;
+  style?: string;
+  description?: string;
+  images?: string[];
+  alt?: string;
+}) {
+  const maxId = items.reduce((m, it) => Math.max(m, it.id), 0);
+  const id = maxId + 1;
+  const newItem: Item = {
+    id,
+    name: data.name,
+    category: data.category,
+    pricePerDay: data.pricePerDay,
+    sizes: data.sizes ?? [],
+    color: data.color ?? "unknown",
+    style: data.style,
+    description: data.description ?? "",
+    images: data.images ?? ["/images/placeholder.jpg"],
+    alt: data.alt ?? data.name,
+  };
+  items.push(newItem);
+  return newItem;
+}
+
+export function getItemById(id: number | string) {
+  const nid = Number(id);
+  return items.find((i) => i.id === nid) ?? null;
+}
+
+export function updateItem(id: number | string, updates: Partial<Item>) {
+  const nid = Number(id);
+  const idx = items.findIndex((i) => i.id === nid);
+  if (idx === -1) return null;
+  items[idx] = { ...items[idx], ...updates, id: nid };
+  return items[idx];
+}
+
+export function deleteItem(id: number | string) {
+  const nid = Number(id);
+  const idx = items.findIndex((i) => i.id === nid);
+  if (idx === -1) return false;
+  items.splice(idx, 1);
+  return true;
+}

@@ -1,0 +1,52 @@
+import { NextResponse } from "next/server";
+import { isAdmin, verifyCsrfToken } from "../../../../../../lib/CsrfSessionManagement";
+import { updateItem, deleteItem, getItemById } from "../../../../../../lib/RentalManagementSystem";
+
+export async function PUT(req: Request, { params }: { params: { id: string } }) {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const data = await req.json();
+  const csrf = data.csrf;
+  if (!(await verifyCsrfToken(csrf))) {
+    return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
+  }
+
+  const id = params.id;
+  const existed = getItemById(Number(id));
+  if (!existed) return NextResponse.json({ error: "Item not found" }, { status: 404 });
+
+  const updates = {
+    name: data.name,
+    category: data.category,
+    pricePerDay: data.pricePerDay !== undefined ? Number(data.pricePerDay) : undefined,
+    sizes: Array.isArray(data.sizes) ? data.sizes : undefined,
+    color: data.color,
+    style: data.style,
+    description: data.description,
+    images: data.images,
+    alt: data.alt,
+  };
+
+  const updated = updateItem(id, updates as any);
+  if (!updated) return NextResponse.json({ error: "Update failed" }, { status: 500 });
+
+  return NextResponse.json({ item: updated });
+}
+
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const data = await req.json();
+  const csrf = data.csrf;
+  if (!(await verifyCsrfToken(csrf))) {
+    return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
+  }
+
+  const ok = deleteItem(params.id);
+  if (!ok) return NextResponse.json({ error: "Item not found" }, { status: 404 });
+  return NextResponse.json({ success: true });
+}
