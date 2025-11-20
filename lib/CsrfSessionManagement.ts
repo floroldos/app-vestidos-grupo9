@@ -48,13 +48,26 @@ export async function clearAdminSession() {
     });
 }
 
-export async function isAdmin() {
-    const token = (await cookies()).get(SESSION_COOKIE)?.value;
+export async function isAdmin(rawCookieHeader?: string) {
+    let token: string | undefined;
+
+    if (rawCookieHeader) {
+        // Cuando viene desde GET/POST de un API route
+        const cookiesArray = rawCookieHeader.split(";").map((c) => c.trim());
+        const session = cookiesArray.find((c) =>
+            c.startsWith(`${SESSION_COOKIE}=`)
+        );
+        token = session?.split("=")[1];
+    } else {
+        // Cuando viene desde Server Components
+        token = (await cookies()).get(SESSION_COOKIE)?.value;
+    }
+
     if (!token) return false;
 
     try {
         const decoded = jwt.verify(token, SECRET) as { role?: string };
-        return decoded?.role === "admin";
+        return decoded.role === "admin";
     } catch {
         return false;
     }
