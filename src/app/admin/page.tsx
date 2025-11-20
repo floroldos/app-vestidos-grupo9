@@ -1,9 +1,7 @@
-export const dynamic = "force-dynamic";
-
 import { isAdmin, getOrCreateCsrfToken } from "../../../lib/CsrfSessionManagement";
 import { listItems } from "../../../lib/RentalManagementSystem";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
+import AdminRentals from "./AdminRentals"; // Client Component
 
 type AdminItem = {
   id: number | string;
@@ -13,40 +11,12 @@ type AdminItem = {
   pricePerDay: number;
 };
 
-type Rental = {
-  id: string;
-  itemId: number;
-  start: string;
-  end: string;
-  customer: { name: string; email: string; phone: string };
-  status: string;
-};
-
-async function loadRentals(): Promise<Rental[]> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("gr_admin")?.value;
-
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/rentals`, {
-    headers: { cookie: `gr_admin=${token}` },
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    console.error("Failed to load rentals", await res.text());
-    return [];
-  }
-
-  const data = await res.json();
-  return data.rentals ?? [];
-}
-
 export default async function Page() {
   const admin = await isAdmin();
-  if (!admin) redirect("/admin/login"); // redirigir si no es admin
+  if (!admin) redirect("/admin/login");
 
   const csrf = await getOrCreateCsrfToken();
-  const items = listItems(); // inventario estático
-  const rentals = await loadRentals(); // rentals actualizados del servidor
+  const items = listItems();
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
@@ -59,9 +29,7 @@ export default async function Page() {
 
       <section className="mt-8">
         <h2 className="font-semibold">Inventory</h2>
-        <p className="text-sm text-slate-600 dark:text-slate-400">
-          Add/edit/delete can be wired to a database later.
-        </p>
+        <p className="text-sm text-slate-600 dark:text-slate-400">Add/edit/delete can be wired to a database later.</p>
         <div className="mt-3 overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead>
@@ -90,60 +58,7 @@ export default async function Page() {
 
       <section className="mt-10">
         <h2 className="font-semibold">Scheduled rentals</h2>
-        <div className="mt-3 overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="text-left">
-                <th className="py-2 pr-4">Rental ID</th>
-                <th className="py-2 pr-4">Item</th>
-                <th className="py-2 pr-4">Dates</th>
-                <th className="py-2 pr-4">Customer</th>
-                <th className="py-2 pr-4">Status</th>
-                <th className="py-2 pr-4">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rentals.map((r) => (
-                <tr key={r.id} className="border-t">
-                  <td className="py-2 pr-4">{r.id.slice(0, 8)}</td>
-                  <td className="py-2 pr-4">{r.itemId}</td>
-                  <td className="py-2 pr-4">
-                    {r.start} → {r.end}
-                  </td>
-                  <td className="py-2 pr-4">
-                    {r.customer.name}
-                    <div className="text-slate-500 text-xs">
-                      {r.customer.email} • {r.customer.phone}
-                    </div>
-                  </td>
-                  <td className="py-2 pr-4 capitalize">{r.status}</td>
-                  <td className="py-2 pr-4">
-                    {r.status === "active" ? (
-                      <form
-                        action={`/api/admin/rentals/${r.id}/cancel`}
-                        method="POST"
-                      >
-                        <input type="hidden" name="csrf" value={csrf} />
-                        <button className="rounded-lg border px-3 py-1 hover:bg-slate-50 dark:hover:bg-slate-800">
-                          Cancel
-                        </button>
-                      </form>
-                    ) : (
-                      <span className="text-slate-400">—</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-              {rentals.length === 0 && (
-                <tr>
-                  <td className="py-3 text-slate-500" colSpan={6}>
-                    No rentals yet.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <AdminRentals csrf={csrf} />
       </section>
     </div>
   );
