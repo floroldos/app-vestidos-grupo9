@@ -23,7 +23,6 @@ export default function ItemCalendar({ itemId }: Props) {
       .catch(() => setBusy([]));
   }, [itemId, success]);
 
-  // Show next 30 days
   const today = new Date();
   const days = Array.from({ length: 30 }, (_, i) => {
     const d = new Date(today);
@@ -44,11 +43,12 @@ export default function ItemCalendar({ itemId }: Props) {
           <div
             key={d.toISOString()}
             title={toISO(d)}
-            className={`text-center text-xs rounded-md px-2 py-3 ${
-              booked ? "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-200" : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-100"
-            }`}
+            className={`text-center text-xs rounded-md px-2 py-3 ${booked
+                ? "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-200"
+                : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              }`}
           >
-            {d.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+            {d.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
             {booked && <div className="mt-1">Booked</div>}
           </div>
         );
