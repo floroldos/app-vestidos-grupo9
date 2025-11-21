@@ -145,7 +145,7 @@ export default function Home() {
                 </div>
                 <div className="p-4">
                   <p className="font-medium">{item.name}</p>
-                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Free cleaning • 2–7 day rentals</p>
+                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Free cleaning • 1–7 day rentals</p>
                   <div className="mt-4">
                     <Link
                       href={`/items/${item.id}`}
