@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import DateRangeSelector from "../../../components/DateRangeSelector";
+import DateRangeSelector from "../../components/DateRangeSelector";
 import { listItems, type Category } from "../../../lib/RentalManagementSystem";
 
 type SearchParams = {
