@@ -150,7 +150,7 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-3 rounded-2xl border p-4">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-3 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 sm:p-5">
         <input type="hidden" name="itemId" value={itemId} />
         <input type="hidden" name="csrf" value={csrf} />
 
@@ -163,7 +163,7 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
             name="name"
             required
             placeholder="Full name"
-            className="w-full rounded-xl border px-4 py-3 text-sm"
+            className="w-full rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2.5 sm:py-3 text-sm bg-white dark:bg-slate-900 focus:ring-2 focus:ring-fuchsia-500 outline-none"
           />
         </div>
 
@@ -177,7 +177,7 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
             type="email"
             required
             placeholder="Email"
-            className="w-full rounded-xl border px-4 py-3 text-sm"
+            className="w-full rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2.5 sm:py-3 text-sm bg-white dark:bg-slate-900 focus:ring-2 focus:ring-fuchsia-500 outline-none"
           />
         </div>
 
@@ -193,7 +193,7 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
             pattern="[0-9]{7,15}"
             required
             placeholder="Phone"
-            className="w-full rounded-xl border px-4 py-3 text-sm"
+            className="w-full rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2.5 sm:py-3 text-sm bg-white dark:bg-slate-900 focus:ring-2 focus:ring-fuchsia-500 outline-none"
           />
         </div>
 
@@ -209,7 +209,7 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
             min={today}
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="w-full rounded-xl border px-4 py-3 text-sm"
+            className="w-full rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2.5 sm:py-3 text-sm bg-white dark:bg-slate-900 focus:ring-2 focus:ring-fuchsia-500 outline-none"
           />
         </div>
 
@@ -225,7 +225,7 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
             min={startDate || today}
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="w-full rounded-xl border px-4 py-3 text-sm"
+            className="w-full rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2.5 sm:py-3 text-sm bg-white dark:bg-slate-900 focus:ring-2 focus:ring-fuchsia-500 outline-none"
           />
         </div>
 
@@ -268,11 +268,11 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
           </fieldset>
         </div>
 
-        <div className="sm:col-span-2">
+        <div className="sm:col-span-2 pt-2">
           <button
             type="submit"
             disabled={loading}
-            className="w-full sm:w-auto rounded-xl bg-fuchsia-600 text-white px-6 py-3 text-sm font-semibold hover:bg-fuchsia-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-xl bg-gradient-to-r from-fuchsia-600 to-rose-600 hover:from-fuchsia-700 hover:to-rose-700 text-white px-6 py-3 text-sm font-semibold shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-md"
           >
             {loading ? "Processing..." : "Request rental"}
           </button>
