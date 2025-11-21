@@ -15,6 +15,9 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
   const [loading, setLoading] = useState(false);
 
   const available = new Set(availableSizes.map((s: string) => s.toUpperCase()));
+  
+  // Get today's date in YYYY-MM-DD format for min attribute
+  const today = new Date().toISOString().split('T')[0];
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -22,6 +25,28 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
+    
+    // Client-side validation for past dates
+    const startDate = formData.get('start')?.toString();
+    const endDate = formData.get('end')?.toString();
+    
+    if (startDate && startDate < today) {
+      setError("Invalid date. Select a start date later than today.");
+      setLoading(false);
+      return;
+    }
+    
+    if (endDate && endDate < today) {
+      setError("Invalid date. Select an end date later than today.");
+      setLoading(false);
+      return;
+    }
+    
+    if (startDate && endDate && endDate < startDate) {
+      setError("End date must be later than start date.");
+      setLoading(false);
+      return;
+    }
 
     try {
       const response = await fetch("/api/rentals", {
@@ -125,6 +150,7 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
             name="start"
             type="date"
             required
+            min={today}
             className="w-full rounded-xl border px-4 py-3 text-sm"
           />
         </div>
@@ -138,6 +164,7 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
             name="end"
             type="date"
             required
+            min={today}
             className="w-full rounded-xl border px-4 py-3 text-sm"
           />
         </div>

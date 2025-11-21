@@ -5,7 +5,7 @@ export type Item = {
   name: string;
   category: Category;
   pricePerDay: number;
-  sizes: string[]; // for shoes you can use "36-41"
+  sizes: string[];
   color: string;
   style?: string;
   description: string;
@@ -16,14 +16,17 @@ export type Item = {
 export type Rental = {
   id: string;
   itemId: number;
-  start: string; // ISO date (yyyy-mm-dd)
-  end: string;   // ISO date (yyyy-mm-dd)
+  start: string; // ISO yyyy-mm-dd
+  end: string;   // ISO yyyy-mm-dd
   customer: { name: string; email: string; phone: string };
   createdAt: string;
   status: "active" | "canceled";
 };
 
-// In-memory store for demo. Replace with a DB in production.
+// -----------------------------
+// DATA
+// -----------------------------
+
 const items: Item[] = [
   {
     id: 1,
@@ -77,37 +80,16 @@ const items: Item[] = [
 
 const rentals: Rental[] = [];
 
-export function listItems(filters?: {
-  q?: string;
-  category?: Category;
-  size?: string;
-  color?: string;
-  style?: string;
-}) {
-  const q = filters?.q?.toLowerCase().trim();
-  return items.filter((it) => {
-    if (filters?.category && it.category !== filters.category) return false;
-    if (filters?.size && !it.sizes.includes(filters.size)) return false;
-    if (filters?.color && it.color.toLowerCase() !== filters.color.toLowerCase()) return false;
-    if (filters?.style && (it.style ?? "").toLowerCase() !== filters.style.toLowerCase()) return false;
-    if (q) {
-      const hay = [it.name, it.color, it.style ?? "", it.category].join(" ").toLowerCase();
-      if (!hay.includes(q)) return false;
-    }
-    return true;
-  });
-}
+// -----------------------------
+// HELPERS
+// -----------------------------
 
-export function getItem(id: number) {
-  return items.find((i) => i.id === id) ?? null;
+export function hasOverlap(aStart: string, aEnd: string, bStart: string, bEnd: string) {
+  return !(aEnd < bStart || bEnd < aStart);
 }
 
 export function getItemRentals(itemId: number) {
   return rentals.filter((r) => r.itemId === itemId && r.status === "active");
-}
-
-export function hasOverlap(aStart: string, aEnd: string, bStart: string, bEnd: string) {
-  return !(aEnd < bStart || bEnd < aStart);
 }
 
 export function isItemAvailable(itemId: number, start: string, end: string) {
@@ -115,11 +97,65 @@ export function isItemAvailable(itemId: number, start: string, end: string) {
   return rs.every((r) => !hasOverlap(start, end, r.start, r.end));
 }
 
+// -----------------------------
+// ITEMS
+// -----------------------------
+
+export function listItems(filters?: {
+  q?: string;
+  category?: Category;
+  size?: string;
+  color?: string;
+  style?: string;
+
+  // ⬇⬇⬇ AÑADIDO (sin romper nada)
+  start?: string;
+  end?: string;
+}) {
+  const q = filters?.q?.toLowerCase().trim();
+  const start = filters?.start || null;
+  const end = filters?.end || null;
+
+  return items.filter((it) => {
+    if (filters?.category && it.category !== filters.category) return false;
+    if (filters?.size && !it.sizes.includes(filters.size)) return false;
+    if (filters?.color && it.color.toLowerCase() !== filters.color.toLowerCase()) return false;
+    if (filters?.style && (it.style ?? "").toLowerCase() !== filters.style.toLowerCase()) return false;
+
+    if (q) {
+      const hay = [it.name, it.color, it.style ?? "", it.category]
+        .join(" ")
+        .toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+
+    // ⬇⬇⬇ FILTRO POR DISPONIBILIDAD (NO ROMPE NADA)
+    if (start && end) {
+      if (!isItemAvailable(it.id, start, end)) return false;
+    }
+
+    return true;
+  });
+}
+
+// -----------------------------
+// CRUD
+// -----------------------------
+
+export function getItem(id: number) {
+  return items.find((i) => i.id === id) ?? null;
+}
+
 export function createRental(data: Omit<Rental, "id" | "createdAt" | "status">) {
   const ok = isItemAvailable(data.itemId, data.start, data.end);
   if (!ok) return { error: "Item is not available for the selected dates." as const };
   const id = crypto.randomUUID();
-  const rental: Rental = { ...data, id, createdAt: new Date().toISOString(), status: "active" };
+  const rental: Rental = {
+    ...data,
+    id,
+    createdAt: new Date().toISOString(),
+    status: "active",
+  };
   rentals.push(rental);
   return { rental };
 }
@@ -148,6 +184,7 @@ export function addItem(data: {
 }) {
   const maxId = items.reduce((m, it) => Math.max(m, it.id), 0);
   const id = maxId + 1;
+
   const newItem: Item = {
     id,
     name: data.name,
@@ -160,6 +197,7 @@ export function addItem(data: {
     images: data.images ?? ["/images/placeholder.jpg"],
     alt: data.alt ?? data.name,
   };
+
   items.push(newItem);
   return newItem;
 }

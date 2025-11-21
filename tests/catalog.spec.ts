@@ -89,11 +89,11 @@ test.describe('Navegación y catálogo', () => {
         test('combina filtros de vestidos correctamente (talla, color, estilo)', async ({ catalog }) => {
             await catalog.applyComplexFilter({
                 category: 'dress',
-                style: 'gala',
+                style: 'cocktail',
             });
 
             await catalog.Page.getByPlaceholder('Size').fill('M');
-            await catalog.Page.getByPlaceholder('Color').fill('black');
+            await catalog.Page.getByPlaceholder('Color').fill('burgundy');
             await catalog.Page.getByRole('button', { name: 'Search' }).click();
 
             await catalog.assertResultsAreVisible();
@@ -114,12 +114,13 @@ test.describe('Navegación y catálogo', () => {
             await catalog.assertResultsAreVisible();
 
             // Cambiar color
-            await catalog.Page.getByPlaceholder('Color').fill('red');
+            await catalog.Page.getByPlaceholder('Color').fill('black');
             await catalog.Page.getByRole('button', { name: 'Search' }).click();
 
-            // Verificar que los resultados cambian 
-            const hasRedItems = await catalog.Page.locator('.grid').innerText();
-            expect(hasRedItems.toLowerCase()).toContain('red');
+            // Verificar que los resultados cambian y hay items con ese color
+            const resultsGrid = catalog.Page.locator('.grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-4');
+            const hasBlackItems = await resultsGrid.innerText();
+            expect(hasBlackItems.toLowerCase()).toContain('black');
         });
     });
 });

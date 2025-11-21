@@ -9,7 +9,7 @@ import { Key } from "react";
 import { RentalForm } from "@/components/RentalForm";
 import { SuccessBanner } from "./SuccessBanner";
 
-export default async function ItemDetail({ params }: { params: { id: string } }) {
+export default async function ItemDetail({ params }: { params: Promise<{ id: string }> }) {
   const id = Number((await params).id);
   const item = getItem(id);
   if (!item) return notFound();

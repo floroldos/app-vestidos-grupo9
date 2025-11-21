@@ -34,7 +34,17 @@ export async function POST(req: Request) {
 
   const item = getItem(itemId);
   if (!item) return NextResponse.json({ error: "Item not found" }, { status: 404 });
-  if (end < start) return NextResponse.json({ error: "End date must be after start date" }, { status: 400 });
+  
+  // Validate dates are not in the past
+  const today = new Date().toISOString().split('T')[0];
+  if (start < today) {
+    return NextResponse.json({ error: "Invalid date. Select a start date later than today." }, { status: 400 });
+  }
+  if (end < today) {
+    return NextResponse.json({ error: "Invalid date. Select an end date later than today." }, { status: 400 });
+  }
+  
+  if (end < start) return NextResponse.json({ error: "End date must be later than start date." }, { status: 400 });
 
   if (!isItemAvailable(itemId, start, end)) {
     return NextResponse.json({ error: "Item not available for selected dates" }, { status: 409 });
