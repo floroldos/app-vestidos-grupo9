@@ -2,13 +2,9 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import DateRangeSelectorHome from "../components/DateRangeSelectorHome";
 
 export default function Home() {
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
-
   const featured = [
     { id: 1, name: "Silk Evening Gown", price: 79, image: "/images/dresses/silk-evening-gown.jpg", alt: "Model wearing a champagne silk evening gown" },
     { id: 2, name: "Black Tie Dress", price: 99, image: "/images/dresses/black-tie-dress.jpg", alt: "Elegant black tie dress" },
@@ -42,6 +38,7 @@ export default function Home() {
       </header>
 
       <main>
+        {/* HERO */}
         <section className="relative overflow-hidden">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
             <div className="max-w-3xl">
@@ -53,8 +50,14 @@ export default function Home() {
                 Look stunning without the price tag. Flexible rentals, free cleaning, and fast delivery.
               </p>
 
-              <form action="/search" method="GET" className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 p-4 shadow-sm">
+              {/* FILTER BAR */}
+              <form
+                action="/search"
+                method="GET"
+                className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 p-4 shadow-sm"
+              >
 
+                {/* Search bar */}
                 <div className="col-span-1 lg:col-span-2">
                   <label htmlFor="query" className="sr-only">Search</label>
                   <input
@@ -66,28 +69,12 @@ export default function Home() {
                   />
                 </div>
 
+                {/* 🔥 Date range selector nuevo */}
                 <div className="w-full">
-                  <DatePicker
-                    selected={startDate}
-                    onChange={setStartDate}
-                    dateFormat="yyyy-MM-dd"
-                    placeholderText="Start date"
-                    className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-slate-900 dark:text-slate-100"
-                    name="start"
-                  />
+                  <DateRangeSelectorHome />
                 </div>
 
-                <div className="w-full">
-                  <DatePicker
-                    selected={endDate}
-                    onChange={setEndDate}
-                    dateFormat="yyyy-MM-dd"
-                    placeholderText="End date"
-                    className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-slate-900 dark:text-slate-100"
-                    name="end"
-                  />
-                </div>
-
+                {/* Size filter */}
                 <div>
                   <label htmlFor="size" className="sr-only">Size</label>
                   <select
@@ -104,6 +91,7 @@ export default function Home() {
                   </select>
                 </div>
 
+                {/* Submit button */}
                 <div className="lg:col-span-5">
                   <button
                     type="submit"
@@ -117,6 +105,7 @@ export default function Home() {
           </div>
         </section>
 
+        {/* FEATURED */}
         <section id="featured" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <div className="flex items-end justify-between gap-4">
             <h2 className="text-2xl sm:text-3xl font-bold">Featured picks</h2>
@@ -146,7 +135,7 @@ export default function Home() {
                 </div>
                 <div className="p-4">
                   <p className="font-medium">{item.name}</p>
-                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Free cleaning • 2–7 day rentals</p>
+                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Free cleaning • 1–7 day rentals</p>
                   <div className="mt-4">
                     <Link
                       href={`/items/${item.id}`}
@@ -161,6 +150,7 @@ export default function Home() {
           </div>
         </section>
 
+        {/* HOW IT WORKS */}
         <section id="how" className="bg-slate-50/70 dark:bg-slate-900/60 border-y border-slate-200/60 dark:border-slate-800">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
             <h2 className="text-2xl sm:text-3xl font-bold text-center">How it works</h2>
