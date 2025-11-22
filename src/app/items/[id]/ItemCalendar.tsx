@@ -1,72 +1,125 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
-// ---- Tipos ----
-interface AvailabilityRange {
-  start: string;
-  end: string;
+type Props = { itemId: number };
+type Range = { start: string; end: string };
+
+function toISO(d: Date) {
+  return d.toISOString().slice(0, 10);
 }
 
-interface AvailabilityResponse {
-  availability: AvailabilityRange[];
-}
-
-// ---- Componente ----
-export default function ItemCalendar({ itemId }: { itemId: number }) {
-  const [availability, setAvailability] = useState<AvailabilityRange[]>([]);
+export default function ItemCalendar({ itemId }: Props) {
+  const [busy, setBusy] = useState<Range[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(false);
+  const searchParams = useSearchParams();
+  const success = searchParams.get("success");
 
   useEffect(() => {
-    async function fetchAvailability() {
-      try {
-        setLoading(true);
-
-        const res = await fetch(`/api/items/${itemId}/availability`);
-        if (!res.ok) throw new Error("No se pudo cargar disponibilidad");
-
-        const data: AvailabilityResponse = await res.json();
-        setAvailability(data.availability ?? []);
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : "Error desconocido";
-        setError(message);
-      } finally {
+    setLoading(true);
+    setError(false);
+    fetch(`/api/items/${itemId}/availability`)
+      .then((r) => r.json())
+      .then((data) => {
+        setBusy(data.rentals ?? []);
         setLoading(false);
-      }
-    }
+      })
+      .catch(() => {
+        setBusy([]);
+        setError(true);
+        setLoading(false);
+      });
+  }, [itemId, success]);
 
-    fetchAvailability();
-  }, [itemId]);
 
-  if (loading) return <p>Cargando disponibilidad...</p>;
-  if (error) return <p>Error: {error}</p>;
+  const today = new Date();
+  const days = Array.from({ length: 42 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + i);
+    return d;
+  });
+
+  function isBooked(date: Date) {
+    const iso = toISO(date);
+    return busy.some((r) => r.start <= iso && iso <= r.end);
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-fuchsia-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-xl border border-red-300 bg-red-50 p-4">
+        <p className="text-sm text-red-800">
+          No se pudo cargar la disponibilidad. Refresque la página.
+        </p>
+      </div>
+    );
+  }
+
+  const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
-    <div className="p-4 border rounded-xl shadow bg-white w-full max-w-xl">
-      <h2 className="text-xl font-bold mb-2">
-        Disponibilidad del ítem #{itemId}
-      </h2>
+    <div>
+      {/* Legend */}
+      <div className="mb-4 flex flex-wrap gap-4 text-xs">
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-emerald-100 dark:bg-emerald-900/40 border border-emerald-300 dark:border-emerald-700"></div>
+          <span>Available</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-rose-100 dark:bg-rose-900/40 border border-rose-300 dark:border-rose-700"></div>
+          <span>Booked</span>
+        </div>
+      </div>
 
-      <div className="grid grid-cols-1 gap-2">
-        {availability.length === 0 && (
-          <p className="text-sm text-gray-600">
-            Este ítem está completamente disponible.
-          </p>
-        )}
-
-        {availability.map((range, idx) => (
-          <div
-            key={idx}
-            className="p-2 bg-red-100 rounded-lg border border-red-300"
-          >
-            <p className="text-sm font-medium text-red-700">OCUPADO</p>
-            <p className="text-xs text-gray-700">
-              {range.start} → {range.end}
-            </p>
+      {/* Day names header */}
+      <div className="grid grid-cols-7 gap-2 mb-2">
+        {weekDays.map((day) => (
+          <div key={day} className="text-center text-xs font-semibold text-slate-600 dark:text-slate-400">
+            {day}
           </div>
         ))}
+      </div>
+
+      <div className="grid grid-cols-7 gap-2">
+        {days.map((d) => {
+          const booked = isBooked(d);
+          const isToday = toISO(d) === toISO(new Date());
+
+          return (
+            <div
+              key={d.toISOString()}
+              className={`
+                relative text-center text-xs rounded-lg px-2 py-3 transition-all duration-200
+                ${isToday ? "ring-2 ring-fuchsia-500" : ""}
+                ${booked
+                  ? "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-200 border border-rose-300 dark:border-rose-700"
+                  : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700 hover:bg-emerald-200 dark:hover:bg-emerald-900/60 cursor-pointer"
+                }
+              `}
+              title={`${toISO(d)} - ${booked ? "Booked" : "Available"}`}
+            >
+              <div className="font-semibold">{d.getDate()}</div>
+              <div className="text-[10px] opacity-70">
+                {d.toLocaleDateString(undefined, { month: "short" })}
+              </div>
+
+              {booked && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-[10px] font-semibold bg-rose-600 text-white px-1 rounded"></div>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
