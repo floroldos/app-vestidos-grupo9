@@ -33,6 +33,8 @@ export default function ItemCalendar({ itemId }: Props) {
         setLoading(false);
       });
   }, [itemId, success]);
+
+  // Show next 42 days (6 weeks) for better calendar view
   const today = new Date();
   const days = Array.from({ length: 42 }, (_, i) => {
     const d = new Date(today);
