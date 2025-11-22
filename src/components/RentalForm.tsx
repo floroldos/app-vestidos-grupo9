@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const ALL_SIZES = ["XS", "S", "M", "L", "XL"];
 
@@ -13,11 +13,50 @@ interface RentalFormProps {
 export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [checkingAvailability, setCheckingAvailability] = useState(false);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const available = new Set(availableSizes.map((s: string) => s.toUpperCase()));
   
   // Get today's date in YYYY-MM-DD format for min attribute
   const today = new Date().toISOString().split('T')[0];
+
+  // Check availability when both dates are selected
+  useEffect(() => {
+    if (startDate && endDate && startDate <= endDate) {
+      checkAvailability(startDate, endDate);
+    }
+  }, [startDate, endDate]);
+
+  async function checkAvailability(start: string, end: string) {
+    setCheckingAvailability(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(`/api/items/${itemId}/availability`);
+      if (!response.ok) {
+        setCheckingAvailability(false);
+        return;
+      }
+
+      const data = await response.json();
+      const rentals = data.rentals ?? [];
+      
+      // Check if selected dates overlap with any existing rental
+      const hasOverlap = rentals.some((rental: { start: string; end: string }) => {
+        return !(end < rental.start || start > rental.end);
+      });
+
+      if (hasOverlap) {
+        setError("Fecha no disponible, por favor seleccione otra.");
+      }
+    } catch {
+      // Silently fail - validation will happen on submit anyway
+    } finally {
+      setCheckingAvailability(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -88,9 +127,26 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
 
   return (
     <>
+      {checkingAvailability && (
+        <div className="mb-4 rounded-xl border border-blue-300 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20 p-4">
+          <p className="text-sm font-medium text-blue-800 dark:text-blue-200 flex items-center gap-2">
+            <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></span>
+            Checking availability...
+          </p>
+        </div>
+      )}
+
       {error && (
         <div className="mb-4 rounded-xl border border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-900/20 p-4">
           <p className="text-sm font-medium text-red-800 dark:text-red-200">{error}</p>
+        </div>
+      )}
+
+      {!error && !checkingAvailability && startDate && endDate && startDate <= endDate && (
+        <div className="mb-4 rounded-xl border border-green-300 bg-green-50 dark:border-green-800 dark:bg-green-900/20 p-4">
+          <p className="text-sm font-medium text-green-800 dark:text-green-200 flex items-center gap-2">
+            ✓ Dates are available
+          </p>
         </div>
       )}
 
@@ -151,6 +207,8 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
             type="date"
             required
             min={today}
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
             className="w-full rounded-xl border px-4 py-3 text-sm"
           />
         </div>
@@ -164,7 +222,9 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
             name="end"
             type="date"
             required
-            min={today}
+            min={startDate || today}
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
             className="w-full rounded-xl border px-4 py-3 text-sm"
           />
         </div>
