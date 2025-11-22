@@ -24,11 +24,12 @@ export default function DateRangeSelector({ start, end }: Props) {
 
     return (
         <div className="relative w-full">
-            {/* Ícono adelante del input */}
-            <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 
-                text-white z-20 pointer-events-none" />
+            {/* Ícono blanco */}
+            <CalendarDays
+                className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 
+                text-white z-20 pointer-events-none"
+            />
 
-            {/* Input */}
             <DatePicker
                 selectsRange
                 startDate={startDate}
@@ -39,16 +40,27 @@ export default function DateRangeSelector({ start, end }: Props) {
                 monthsShown={2}
                 placeholderText="Select date range"
                 dateFormat="yyyy-MM-dd"
+                portalId="datepicker-root"
+                popperClassName="z-[999999]"
                 className="w-full pl-10 rounded-xl border px-3 py-2 text-sm 
                 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 
                 outline-none focus:ring-2 focus:ring-fuchsia-500 z-10 relative"
             />
 
+            {/* Hidden GET fields */}
             {startDate && (
-                <input type="hidden" name="start" value={startDate.toISOString().split("T")[0]} />
+                <input
+                    type="hidden"
+                    name="start"
+                    value={startDate.toISOString().split("T")[0]}
+                />
             )}
             {endDate && (
-                <input type="hidden" name="end" value={endDate.toISOString().split("T")[0]} />
+                <input
+                    type="hidden"
+                    name="end"
+                    value={endDate.toISOString().split("T")[0]}
+                />
             )}
         </div>
     );

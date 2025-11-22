@@ -31,6 +31,10 @@ export default function RootLayout({
         <main className="flex-1">
           {children}
         </main>
+
+        {/* 🔥 Portal para que el DatePicker se renderice fuera del layout */}
+        <div id="datepicker-root"></div>
+
         <Footer />
       </body>
     </html>
