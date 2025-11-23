@@ -8,7 +8,7 @@ export class CatalogPage {
     }
 
     private firstViewDetails = this.page.locator('a[href^="/items/"]').first();
-    private searchInput = this.page.getByPlaceholder('Search...');
+    private searchInput = this.page.getByPlaceholder('Search…');
     private categorySelect = this.page.getByRole('combobox', { name: 'category' });
     private styleInput = this.page.getByPlaceholder('e.g. elegant');
     private searchButton = this.page.getByRole('button', { name: 'Search' });
@@ -19,7 +19,7 @@ export class CatalogPage {
     }
 
     async assertCatalogLoaded() {
-        await expect(this.page.getByRole('heading', { name: 'Browse Our Collection' })).toBeVisible();
+        await expect(this.page.getByRole('heading', { name: 'Browse catalog' })).toBeVisible();
         await this.page.waitForSelector('.grid.grid-cols-1');
     }
 

@@ -4,7 +4,7 @@ import { HomePage } from './pages/HomePage';
 
 test.use({ baseURL: 'http://localhost:3000' });
 
-test.describe('Test Cases from Requirements (Formato 1)', () => {
+test.describe('Test Cases para Requerimientos RF001-01, RF002-01, RF003-01', () => {
 
     /**
      * CT-RF001-01: Búsqueda por palabra clave válida

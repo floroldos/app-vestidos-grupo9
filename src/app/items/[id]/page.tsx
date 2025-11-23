@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getItem, getItemRentals } from "../../../../lib/RentalManagementSystem";
 import ItemCalendar from "./ItemCalendar";
-import { getOrCreateCsrfToken } from "../../../../lib/CsrfSessionManagement";
+import { getCsrfToken } from "../../../../lib/CsrfSessionManagement";
 import { RentalForm } from "@/components/RentalForm";
 import { SuccessBanner } from "./SuccessBanner";
 import { ImageGallery } from "@/components/ImageGallery";
@@ -12,7 +12,7 @@ export default async function ItemDetail({ params }: { params: Promise<{ id: str
   const item = getItem(id);
   if (!item) return notFound();
 
-  const csrf = await getOrCreateCsrfToken();
+  const csrf = await getCsrfToken();
   const booked = await getItemRentals(id);
 
   const _available = new Set((item.sizes ?? []).map((s: string) => s.toUpperCase()));
