@@ -1,5 +1,5 @@
 import {NextResponse} from "next/server";
-import {listItems, type Category} from "../../../../lib/RentalManagementSystem";
+import {listItems, type Category, type Item} from "../../../../lib/RentalManagementSystem";
 
 export function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -9,7 +9,7 @@ export function GET(req: Request) {
   const color = searchParams.get("color") || undefined;
   const style = searchParams.get("style") || undefined;
 
-  const items = listItems({ q, category, size, color, style }).map((i) => ({
+  const items = listItems({ q, category, size, color, style }).map((i: Item) => ({
     id: i.id,
     name: i.name,
     category: i.category,

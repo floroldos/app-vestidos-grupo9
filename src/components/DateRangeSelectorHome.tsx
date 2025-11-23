@@ -38,11 +38,11 @@ export default function DateRangeSelectorHome({ start, end }: Props) {
                 maxDate={maxDate}
                 monthsShown={2}
                 placeholderText="Select date range"
-                dateFormat="yyyy-MM-dd"
+                dateFormat="dd/MM/yyyy"
                 portalId="datepicker-root"
                 popperClassName="z-[999999]"
-                className="w-full pl-10 rounded-xl border border-slate-200 dark:border-slate-700 
-                bg-white dark:bg-slate-900 px-4 py-3 text-sm 
+                className="w-full pl-9 pr-4 rounded-xl border border-slate-200 dark:border-slate-700 
+                bg-white dark:bg-slate-900 py-3 text-sm 
                 text-slate-900 dark:text-slate-100 
                 focus:ring-2 focus:ring-fuchsia-500"
             />

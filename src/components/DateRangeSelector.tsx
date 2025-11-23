@@ -3,7 +3,6 @@
 import { useState } from "react";
 import DatePicker from "react-datepicker";
 import { CalendarDays } from "lucide-react";
-import "react-datepicker/dist/react-datepicker.css";
 
 type Props = {
     start?: string;
@@ -39,10 +38,10 @@ export default function DateRangeSelector({ start, end }: Props) {
                 maxDate={maxDate}
                 monthsShown={2}
                 placeholderText="Select date range"
-                dateFormat="yyyy-MM-dd"
+                dateFormat="dd/MM/yyyy"
                 portalId="datepicker-root"
                 popperClassName="z-[999999]"
-                className="w-full pl-10 rounded-xl border px-3 py-2 text-sm 
+                className="w-full pl-10 rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm 
                 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 
                 outline-none focus:ring-2 focus:ring-fuchsia-500 z-10 relative"
             />

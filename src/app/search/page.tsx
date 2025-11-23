@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import DateRangeSelector from "../../components/DateRangeSelector";
-import { listItems, type Category } from "../../../lib/RentalManagementSystem";
+import { listItems, type Category, type Item } from "../../../lib/RentalManagementSystem";
 
 type SearchParams = {
   q?: string;
@@ -104,7 +104,7 @@ export default async function Page({
 
       {/* Product Grid */}
       <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {items.map((it) => (
+        {items.map((it: Item) => (
           <Link
             key={it.id}
             href={`/items/${it.id}`}

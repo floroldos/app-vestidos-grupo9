@@ -62,7 +62,7 @@ export default function Home() {
         {/* HERO SECTION */}
         <section className="relative overflow-hidden">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
-            <div className="max-w-3xl">
+            <div className="max-w-5xl">
               <h1 className="text-3xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight leading-tight">
                 Rent designer dresses for every
                 <span className="block mt-2 bg-gradient-to-r from-fuchsia-600 via-rose-500 to-orange-400 bg-clip-text text-transparent">
@@ -81,7 +81,7 @@ export default function Home() {
                 className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 p-4 shadow-sm"
               >
                 {/* Search bar */}
-                <div className="col-span-1 lg:col-span-2">
+                <div className="col-span-2 sm:col-span-2 lg:col-span-2">
                   <label htmlFor="query" className="sr-only">Search</label>
                   <input
                     id="query"
@@ -93,12 +93,12 @@ export default function Home() {
                 </div>
 
                 {/* Dates */}
-                <div className="w-full">
+                <div className="col-span-1 sm:col-span-1 lg:col-span-2">
                   <DateRangeSelectorHome />
                 </div>
 
                 {/* Size */}
-                <div>
+                <div className="col-span-2 sm:col-span-2 lg:col-span-1">
                   <label htmlFor="size" className="sr-only">Size</label>
                   <select
                     id="size"
@@ -114,7 +114,7 @@ export default function Home() {
                   </select>
                 </div>
 
-                <div className="lg:col-span-5">
+                <div className="col-span-1 sm:col-span-2 lg:col-span-5">
                   <button
                     type="submit"
                     className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-fuchsia-600 px-6 py-3 text-sm font-semibold text-white hover:bg-fuchsia-500"
