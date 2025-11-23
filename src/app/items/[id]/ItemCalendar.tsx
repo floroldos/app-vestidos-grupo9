@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 type Props = { itemId: number };
-
 type Range = { start: string; end: string };
 
 function toISO(d: Date) {
-  return d.toISOString().slice(0, 10);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 export default function ItemCalendar({ itemId }: Props) {
@@ -34,7 +36,7 @@ export default function ItemCalendar({ itemId }: Props) {
       });
   }, [itemId, success]);
 
-  // Show next 42 days (6 weeks) for better calendar view
+
   const today = new Date();
   const days = Array.from({ length: 42 }, (_, i) => {
     const d = new Date(today);
@@ -57,9 +59,9 @@ export default function ItemCalendar({ itemId }: Props) {
 
   if (error) {
     return (
-      <div className="rounded-xl border border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-900/20 p-4">
-        <p className="text-sm text-red-800 dark:text-red-200">
-          Error loading availability. Please refresh the page.
+      <div className="rounded-xl border border-red-300 bg-red-50 p-4">
+        <p className="text-sm text-red-800">
+          No se pudo cargar la disponibilidad. Refresque la página.
         </p>
       </div>
     );
@@ -90,35 +92,32 @@ export default function ItemCalendar({ itemId }: Props) {
         ))}
       </div>
 
-      {/* Calendar grid */}
       <div className="grid grid-cols-7 gap-2">
         {days.map((d) => {
           const booked = isBooked(d);
           const isToday = toISO(d) === toISO(new Date());
-          
+
           return (
             <div
               key={d.toISOString()}
-              title={`${toISO(d)} - ${booked ? "Booked" : "Available"}`}
               className={`
                 relative text-center text-xs rounded-lg px-2 py-3 transition-all duration-200
                 ${isToday ? "ring-2 ring-fuchsia-500" : ""}
-                ${
-                  booked
-                    ? "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-200 border border-rose-300 dark:border-rose-700"
-                    : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700 hover:bg-emerald-200 dark:hover:bg-emerald-900/60 cursor-pointer"
+                ${booked
+                  ? "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-200 border border-rose-300 dark:border-rose-700"
+                  : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700 hover:bg-emerald-200 dark:hover:bg-emerald-900/60 cursor-pointer"
                 }
               `}
+              title={`${toISO(d)} - ${booked ? "Booked" : "Available"}`}
             >
               <div className="font-semibold">{d.getDate()}</div>
               <div className="text-[10px] opacity-70">
                 {d.toLocaleDateString(undefined, { month: "short" })}
               </div>
+
               {booked && (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-[10px] font-semibold bg-rose-600 text-white px-1 rounded">
-                    ✕
-                  </div>
+                  <div className="text-[10px] font-semibold bg-rose-600 text-white px-1 rounded"></div>
                 </div>
               )}
             </div>

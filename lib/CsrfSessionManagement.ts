@@ -33,6 +33,19 @@ export async function verifyCsrfToken(formToken: string | null | undefined) {
     return !!cookieToken && cookieToken === formToken;
 }
 
+export async function setCsrfToken(providedToken?: string) {
+    const c = await cookies();
+    const token = providedToken ?? crypto.randomUUID();
+    c.set(CSRF_COOKIE, token, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: 60 * 60,
+    });
+    return token;
+}
+
 export async function setAdminSession() {
     const token = jwt.sign({ role: "admin" }, SECRET, { expiresIn: "1h" });
     const c = await cookies();
@@ -59,6 +72,14 @@ export async function clearAdminSession() {
         path: "/",
         maxAge: 0,
     });
+    c.set(CSRF_COOKIE, "", {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: 0,
+    });
+
 }
 
 export async function isAdmin(rawCookieHeader?: string) {
