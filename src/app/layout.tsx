@@ -31,6 +31,8 @@ export default function RootLayout({
         <main className="flex-1">
           {children}
         </main>
+        <div id="datepicker-root"></div>
+
         <Footer />
       </body>
     </html>

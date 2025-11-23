@@ -1,13 +1,26 @@
-import Database from 'better-sqlite3';
+import 'server-only';
 import type { Item, Rental } from './RentalManagementSystem';
+
+// Importación dinámica solo en servidor
+let Database: any = null;
 
 // Usar globalThis para persistir la BD entre HMR en desarrollo
 declare global {
-    var __db: Database.Database | undefined;
+    var __db: any | undefined;
 }
 
 export function initDatabase() {
+    // Solo ejecutar en servidor
+    if (typeof window !== 'undefined') {
+        throw new Error('Database can only be initialized on the server');
+    }
+
     if (globalThis.__db) return globalThis.__db;
+
+    // Cargar better-sqlite3 dinámicamente
+    if (!Database) {
+        Database = require('better-sqlite3');
+    }
 
     // Crear BD en memoria
     globalThis.__db = new Database(':memory:');

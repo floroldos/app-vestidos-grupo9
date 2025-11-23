@@ -1,3 +1,4 @@
+import 'server-only';
 import { initDatabase, getDatabase, seedInitialData, rowToItem, rowToRental } from './database';
 
 export type Category = "dress" | "shoes" | "bag" | "jacket";
@@ -7,7 +8,7 @@ export type Item = {
   name: string;
   category: Category;
   pricePerDay: number;
-  sizes: string[]; // for shoes you can use "36-41"
+  sizes: string[];
   color: string;
   style?: string;
   description: string;
@@ -18,8 +19,8 @@ export type Item = {
 export type Rental = {
   id: string;
   itemId: number;
-  start: string; // ISO date (yyyy-mm-dd)
-  end: string;   // ISO date (yyyy-mm-dd)
+  start: string; // ISO yyyy-mm-dd
+  end: string;   // ISO yyyy-mm-dd
   customer: { name: string; email: string; phone: string };
   createdAt: string;
   status: "active" | "canceled";
@@ -106,12 +107,40 @@ function ensureDatabase() {
   }
 }
 
+// -----------------------------
+// HELPERS
+// -----------------------------
+
+export function hasOverlap(aStart: string, aEnd: string, bStart: string, bEnd: string) {
+  return !(aEnd < bStart || bEnd < aStart);
+}
+
+export function getItemRentals(itemId: number) {
+  ensureDatabase();
+  const db = getDatabase();
+  const stmt = db.prepare('SELECT * FROM rentals WHERE itemId = ? AND status = ?');
+  const rows = stmt.all(itemId, 'active');
+  console.log(`📅 getItemRentals(${itemId}):`, rows.length, 'rentals activos');
+  return rows.map(rowToRental);
+}
+
+export function isItemAvailable(itemId: number, start: string, end: string) {
+  const rs = getItemRentals(itemId);
+  return rs.every((r: Rental) => !hasOverlap(start, end, r.start, r.end));
+}
+
+// -----------------------------
+// ITEMS
+// -----------------------------
+
 export function listItems(filters?: {
   q?: string;
   category?: Category;
   size?: string;
   color?: string;
   style?: string;
+  start?: string;
+  end?: string;
 }) {
   ensureDatabase();
   const db = getDatabase();
@@ -140,15 +169,20 @@ export function listItems(filters?: {
   
   // Filtros que necesitan post-procesamiento
   if (filters?.size) {
-    items = items.filter(item => item.sizes.includes(filters.size!));
+    items = items.filter((item: Item) => item.sizes.includes(filters.size!));
   }
   
   if (filters?.q) {
     const q = filters.q.toLowerCase().trim();
-    items = items.filter(it => {
+    items = items.filter((it: Item) => {
       const hay = [it.name, it.color, it.style ?? "", it.category].join(" ").toLowerCase();
       return hay.includes(q);
     });
+  }
+  
+  // Filtro por disponibilidad
+  if (filters?.start && filters?.end) {
+    items = items.filter((it: Item) => isItemAvailable(it.id, filters.start!, filters.end!));
   }
   
   return items;
@@ -162,22 +196,9 @@ export function getItem(id: number) {
   return row ? rowToItem(row) : null;
 }
 
-export function getItemRentals(itemId: number) {
-  ensureDatabase();
-  const db = getDatabase();
-  const stmt = db.prepare('SELECT * FROM rentals WHERE itemId = ? AND status = ?');
-  const rows = stmt.all(itemId, 'active');
-  console.log(`📅 getItemRentals(${itemId}):`, rows.length, 'rentals activos');
-  return rows.map(rowToRental);
-}
-
-export function hasOverlap(aStart: string, aEnd: string, bStart: string, bEnd: string) {
-  return !(aEnd < bStart || bEnd < aStart);
-}
-
-export function isItemAvailable(itemId: number, start: string, end: string) {
-  const rs = getItemRentals(itemId);
-  return rs.every((r) => !hasOverlap(start, end, r.start, r.end));
+// Alias para compatibilidad
+export function getItemById(id: number | string) {
+  return getItem(Number(id));
 }
 
 export function createRental(data: Omit<Rental, "id" | "createdAt" | "status">) {
@@ -231,4 +252,104 @@ export function cancelRental(id: string) {
   updateStmt.run('canceled', id);
   
   return { ok: true as const };
+}
+
+// -----------------------------
+// ADMIN FUNCTIONS
+// -----------------------------
+
+export function addItem(data: {
+  name: string;
+  category: Category;
+  pricePerDay: number;
+  sizes: string[];
+  color?: string;
+  style?: string;
+  description?: string;
+  images?: string[];
+  alt?: string;
+}) {
+  ensureDatabase();
+  const db = getDatabase();
+  
+  // Obtener el máximo ID actual
+  const maxIdRow = db.prepare('SELECT MAX(id) as maxId FROM items').get() as { maxId: number | null };
+  const id = (maxIdRow.maxId || 0) + 1;
+
+  const newItem: Item = {
+    id,
+    name: data.name,
+    category: data.category,
+    pricePerDay: data.pricePerDay,
+    sizes: data.sizes ?? [],
+    color: data.color ?? "unknown",
+    style: data.style,
+    description: data.description ?? "",
+    images: data.images ?? ["/images/placeholder.jpg"],
+    alt: data.alt ?? data.name,
+  };
+
+  const stmt = db.prepare(`
+    INSERT INTO items (id, name, category, pricePerDay, sizes, color, style, description, images, alt)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  
+  stmt.run(
+    newItem.id,
+    newItem.name,
+    newItem.category,
+    newItem.pricePerDay,
+    JSON.stringify(newItem.sizes),
+    newItem.color,
+    newItem.style || null,
+    newItem.description,
+    JSON.stringify(newItem.images),
+    newItem.alt
+  );
+
+  return newItem;
+}
+
+export function updateItem(id: number | string, updates: Partial<Item>) {
+  ensureDatabase();
+  const db = getDatabase();
+  const nid = Number(id);
+  
+  const existing = getItem(nid);
+  if (!existing) return null;
+  
+  const updated = { ...existing, ...updates, id: nid };
+  
+  const stmt = db.prepare(`
+    UPDATE items 
+    SET name = ?, category = ?, pricePerDay = ?, sizes = ?, color = ?, 
+        style = ?, description = ?, images = ?, alt = ?
+    WHERE id = ?
+  `);
+  
+  stmt.run(
+    updated.name,
+    updated.category,
+    updated.pricePerDay,
+    JSON.stringify(updated.sizes),
+    updated.color,
+    updated.style || null,
+    updated.description,
+    JSON.stringify(updated.images),
+    updated.alt,
+    nid
+  );
+  
+  return updated;
+}
+
+export function deleteItem(id: number | string) {
+  ensureDatabase();
+  const db = getDatabase();
+  const nid = Number(id);
+  
+  const stmt = db.prepare('DELETE FROM items WHERE id = ?');
+  const result = stmt.run(nid);
+  
+  return result.changes > 0;
 }
