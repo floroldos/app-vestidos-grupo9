@@ -43,12 +43,14 @@ export default function Home() {
               GlamRent
             </span>
           </Link>
+
           <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-sm font-medium">
             <Link href="/search" className="hover:text-fuchsia-600 transition-colors">Browse</Link>
             <Link href="#how" className="hover:text-fuchsia-600 transition-colors">How it works</Link>
             <Link href="#featured" className="hover:text-fuchsia-600 transition-colors">Featured</Link>
             <Link href="/faq" className="hover:text-fuchsia-600 transition-colors">FAQ</Link>
           </nav>
+
           <div className="flex items-center gap-3">
             <Link href="/admin/login" className="text-sm hover:text-fuchsia-600 transition-colors hidden sm:inline-block">Admin</Link>
             <Link href="/search" className="md:hidden rounded-lg bg-gradient-to-r from-fuchsia-600 to-rose-600 px-3 py-1.5 text-sm font-medium text-white">Browse</Link>
@@ -57,6 +59,7 @@ export default function Home() {
       </header>
 
       <main>
+        {/* HERO SECTION */}
         <section className="relative overflow-hidden">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
             <div className="max-w-3xl">
@@ -66,6 +69,7 @@ export default function Home() {
                   special occasion
                 </span>
               </h1>
+
               <p className="mt-4 sm:mt-6 text-base sm:text-lg lg:text-xl text-slate-600 dark:text-slate-300 leading-relaxed">
                 Look stunning without the commitment. Premium designer dresses with free delivery, professional cleaning, and flexible rental periods.
               </p>
@@ -76,7 +80,6 @@ export default function Home() {
                 method="GET"
                 className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 p-4 shadow-sm"
               >
-
                 {/* Search bar */}
                 <div className="col-span-1 lg:col-span-2">
                   <label htmlFor="query" className="sr-only">Search</label>
@@ -89,12 +92,12 @@ export default function Home() {
                   />
                 </div>
 
-                {/* 🔥 Date range selector nuevo */}
+                {/* Dates */}
                 <div className="w-full">
                   <DateRangeSelectorHome />
                 </div>
 
-                {/* Size filter */}
+                {/* Size */}
                 <div>
                   <label htmlFor="size" className="sr-only">Size</label>
                   <select
@@ -111,7 +114,6 @@ export default function Home() {
                   </select>
                 </div>
 
-
                 <div className="lg:col-span-5">
                   <button
                     type="submit"
@@ -125,6 +127,7 @@ export default function Home() {
           </div>
         </section>
 
+        {/* FEATURED */}
         <section id="featured" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <div className="flex items-end justify-between gap-4">
             <h2 className="text-2xl sm:text-3xl font-bold">Featured picks</h2>
@@ -147,30 +150,21 @@ export default function Home() {
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                     priority={item.id === 1}
                   />
+
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
                   <div className="absolute top-3 left-3">
                     <span className="inline-flex items-center rounded-full bg-white/95 dark:bg-slate-900/95 px-3 py-1.5 text-xs font-semibold text-slate-900 dark:text-slate-100 shadow-lg backdrop-blur-sm">
                       From ${item.price}/day
                     </span>
                   </div>
                 </div>
-                <div className="p-4">
-                  <p className="font-medium">{item.name}</p>
-                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Free cleaning • 1–7 day rentals</p>
-                  <div className="mt-4">
-                    <Link
-                      href={`/items/${item.id}`}
-                      className="inline-flex items-center rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-800"
-                    >
-                      View details
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
+
                 <div className="p-5">
-                  <h3 className="font-semibold text-lg group-hover:text-fuchsia-600 transition-colors">{item.name}</h3>
+                  <h3 className="font-semibold text-lg group-hover:text-fuchsia-600 transition-colors">
+                    {item.name}
+                  </h3>
+
                   <div className="mt-2 flex items-center gap-4 text-xs text-slate-600 dark:text-slate-400">
                     <span className="flex items-center gap-1">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -178,6 +172,7 @@ export default function Home() {
                       </svg>
                       Free cleaning
                     </span>
+
                     <span className="flex items-center gap-1">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -191,20 +186,18 @@ export default function Home() {
           </div>
         </section>
 
+        {/* HOW IT WORKS */}
         <section id="how" className="bg-slate-50/70 dark:bg-slate-900/60 border-y border-slate-200/60 dark:border-slate-800">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
             <h2 className="text-2xl sm:text-3xl font-bold text-center">How it works</h2>
+
             <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-6">
               {steps.map((s, i) => (
-                <div
-                  key={i}
-                  className="relative"
-                >
-                  {/* Step number badge */}
+                <div key={i} className="relative">
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-gradient-to-br from-fuchsia-600 to-rose-600 text-white flex items-center justify-center font-bold text-sm shadow-lg z-10">
                     {i + 1}
                   </div>
-                  
+
                   <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 text-center hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-slate-950/50 transition-all hover:-translate-y-1 pt-10">
                     <div className="mx-auto h-16 w-16 rounded-2xl bg-gradient-to-br from-fuchsia-600/10 to-rose-600/10 dark:from-fuchsia-600/20 dark:to-rose-600/20 flex items-center justify-center text-4xl mb-6">
                       {s.emoji}
@@ -218,13 +211,14 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Testimonials */}
+        {/* TESTIMONIALS */}
         <section className="bg-white dark:bg-slate-900 py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl sm:text-4xl font-bold">What Our Customers Say</h2>
               <p className="mt-4 text-slate-600 dark:text-slate-400">Join hundreds of happy renters</p>
             </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {testimonials.map((testimonial, i) => (
                 <div
@@ -234,10 +228,11 @@ export default function Home() {
                   <div className="flex gap-1 mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
                       <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
                       </svg>
                     ))}
                   </div>
+
                   <p className="text-slate-700 dark:text-slate-300 mb-4">"{testimonial.text}"</p>
                   <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">— {testimonial.name}</p>
                 </div>
@@ -246,13 +241,14 @@ export default function Home() {
           </div>
         </section>
 
-        {/* CTA Section */}
+        {/* CTA */}
         <section className="bg-gradient-to-br from-fuchsia-600 via-rose-600 to-orange-500 text-white py-20">
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-3xl sm:text-5xl font-bold mb-6">Ready to Look Amazing?</h2>
             <p className="text-lg sm:text-xl text-white/90 mb-8 max-w-2xl mx-auto">
               Browse our collection of designer dresses and find the perfect outfit for your special occasion.
             </p>
+
             <Link
               href="/search"
               className="inline-flex items-center gap-2 rounded-xl bg-white text-fuchsia-600 px-8 py-4 text-lg font-semibold hover:bg-slate-50 shadow-2xl hover:shadow-white/20 transition-all hover:scale-105"
