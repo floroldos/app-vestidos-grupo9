@@ -11,6 +11,13 @@ if (!process.env.SESSION_SECRET) {
 
 const SECRET: string = process.env.SESSION_SECRET;
 
+// Solo leer el token (para Server Components que no pueden modificar cookies)
+export async function getCsrfToken() {
+    const c = await cookies();
+    return c.get(CSRF_COOKIE)?.value || "";
+}
+
+// Crear o obtener token (solo para Route Handlers y Server Actions)
 export async function getOrCreateCsrfToken() {
     const c = await cookies();
     let token = c.get(CSRF_COOKIE)?.value;
