@@ -119,4 +119,29 @@ test.describe('Test Cases from Requirements (Formato 1)', () => {
         await expect(page).not.toHaveURL(/.*success=1/);
     });
 
+    /**
+     * CT-RF008-01: Acceso a FAQ
+     * Objetivo: Validar que la FAQ este accesible desde el menu principal
+     * Prioridad: Media
+     */
+    test('CT-RF008-01: FAQ can be accessed from main menu', async ({ page }) => {
+        const catalogPage = new CatalogPage(page);
+        
+        // Paso 1: Abrir Home
+        await catalogPage.goto();
+        
+       // Paso 2: Seleccionar FAQ desde el menú superior
+        const faqLink = page.getByRole('link', { name: /faq/i });
+        await faqLink.click();
+
+        // Resultado esperado: Se abre la página FAQ
+        await expect(page).toHaveURL(/\/faq/);
+
+        // Verificar que haya al menos 10 preguntas visibles
+        const questions = page.locator('[id^="faq-"]');
+        const count = await questions.count();
+        expect(count).toBeGreaterThan(3);
+
+    });
+
 });
