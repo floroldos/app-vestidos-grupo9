@@ -125,13 +125,16 @@ test.describe('Test Cases from Requirements (Formato 1)', () => {
      * Prioridad: Media
      */
     test('CT-RF008-01: FAQ can be accessed from main menu', async ({ page }) => {
-        const catalogPage = new CatalogPage(page);
+        await page.setViewportSize({ width: 1280, height: 720 });
+
+        const homePage = new HomePage(page);
         
         // Paso 1: Abrir Home
-        await catalogPage.goto();
+        await homePage.goto();
+        await homePage.assertBasicUI();
         
        // Paso 2: Seleccionar FAQ desde el menú superior
-        const faqLink = page.getByRole('link', { name: /faq/i });
+        const faqLink = page.getByText('FAQ', { exact: false });
         await faqLink.click();
 
         // Resultado esperado: Se abre la página FAQ
