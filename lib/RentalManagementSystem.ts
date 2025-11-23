@@ -37,7 +37,11 @@ const items: Item[] = [
     color: "champagne",
     style: "evening",
     description: "Luxurious silk gown with flattering silhouette.",
-    images: ["/images/dresses/silk-evening-gown.jpg"],
+    images: [
+      "/images/dresses/silk-evening-gown.jpg",
+      "/images/dresses/silk-evening-gown-2.jpg",
+      "/images/dresses/silk-evening-gown-3.jpg",
+    ],
     alt: "Model wearing a champagne silk evening gown",
   },
   {
@@ -49,7 +53,11 @@ const items: Item[] = [
     color: "black",
     style: "black-tie",
     description: "Elegant black-tie dress for formal events.",
-    images: ["/images/dresses/black-tie-dress.jpg"],
+    images: [
+      "/images/dresses/black-tie-dress.jpg",
+      "/images/dresses/black-tie-dress-2.jpg",
+      "/images/dresses/black-tie-dress-3.jpg",
+    ],
     alt: "Elegant black tie dress",
   },
   {
@@ -61,7 +69,11 @@ const items: Item[] = [
     color: "floral",
     style: "daytime",
     description: "Bright floral midi for daytime events.",
-    images: ["/images/dresses/floral-midi-dress.jpg"],
+    images: [
+      "/images/dresses/floral-midi-dress.jpg",
+      "/images/dresses/floral-midi-dress-2.jpg",
+      "/images/dresses/floral-midi-dress-3.jpg",
+    ],
     alt: "Floral midi dress perfect for daytime events",
   },
   {
@@ -73,7 +85,11 @@ const items: Item[] = [
     color: "burgundy",
     style: "cocktail",
     description: "Rich velvet cocktail dress in deep tones.",
-    images: ["/images/dresses/velvet-cocktail-dress.jpg"],
+    images: [
+      "/images/dresses/velvet-cocktail-dress.jpg",
+      "/images/dresses/velvet-cocktail-dress-2.jpg",
+      "/images/dresses/velvet-cocktail-dress-3.jpg",
+    ],
     alt: "Velvet cocktail dress in deep tones",
   },
 ];

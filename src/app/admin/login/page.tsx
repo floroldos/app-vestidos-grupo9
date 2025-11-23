@@ -10,10 +10,11 @@ import { cookies } from "next/headers";
 export default async function AdminLogin({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const csrf = await getOrCreateCsrfToken();
-  const errorMessage = searchParams?.error ?? null;
+  const params = await searchParams;
+  const errorMessage = params?.error ?? null;
 
   async function handleLogin(formData: FormData) {
     "use server";

@@ -7,24 +7,25 @@ export class CatalogPage {
         return this.page;
     }
 
-    private firstViewDetails = this.page.getByRole('link', { name: /view details|ver detalles/i }).first();
-    private searchInput = this.page.getByPlaceholder('Search…');
+    private firstViewDetails = this.page.locator('a[href^="/items/"]').first();
+    private searchInput = this.page.getByPlaceholder('Search...');
     private categorySelect = this.page.getByRole('combobox', { name: 'category' });
-    private styleInput = this.page.getByPlaceholder('Style (e.g., cocktail)');
+    private styleInput = this.page.getByPlaceholder('e.g. elegant');
     private searchButton = this.page.getByRole('button', { name: 'Search' });
-    private noItemsMessage = this.page.getByText('No items match your filters.');
+    private noItemsMessage = this.page.getByText('No dresses found');
 
     async goto() {
         await this.page.goto('/search');
     }
 
     async assertCatalogLoaded() {
-        await expect(this.page.getByRole('heading', { name: 'Browse catalog' })).toBeVisible();
+        await expect(this.page.getByRole('heading', { name: 'Browse Our Collection' })).toBeVisible();
         await this.page.waitForSelector('.grid.grid-cols-1');
     }
 
     async openFirstProduct() {
         await this.firstViewDetails.click();
+        await this.page.waitForURL(/.*items\/.+/);
     }
 
     async searchByQuery(query: string) {
