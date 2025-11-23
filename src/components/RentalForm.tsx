@@ -18,8 +18,7 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
   const [endDate, setEndDate] = useState("");
 
   const available = new Set(availableSizes.map((s: string) => s.toUpperCase()));
-  
-  // Get today's date in YYYY-MM-DD format for min attribute
+
   const today = new Date().toISOString().split('T')[0];
 
   // Check availability when both dates are selected
@@ -64,23 +63,22 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
-    
-    // Client-side validation for past dates
+
     const startDate = formData.get('start')?.toString();
     const endDate = formData.get('end')?.toString();
-    
+
     if (startDate && startDate < today) {
       setError("Invalid date. Select a start date later than today.");
       setLoading(false);
       return;
     }
-    
+
     if (endDate && endDate < today) {
       setError("Invalid date. Select an end date later than today.");
       setLoading(false);
       return;
     }
-    
+
     if (startDate && endDate && endDate < startDate) {
       setError("End date must be later than start date.");
       setLoading(false);
@@ -94,12 +92,10 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
       });
 
       if (!response.ok) {
-        // Try to parse JSON error body; fallback to generic message
         let data: { error?: string } = {};
         try {
           data = await response.json();
         } catch {
-          // ignore parse errors
         }
 
         if (response.status === 409) {
@@ -113,9 +109,7 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
         return;
       }
 
-      // Success - clear loading and trigger a hard refresh to reload server data
       setLoading(false);
-      // Use a small delay to ensure the backend state is updated, then do a full page reload
       setTimeout(() => {
         window.location.href = `/items/${itemId}?success=1`;
       }, 300);
@@ -238,9 +232,8 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
                 return (
                   <label
                     key={size}
-                    className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm ${
-                      inStock ? "cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800" : "opacity-50 cursor-not-allowed"
-                    }`}
+                    className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm ${inStock ? "cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800" : "opacity-50 cursor-not-allowed"
+                      }`}
                   >
                     <input
                       type="radio"

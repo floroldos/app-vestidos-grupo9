@@ -4,13 +4,13 @@
   --background: #ffffff;
   --foreground: #171717;
 
-  --text-size-base: clamp(0.875rem, 0.82rem + 0.3vw, 1rem); 
+  --text-size-base: clamp(0.875rem, 0.82rem + 0.3vw, 1rem);
   --text-line-height: 1.5;
 
-  --color-primary: #7c3aed;      
+  --color-primary: #7c3aed;
   --color-on-primary: #ffffff;
-  --link: #2563eb;               
-  --link-hover: #1d4ed8;         
+  --link: #2563eb;
+  --link-hover: #1d4ed8;
 }
 
 @theme inline {
@@ -24,15 +24,24 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
-    --color-primary: #a78bfa;   
+    --color-primary: #a78bfa;
     --color-on-primary: #0b0b0b;
-    --link: #60a5fa;             
-    --link-hover: #93c5fd;       
+    --link: #60a5fa;
+    --link-hover: #93c5fd;
   }
 }
 
-*, *::before, *::after { box-sizing: border-box; }
-html, body { height: 100%; overflow-x: hidden; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  overflow-x: hidden;
+}
 
 body {
   background: var(--background);
@@ -44,17 +53,46 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-img, video, canvas, svg { max-width: 100%; height: auto; display: block; }
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
 
-h1 { font-size: clamp(1.5rem, 1.2rem + 1.5vw, 2.25rem); line-height: 1.2; }
-h2 { font-size: clamp(1.25rem, 1.1rem + 1vw, 1.875rem); line-height: 1.3; }
-h3 { font-size: clamp(1.125rem, 1rem + 0.7vw, 1.5rem); line-height: 1.35; }
+h1 {
+  font-size: clamp(1.5rem, 1.2rem + 1.5vw, 2.25rem);
+  line-height: 1.2;
+}
 
-a { color: var(--link); text-decoration: none; }
-a:hover { color: var(--link-hover); text-decoration: underline; }
+h2 {
+  font-size: clamp(1.25rem, 1.1rem + 1vw, 1.875rem);
+  line-height: 1.3;
+}
+
+h3 {
+  font-size: clamp(1.125rem, 1rem + 0.7vw, 1.5rem);
+  line-height: 1.35;
+}
+
+a {
+  color: var(--link);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--link-hover);
+  text-decoration: underline;
+}
 
 
-:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; border-radius: 6px; }
+:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
 
 @media (prefers-reduced-motion: reduce) {
   * {
@@ -65,7 +103,11 @@ a:hover { color: var(--link-hover); text-decoration: underline; }
   }
 }
 
-.container-fluid { max-width: 80rem; margin-inline: auto; padding-inline: clamp(1rem, 2vw, 2rem); }
+.container-fluid {
+  max-width: 80rem;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 2vw, 2rem);
+}
 
 .react-datepicker {
   background-color: #0f172a !important;
@@ -87,10 +129,21 @@ a:hover { color: var(--link-hover); text-decoration: underline; }
 
 .react-datepicker__day--selected,
 .react-datepicker__day--keyboard-selected {
-  background-color: #d946ef !important; /* fuchsia-500 */
+  background-color: #d946ef !important;
+  /* fuchsia-500 */
   color: white !important;
 }
 
 .react-datepicker__day:hover {
-  background-color: #64748b !important; /* slate-500 */
+  background-color: #64748b !important;
+  /* slate-500 */
+}
+
+
+.react-datepicker-popper {
+  z-index: 999999 !important;
+}
+
+.react-datepicker {
+  z-index: 999999 !important;
 }
