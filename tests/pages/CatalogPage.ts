@@ -10,7 +10,7 @@ export class CatalogPage {
     private firstViewDetails = this.page.locator('a[href^="/items/"]').first();
     private searchInput = this.page.getByPlaceholder('Search…');
     private categorySelect = this.page.getByRole('combobox', { name: 'category' });
-    private styleInput = this.page.getByPlaceholder('e.g. elegant');
+    private styleInput = this.page.getByPlaceholder('Style (e.g., cocktail)');
     private searchButton = this.page.getByRole('button', { name: 'Search' });
     private noItemsMessage = this.page.getByText('No dresses found');
 
@@ -29,19 +29,30 @@ export class CatalogPage {
     }
 
     async searchByQuery(query: string) {
+        await this.searchInput.waitFor({ state: 'visible' });
         await this.searchInput.fill(query);
         await this.searchButton.click();
     }
 
     async filterByCategory(category: string) {
+        await this.categorySelect.waitFor({ state: 'visible' });
         await this.categorySelect.selectOption({ value: category });
         await this.searchButton.click();
     }
 
     async applyComplexFilter(data: { query?: string; category?: string; style?: string }) {
-        if (data.query) await this.searchInput.fill(data.query);
-        if (data.category) await this.categorySelect.selectOption({ value: data.category });
-        if (data.style) await this.styleInput.fill(data.style);
+        if (data.query) {
+            await this.searchInput.waitFor({ state: 'visible' });
+            await this.searchInput.fill(data.query);
+        }
+        if (data.category) {
+            await this.categorySelect.waitFor({ state: 'visible' });
+            await this.categorySelect.selectOption({ value: data.category });
+        }
+        if (data.style) {
+            await this.styleInput.waitFor({ state: 'visible' });
+            await this.styleInput.fill(data.style);
+        }
         await this.searchButton.click();
     }
 
