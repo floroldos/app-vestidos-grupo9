@@ -2,11 +2,11 @@ import 'server-only';
 import type { Item, Rental } from './RentalManagementSystem';
 
 // Importación dinámica solo en servidor
-let Database: any = null;
+let Database: unknown = null;
 
 // Usar globalThis para persistir la BD entre HMR en desarrollo
 declare global {
-    var __db: any | undefined;
+    var __db: unknown | undefined;
 }
 
 export function initDatabase() {
@@ -20,6 +20,7 @@ export function initDatabase() {
     // Cargar better-sqlite3 dinámicamente
     if (!Database) {
         try {
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
             Database = require('better-sqlite3');
         } catch (error) {
             console.warn('⚠️  better-sqlite3 not available, using mock database');
@@ -30,7 +31,8 @@ export function initDatabase() {
     }
 
     // Crear BD en memoria
-    globalThis.__db = new Database(':memory:');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    globalThis.__db = new (Database as any)(':memory:');
 
     // Crear tablas
     globalThis.__db.exec(`
@@ -69,11 +71,21 @@ export function initDatabase() {
     return globalThis.__db;
 }
 
-export function getDatabase() {
+type DatabaseInstance = {
+    prepare: (query: string) => {
+        run: (...args: unknown[]) => { changes: number };
+        get: (...args: unknown[]) => unknown;
+        all: (...args: unknown[]) => unknown[];
+    };
+    exec: (query: string) => void;
+    transaction: (fn: () => void) => void;
+};
+
+export function getDatabase(): DatabaseInstance {
     if (!globalThis.__db) {
         throw new Error('Database not initialized. Call initDatabase() first.');
     }
-    return globalThis.__db;
+    return globalThis.__db as DatabaseInstance;
 }
 
 // Seed inicial con los items del JSON
@@ -114,7 +126,7 @@ export function seedInitialData(items: Item[]) {
 }
 
 // Helper para convertir row de BD a Item
-export function rowToItem(row: any): Item {
+export function rowToItem(row: Record<string, unknown>): Item {
     return {
         id: row.id,
         name: row.name,
@@ -130,7 +142,7 @@ export function rowToItem(row: any): Item {
 }
 
 // Helper para convertir row de BD a Rental
-export function rowToRental(row: any): Rental {
+export function rowToRental(row: Record<string, unknown>): Rental {
     return {
         id: row.id,
         itemId: row.itemId,
@@ -148,16 +160,14 @@ export function rowToRental(row: any): Rental {
 
 // Mock database para CI/testing cuando better-sqlite3 no está disponible
 function createMockDatabase() {
-    const mockData = { items: [], rentals: [] };
-    
     return {
-        prepare: (query: string) => ({
-            run: (...args: any[]) => ({ changes: 0 }),
-            get: (...args: any[]) => null,
-            all: (...args: any[]) => [],
+        prepare: () => ({
+            run: () => ({ changes: 0 }),
+            get: () => null,
+            all: () => [],
         }),
-        exec: (query: string) => {},
-        transaction: (fn: Function) => fn,
+        exec: () => {},
+        transaction: (fn: () => void) => fn,
     };
 }
 

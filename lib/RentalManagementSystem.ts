@@ -146,7 +146,7 @@ export function listItems(filters?: {
   const db = getDatabase();
   
   let query = 'SELECT * FROM items WHERE 1=1';
-  const params: any[] = [];
+  const params: (string | number)[] = [];
   
   if (filters?.category) {
     query += ' AND category = ?';

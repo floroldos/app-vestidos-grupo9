@@ -26,6 +26,7 @@ export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProp
     if (startDate && endDate && startDate <= endDate) {
       checkAvailability(startDate, endDate);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startDate, endDate]);
 
   async function checkAvailability(start: string, end: string) {

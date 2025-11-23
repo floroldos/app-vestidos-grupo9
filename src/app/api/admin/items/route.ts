@@ -22,7 +22,9 @@ export async function POST(req: Request) {
   }
 
   const name = (data.name || "").toString().trim();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const category = (data.category || "dress").toString() as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sizes = Array.isArray(data.sizes) ? data.sizes : (data.sizes || []).map?.((s: any) => s.toString()) ?? [];
   const pricePerDay = Number(data.pricePerDay) || 0;
 

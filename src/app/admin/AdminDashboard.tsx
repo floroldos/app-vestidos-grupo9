@@ -66,6 +66,7 @@ export default function AdminDashboard({ csrf }: { csrf: string }) {
       name: "",
       category: "dress",
       sizes: "",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       pricePerDay: undefined as any,
       color: "",
       description: "",
@@ -74,7 +75,6 @@ export default function AdminDashboard({ csrf }: { csrf: string }) {
 
   useEffect(() => {
     loadAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadAll() {
@@ -93,6 +93,7 @@ export default function AdminDashboard({ csrf }: { csrf: string }) {
       setItems(itemsData.items ?? []);
       setRentals(rentalsData.rentals ?? []);
       setError(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err?.message ?? "Error");
     } finally {
@@ -112,6 +113,7 @@ export default function AdminDashboard({ csrf }: { csrf: string }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Cancel failed");
       await loadAll();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err?.message ?? "Cancel failed");
     }
@@ -130,6 +132,7 @@ export default function AdminDashboard({ csrf }: { csrf: string }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Delete failed");
       setItems((s) => s.filter((i) => i.id !== id));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err?.message ?? "Delete failed");
     }
@@ -164,6 +167,7 @@ export default function AdminDashboard({ csrf }: { csrf: string }) {
       setItems((s) => s.map((x) => (x.id === data.item.id ? data.item : x)));
       setShowEditModal(false);
       setEditItem(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err?.message ?? "Update failed");
     }
@@ -264,6 +268,7 @@ export default function AdminDashboard({ csrf }: { csrf: string }) {
       setCreatePreviews([]);
       setShowCreateModal(false);
       setImageErrors(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err?.message ?? "Create failed");
     } finally {
@@ -509,6 +514,7 @@ export default function AdminDashboard({ csrf }: { csrf: string }) {
                 <input value={editItem.name} onChange={(e) => setEditItem({ ...editItem, name: e.target.value })} className="w-full rounded-md border px-3 py-2 mb-2" />
 
                 <label className="block text-xs mb-1">Category</label>
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 <select value={editItem.category} onChange={(e) => setEditItem({ ...editItem, category: e.target.value as any })} className="w-full rounded-md border px-3 py-2 mb-2 dark:bg-slate-800 text-slate-900">
                   <option value="dress">dress</option>
                   <option value="shoes">shoes</option>

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { isAdmin, verifyCsrfToken } from "../../../../../../lib/CsrfSessionManagement";
 import { updateItem, deleteItem, getItemById } from "../../../../../../lib/RentalManagementSystem";
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!(await isAdmin())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -13,7 +13,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
   }
 
-  const id = params.id;
+  const { id } = await params;
   const existed = getItemById(Number(id));
   if (!existed) return NextResponse.json({ error: "Item not found" }, { status: 404 });
 
@@ -29,13 +29,14 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     alt: data.alt,
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updated = updateItem(id, updates as any);
   if (!updated) return NextResponse.json({ error: "Update failed" }, { status: 500 });
 
   return NextResponse.json({ item: updated });
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!(await isAdmin())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -46,7 +47,8 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
   }
 
-  const ok = deleteItem(params.id);
+  const { id } = await params;
+  const ok = deleteItem(id);
   if (!ok) return NextResponse.json({ error: "Item not found" }, { status: 404 });
   return NextResponse.json({ success: true });
 }
