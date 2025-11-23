@@ -348,8 +348,16 @@ export function deleteItem(id: number | string) {
   const db = getDatabase();
   const nid = Number(id);
   
-  const stmt = db.prepare('DELETE FROM items WHERE id = ?');
-  const result = stmt.run(nid);
+  // Verificar si tiene rentals activos
+  const checkStmt = db.prepare('SELECT COUNT(*) as count FROM rentals WHERE itemId = ?');
+  const result = checkStmt.get(nid) as { count: number } | undefined;
   
-  return result.changes > 0;
+  if (result && result.count > 0) {
+    throw new Error('Cannot delete item with existing rentals');
+  }
+  
+  const stmt = db.prepare('DELETE FROM items WHERE id = ?');
+  const deleteResult = stmt.run(nid);
+  
+  return deleteResult.changes > 0;
 }

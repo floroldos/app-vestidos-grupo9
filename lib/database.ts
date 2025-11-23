@@ -4,9 +4,19 @@ import type { Item, Rental } from './RentalManagementSystem';
 // Importación dinámica solo en servidor
 let Database: unknown = null;
 
+type DatabaseInstance = {
+    prepare: (query: string) => {
+        run: (...args: unknown[]) => { changes: number };
+        get: (...args: unknown[]) => unknown;
+        all: (...args: unknown[]) => unknown[];
+    };
+    exec: (query: string) => void;
+    transaction: (fn: () => void) => void;
+};
+
 // Usar globalThis para persistir la BD entre HMR en desarrollo
 declare global {
-    var __db: unknown | undefined;
+    var __db: DatabaseInstance | undefined;
 }
 
 export function initDatabase() {
@@ -32,7 +42,7 @@ export function initDatabase() {
 
     // Crear BD en memoria
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    globalThis.__db = new (Database as any)(':memory:');
+    globalThis.__db = new (Database as any)(':memory:') as DatabaseInstance;
 
     // Crear tablas
     globalThis.__db.exec(`
@@ -70,16 +80,6 @@ export function initDatabase() {
 
     return globalThis.__db;
 }
-
-type DatabaseInstance = {
-    prepare: (query: string) => {
-        run: (...args: unknown[]) => { changes: number };
-        get: (...args: unknown[]) => unknown;
-        all: (...args: unknown[]) => unknown[];
-    };
-    exec: (query: string) => void;
-    transaction: (fn: () => void) => void;
-};
 
 export function getDatabase(): DatabaseInstance {
     if (!globalThis.__db) {
@@ -159,7 +159,7 @@ export function rowToRental(row: Record<string, unknown>): Rental {
 }
 
 // Mock database para CI/testing cuando better-sqlite3 no está disponible
-function createMockDatabase() {
+function createMockDatabase(): DatabaseInstance {
     return {
         prepare: () => ({
             run: () => ({ changes: 0 }),

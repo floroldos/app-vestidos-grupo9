@@ -48,7 +48,16 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   }
 
   const { id } = await params;
-  const ok = deleteItem(id);
-  if (!ok) return NextResponse.json({ error: "Item not found" }, { status: 404 });
-  return NextResponse.json({ success: true });
+  
+  try {
+    const ok = deleteItem(id);
+    if (!ok) return NextResponse.json({ error: "Item not found" }, { status: 404 });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Delete failed';
+    if (message.includes('existing rentals')) {
+      return NextResponse.json({ error: "Cannot delete item with existing rentals" }, { status: 400 });
+    }
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
