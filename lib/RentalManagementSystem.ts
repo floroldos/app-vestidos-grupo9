@@ -119,7 +119,7 @@ export function getItemRentals(itemId: number) {
   ensureDatabase();
   const db = getDatabase();
   const stmt = db.prepare('SELECT * FROM rentals WHERE itemId = ? AND status = ?');
-  const rows = stmt.all(itemId, 'active');
+  const rows = stmt.all(itemId, 'active') as Record<string, unknown>[];
   console.log(`📅 getItemRentals(${itemId}):`, rows.length, 'rentals activos');
   return rows.map(rowToRental);
 }
@@ -164,7 +164,7 @@ export function listItems(filters?: {
   }
   
   const stmt = db.prepare(query);
-  const rows = stmt.all(...params);
+  const rows = stmt.all(...params) as Record<string, unknown>[];
   let items = rows.map(rowToItem);
   
   // Filtros que necesitan post-procesamiento
@@ -192,7 +192,7 @@ export function getItem(id: number) {
   ensureDatabase();
   const db = getDatabase();
   const stmt = db.prepare('SELECT * FROM items WHERE id = ?');
-  const row = stmt.get(id);
+  const row = stmt.get(id) as Record<string, unknown> | undefined;
   return row ? rowToItem(row) : null;
 }
 
@@ -235,7 +235,7 @@ export function listRentals() {
   ensureDatabase();
   const db = getDatabase();
   const stmt = db.prepare('SELECT * FROM rentals ORDER BY createdAt DESC');
-  const rows = stmt.all();
+  const rows = stmt.all() as Record<string, unknown>[];
   return rows.map(rowToRental);
 }
 
@@ -244,7 +244,7 @@ export function cancelRental(id: string) {
   const db = getDatabase();
   
   const checkStmt = db.prepare('SELECT id FROM rentals WHERE id = ?');
-  const exists = checkStmt.get(id);
+  const exists = checkStmt.get(id) as unknown;
   
   if (!exists) return { error: "Not found" as const };
   
