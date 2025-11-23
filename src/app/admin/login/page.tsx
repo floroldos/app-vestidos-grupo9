@@ -1,7 +1,8 @@
 import {
   getOrCreateCsrfToken,
   verifyCsrfToken,
-  createAdminToken,
+  setCsrfToken,
+  setAdminSession,
 } from "../../../../lib/CsrfSessionManagement";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
@@ -18,7 +19,10 @@ export default async function AdminLogin({
     "use server";
 
     const csrfForm = formData.get("csrf")?.toString();
-    if (!verifyCsrfToken(csrfForm)) {
+
+    await setCsrfToken(csrf);
+
+    if (!await verifyCsrfToken(csrfForm)) {
       redirect("/admin/login?error=Invalid+CSRF+token");
     }
 
@@ -35,8 +39,8 @@ export default async function AdminLogin({
       redirect("/admin/login?error=Invalid+credentials");
     }
 
-    const token = createAdminToken();
-    const cookieStore = await cookies();
+    /* const token = createAdminToken(); */
+    /*const  cookieStore = await cookies();
 
     cookieStore.set({
       name: "gr_admin",
@@ -46,7 +50,9 @@ export default async function AdminLogin({
       secure: process.env.NODE_ENV === "production",
       path: "/",
       maxAge: 60 * 60, // 1h
-    });
+    }); */
+
+    await setAdminSession();
 
     redirect("/admin");
   }
