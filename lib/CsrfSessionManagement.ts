@@ -3,13 +3,33 @@ import jwt from "jsonwebtoken";
 
 const CSRF_COOKIE = "gr_csrf";
 const SESSION_COOKIE = "gr_admin";
-const SECRET = process.env.SESSION_SECRET || "default_secret_key";
 
+// Validar que SESSION_SECRET esté definido
+if (!process.env.SESSION_SECRET) {
+    throw new Error("SESSION_SECRET environment variable is required for security");
+}
+
+const SECRET: string = process.env.SESSION_SECRET;
+
+// Solo leer el token (para Server Components que no pueden modificar cookies)
+export async function getCsrfToken() {
+    const c = await cookies();
+    return c.get(CSRF_COOKIE)?.value || "";
+}
+
+// Crear o obtener token (solo para Route Handlers y Server Actions)
 export async function getOrCreateCsrfToken() {
     const c = await cookies();
     let token = c.get(CSRF_COOKIE)?.value;
     if (!token) {
         token = crypto.randomUUID();
+        c.set(CSRF_COOKIE, token, {
+            httpOnly: true,
+            sameSite: "strict",
+            secure: process.env.NODE_ENV === "production",
+            path: "/",
+            maxAge: 60 * 60 * 24, // 24 horas
+        });
     }
     return token;
 }

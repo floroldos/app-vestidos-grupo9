@@ -75,8 +75,8 @@ test.describe('Navegación y catálogo', () => {
 
         test('filtra vestidos por talla y color', async ({ catalog }) => {
             await catalog.applyComplexFilter({ category: 'dress' });
-            await catalog.Page.getByPlaceholder('e.g. M, L').fill('M');
-            await catalog.Page.getByPlaceholder('e.g. red').fill('black');
+            await catalog.Page.getByPlaceholder('Size').fill('M');
+            await catalog.Page.getByPlaceholder('Color').fill('black');
             await catalog.Page.getByRole('button', { name: 'Search' }).click();
 
             await catalog.assertResultsAreVisible();
@@ -94,7 +94,7 @@ test.describe('Navegación y catálogo', () => {
                 style: 'cocktail',
             });
 
-            await catalog.Page.getByPlaceholder('e.g. red').fill('burgundy');
+            await catalog.Page.getByPlaceholder('Color').fill('burgundy');
             await catalog.Page.getByRole('button', { name: 'Search' }).click();
 
             await catalog.assertResultsAreVisible();
@@ -110,12 +110,12 @@ test.describe('Navegación y catálogo', () => {
             await catalog.assertCatalogLoaded();
 
             // Buscar un vestido
-            await catalog.Page.getByPlaceholder('Search...').fill('dress');
+            await catalog.Page.getByPlaceholder('Search…').fill('dress');
             await catalog.Page.getByRole('button', { name: 'Search' }).click();
             await catalog.assertResultsAreVisible();
 
             // Cambiar color
-            await catalog.Page.getByPlaceholder('e.g. red').fill('black');
+            await catalog.Page.getByPlaceholder('Color').fill('black');
             await catalog.Page.getByRole('button', { name: 'Search' }).click();
 
             // Verificar que los resultados cambian y hay items con ese color

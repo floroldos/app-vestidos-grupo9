@@ -10,22 +10,34 @@ interface RentalFormProps {
   availableSizes?: string[];
 }
 
-export function RentalForm({ itemId, csrf, availableSizes = [] }: RentalFormProps) {
+export function RentalForm({ itemId, csrf: initialCsrf, availableSizes = [] }: RentalFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [csrf, setCsrf] = useState(initialCsrf);
 
   const available = new Set(availableSizes.map((s: string) => s.toUpperCase()));
 
   const today = new Date().toISOString().split('T')[0];
+
+  // Get CSRF token if not provided
+  useEffect(() => {
+    if (!csrf) {
+      fetch('/api/csrf')
+        .then(res => res.json())
+        .then(data => setCsrf(data.csrf))
+        .catch(() => {});
+    }
+  }, [csrf]);
 
   // Check availability when both dates are selected
   useEffect(() => {
     if (startDate && endDate && startDate <= endDate) {
       checkAvailability(startDate, endDate);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startDate, endDate]);
 
   async function checkAvailability(start: string, end: string) {

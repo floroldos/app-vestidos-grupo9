@@ -38,9 +38,12 @@ Check your versions:
     - `git clone <your-repo-url> && cd <your-project-folder>`
 3) Install dependencies
     - `npm install`
-4) Start the development server
+4) Configure environment variables
+    - Copy `.env.example` to `.env`: `cp .env.example .env`
+    - Update the values in `.env` (especially `SESSION_SECRET` for production)
+5) Start the development server
     - `npm run dev`
-5) Open the app
+6) Open the app
     - Visit http://localhost:3000
 
 ### Windows
@@ -51,9 +54,12 @@ Check your versions:
     - PowerShell: `git clone <your-repo-url>; cd <your-project-folder>`
 3) Install dependencies
     - `npm install`
-4) Start the development server
+4) Configure environment variables
+    - PowerShell: `Copy-Item .env.example .env`
+    - Update the values in `.env` (especially `SESSION_SECRET` for production)
+5) Start the development server
     - `npm run dev`
-5) Open the app
+6) Open the app
     - Visit http://localhost:3000
 
 ### Common scripts

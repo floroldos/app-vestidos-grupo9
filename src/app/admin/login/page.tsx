@@ -1,18 +1,16 @@
 import {
   getOrCreateCsrfToken,
   verifyCsrfToken,
-  setCsrfToken,
   setAdminSession,
 } from "../../../../lib/CsrfSessionManagement";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
+import { LoginForm } from "./LoginForm";
 
 export default async function AdminLogin({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const csrf = await getOrCreateCsrfToken();
   const params = await searchParams;
   const errorMessage = params?.error ?? null;
 
@@ -21,7 +19,8 @@ export default async function AdminLogin({
 
     const csrfForm = formData.get("csrf")?.toString();
 
-    await setCsrfToken(csrf);
+    // Ensure CSRF token exists (Server Actions can modify cookies)
+    const serverCsrf = await getOrCreateCsrfToken();
 
     if (!await verifyCsrfToken(csrfForm)) {
       redirect("/admin/login?error=Invalid+CSRF+token");
@@ -58,40 +57,5 @@ export default async function AdminLogin({
     redirect("/admin");
   }
 
-  return (
-    <div className="mx-auto max-w-md px-4 py-16">
-      <h1 className="text-2xl font-bold">Admin sign in</h1>
-
-      {errorMessage && (
-        <p className="text-red-600 text-sm mt-4">
-          {decodeURIComponent(errorMessage as string)}
-        </p>
-      )}
-
-      <form action={handleLogin} className="mt-6 grid gap-3 rounded-2xl border p-4">
-        <input type="hidden" name="csrf" value={csrf} />
-
-        <input
-          name="username"
-          placeholder="Username"
-          className="rounded-xl border px-4 py-3 text-sm"
-        />
-
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          className="rounded-xl border px-4 py-3 text-sm"
-        />
-
-        <button className="rounded-xl bg-fuchsia-600 text-white px-4 py-3 text-sm font-semibold">
-          Sign in
-        </button>
-
-        <p className="text-xs text-slate-500">
-          Protected area. Authorized staff only.
-        </p>
-      </form>
-    </div>
-  );
+  return <LoginForm handleLogin={handleLogin} errorMessage={errorMessage} />;
 }

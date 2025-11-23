@@ -4,7 +4,7 @@ import { HomePage } from './pages/HomePage';
 
 test.use({ baseURL: 'http://localhost:3000' });
 
-test.describe('Test Cases from Requirements (Formato 1)', () => {
+test.describe('Test Cases para Requerimientos RF001-01, RF002-01, RF003-01', () => {
 
     /**
      * CT-RF001-01: Búsqueda por palabra clave válida
@@ -54,10 +54,15 @@ test.describe('Test Cases from Requirements (Formato 1)', () => {
         // Esperar a que cargue la página de detalle
         await expect(page).toHaveURL(/.*items\/\d+/);
         
+        // Esperar a que el contenido se cargue completamente
+        await page.waitForLoadState('networkidle');
+        
         // Resultado esperado: Se muestra una página de detalle con información obligatoria
         
         // 1. Título del artículo
-        await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+        const h1 = page.getByRole('heading', { level: 1 });
+        await h1.waitFor({ state: 'visible', timeout: 10000 });
+        await expect(h1).toBeVisible();
         
         // 2. Imágenes: al menos 1 imagen principal visible
         const mainImage = page.locator('img').first();
@@ -97,8 +102,12 @@ test.describe('Test Cases from Requirements (Formato 1)', () => {
         
         await expect(page).toHaveURL(/.*items\/\d+/);
         
+        // Esperar a que el contenido se cargue
+        await page.waitForLoadState('networkidle');
+        
         // Paso 2: Intentar enviar formulario vacío
         const submitButton = page.getByRole('button', { name: /request rental/i });
+        await submitButton.waitFor({ state: 'visible', timeout: 10000 });
         await submitButton.click();
         
         // Resultado esperado: El formulario no se envía y los campos requeridos están marcados
