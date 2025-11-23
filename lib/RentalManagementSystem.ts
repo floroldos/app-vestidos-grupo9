@@ -1,3 +1,5 @@
+import { initDatabase, getDatabase, seedInitialData, rowToItem, rowToRental } from './database';
+
 export type Category = "dress" | "shoes" | "bag" | "jacket";
 
 export type Item = {
@@ -23,8 +25,8 @@ export type Rental = {
   status: "active" | "canceled";
 };
 
-// In-memory store for demo. Replace with a DB in production.
-const items: Item[] = [
+// Datos iniciales que se cargan al iniciar la BD
+const initialItems: Item[] = [
   {
     id: 1,
     name: "Silk Evening Gown",
@@ -91,7 +93,18 @@ const items: Item[] = [
   },
 ];
 
-const rentals: Rental[] = [];
+// Inicializar BD al cargar el módulo
+declare global {
+  var __dbInitialized: boolean | undefined;
+}
+
+function ensureDatabase() {
+  if (!globalThis.__dbInitialized) {
+    initDatabase();
+    seedInitialData(initialItems);
+    globalThis.__dbInitialized = true;
+  }
+}
 
 export function listItems(filters?: {
   q?: string;
@@ -100,26 +113,62 @@ export function listItems(filters?: {
   color?: string;
   style?: string;
 }) {
-  const q = filters?.q?.toLowerCase().trim();
-  return items.filter((it) => {
-    if (filters?.category && it.category !== filters.category) return false;
-    if (filters?.size && !it.sizes.includes(filters.size)) return false;
-    if (filters?.color && it.color.toLowerCase() !== filters.color.toLowerCase()) return false;
-    if (filters?.style && (it.style ?? "").toLowerCase() !== filters.style.toLowerCase()) return false;
-    if (q) {
+  ensureDatabase();
+  const db = getDatabase();
+  
+  let query = 'SELECT * FROM items WHERE 1=1';
+  const params: any[] = [];
+  
+  if (filters?.category) {
+    query += ' AND category = ?';
+    params.push(filters.category);
+  }
+  
+  if (filters?.color) {
+    query += ' AND LOWER(color) = LOWER(?)';
+    params.push(filters.color);
+  }
+  
+  if (filters?.style) {
+    query += ' AND LOWER(style) = LOWER(?)';
+    params.push(filters.style);
+  }
+  
+  const stmt = db.prepare(query);
+  const rows = stmt.all(...params);
+  let items = rows.map(rowToItem);
+  
+  // Filtros que necesitan post-procesamiento
+  if (filters?.size) {
+    items = items.filter(item => item.sizes.includes(filters.size!));
+  }
+  
+  if (filters?.q) {
+    const q = filters.q.toLowerCase().trim();
+    items = items.filter(it => {
       const hay = [it.name, it.color, it.style ?? "", it.category].join(" ").toLowerCase();
-      if (!hay.includes(q)) return false;
-    }
-    return true;
-  });
+      return hay.includes(q);
+    });
+  }
+  
+  return items;
 }
 
 export function getItem(id: number) {
-  return items.find((i) => i.id === id) ?? null;
+  ensureDatabase();
+  const db = getDatabase();
+  const stmt = db.prepare('SELECT * FROM items WHERE id = ?');
+  const row = stmt.get(id);
+  return row ? rowToItem(row) : null;
 }
 
 export function getItemRentals(itemId: number) {
-  return rentals.filter((r) => r.itemId === itemId && r.status === "active");
+  ensureDatabase();
+  const db = getDatabase();
+  const stmt = db.prepare('SELECT * FROM rentals WHERE itemId = ? AND status = ?');
+  const rows = stmt.all(itemId, 'active');
+  console.log(`📅 getItemRentals(${itemId}):`, rows.length, 'rentals activos');
+  return rows.map(rowToRental);
 }
 
 export function hasOverlap(aStart: string, aEnd: string, bStart: string, bEnd: string) {
@@ -132,21 +181,54 @@ export function isItemAvailable(itemId: number, start: string, end: string) {
 }
 
 export function createRental(data: Omit<Rental, "id" | "createdAt" | "status">) {
+  ensureDatabase();
   const ok = isItemAvailable(data.itemId, data.start, data.end);
   if (!ok) return { error: "Item is not available for the selected dates." as const };
+  
+  const db = getDatabase();
   const id = crypto.randomUUID();
-  const rental: Rental = { ...data, id, createdAt: new Date().toISOString(), status: "active" };
-  rentals.push(rental);
+  const createdAt = new Date().toISOString();
+  
+  const stmt = db.prepare(`
+    INSERT INTO rentals (id, itemId, start, end, customerName, customerEmail, customerPhone, createdAt, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  
+  stmt.run(
+    id,
+    data.itemId,
+    data.start,
+    data.end,
+    data.customer.name,
+    data.customer.email,
+    data.customer.phone,
+    createdAt,
+    'active'
+  );
+  
+  const rental: Rental = { ...data, id, createdAt, status: "active" };
   return { rental };
 }
 
 export function listRentals() {
-  return rentals.slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  ensureDatabase();
+  const db = getDatabase();
+  const stmt = db.prepare('SELECT * FROM rentals ORDER BY createdAt DESC');
+  const rows = stmt.all();
+  return rows.map(rowToRental);
 }
 
 export function cancelRental(id: string) {
-  const r = rentals.find((x) => x.id === id);
-  if (!r) return { error: "Not found" as const };
-  r.status = "canceled";
+  ensureDatabase();
+  const db = getDatabase();
+  
+  const checkStmt = db.prepare('SELECT id FROM rentals WHERE id = ?');
+  const exists = checkStmt.get(id);
+  
+  if (!exists) return { error: "Not found" as const };
+  
+  const updateStmt = db.prepare('UPDATE rentals SET status = ? WHERE id = ?');
+  updateStmt.run('canceled', id);
+  
   return { ok: true as const };
 }

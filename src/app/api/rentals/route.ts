@@ -99,18 +99,17 @@ export async function POST(req: Request) {
   }
 
   // --- CREAR RENTAL ---
-  const { error } = createRental({
+  const rental = createRental({
     itemId,
     start,
     end,
     customer: { name, email, phone },
   });
 
-  if (error) {
-    return NextResponse.json({ error }, { status: 409 });
+  if (rental.error) {
+    return NextResponse.json({ error: rental.error }, { status: 409 });
   }
 
-  // Redirect con success
-  const res = NextResponse.redirect(new URL(`/items/${itemId}?success=1`, req.url));
-  return res;
+  // Respuesta exitosa con el rental creado
+  return NextResponse.json({ success: true, rental: rental.rental }, { status: 201 });
 }
