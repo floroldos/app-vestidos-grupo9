@@ -66,4 +66,5 @@ export class CatalogPage {
         await expect(this.noItemsMessage).toBeVisible();
         await expect(this.firstViewDetails).toHaveCount(0);
     }
+
 }
