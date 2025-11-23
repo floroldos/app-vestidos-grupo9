@@ -93,12 +93,12 @@ export default function Home() {
                 </div>
 
                 {/* Dates */}
-                <div className="col-span-1 sm:col-span-1 lg:col-span-2">
+                <div className="col-span-1 sm:col-span-1 lg:col-span-1">
                   <DateRangeSelectorHome />
                 </div>
 
                 {/* Size */}
-                <div className="col-span-2 sm:col-span-2 lg:col-span-1">
+                <div className="col-span-1 sm:col-span-1 lg:col-span-1">
                   <label htmlFor="size" className="sr-only">Size</label>
                   <select
                     id="size"
@@ -114,7 +114,7 @@ export default function Home() {
                   </select>
                 </div>
 
-                <div className="col-span-1 sm:col-span-2 lg:col-span-5">
+                <div className="col-span-1 sm:col-span-1 lg:col-span-1">
                   <button
                     type="submit"
                     className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-fuchsia-600 px-6 py-3 text-sm font-semibold text-white hover:bg-fuchsia-500"
