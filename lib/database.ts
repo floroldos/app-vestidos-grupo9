@@ -11,7 +11,8 @@ type DatabaseInstance = {
         all: (...args: unknown[]) => unknown[];
     };
     exec: (query: string) => void;
-    transaction: (fn: () => void) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    transaction: <T extends (...args: any[]) => any>(fn: T) => T;
 };
 
 // Usar globalThis para persistir la BD entre HMR en desarrollo
@@ -167,7 +168,8 @@ function createMockDatabase(): DatabaseInstance {
             all: () => [],
         }),
         exec: () => {},
-        transaction: (fn: () => void) => fn,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        transaction: <T extends (...args: any[]) => any>(fn: T): T => fn,
     };
 }
 
