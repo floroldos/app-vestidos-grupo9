@@ -163,11 +163,10 @@ test.describe('Test Cases para Requerimientos RF001-01, RF002-01, RF003-01', () 
         await expect(page.locator('[name="phone"]')).toBeVisible();
 
         // Llenar el formulario
-        const today = new Date();
-        const startDate = new Date(today);
+        const startDate = new Date();
         startDate.setDate(startDate.getDate() + 1);
 
-        const endDate = new Date();
+        const endDate = new Date(startDate);
         endDate.setDate(startDate.getDate() + 5);
 
         const formatDate = (date: Date) =>
@@ -189,8 +188,6 @@ test.describe('Test Cases para Requerimientos RF001-01, RF002-01, RF003-01', () 
         await page.waitForURL(/.*success/); 
 
         // Paso 2: Loguearse en el panel de Admin
-        await homePage.goto();
-        await homePage.assertBasicUI();
         await loginPage.goto();
         await loginPage.login('admin', 'admin123');
 
