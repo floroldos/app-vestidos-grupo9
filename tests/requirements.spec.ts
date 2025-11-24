@@ -6,7 +6,7 @@ import { AdminDashboardPage } from './pages/AdminDashboardPage';
 
 test.use({ baseURL: 'http://localhost:3000' });
 
-test.describe('Test Cases para Requerimientos RF001-01, RF002-01, RF003-01', () => {
+test.describe.serial('Test Cases para Requerimientos RF001-01, RF002-01, RF003-01', () => {
 
     /**
      * CT-RF001-01: Búsqueda por palabra clave válida
@@ -14,6 +14,7 @@ test.describe('Test Cases para Requerimientos RF001-01, RF002-01, RF003-01', () 
      * Prioridad: Alta
      */
     test('CT-RF001-01: Search by valid keyword returns related items dynamically', async ({ page }) => {
+
         const catalogPage = new CatalogPage(page);
         
         // Paso 1: Ir al catálogo
@@ -154,16 +155,16 @@ test.describe('Test Cases para Requerimientos RF001-01, RF002-01, RF003-01', () 
         // Esperar a que el contenido se cargue completamente
         await page.waitForLoadState('networkidle');    
 
-        // Comprobar visibilidad del formulario
+        // Esperar formulario de reserva con campos de fecha
         await expect(page.locator('[name="start"]')).toBeVisible();
         await expect(page.locator('[name="end"]')).toBeVisible();
         await expect(page.locator('[name="name"]')).toBeVisible();
         await expect(page.locator('[name="email"]')).toBeVisible();
         await expect(page.locator('[name="phone"]')).toBeVisible();
-    
+
         // Llenar el formulario
-        await page.locator('[name="start"]').fill('2025-12-08');
-        await page.locator('[name="end"]').fill('2025-12-12');
+        await page.locator('[name="start"]').fill('2025-12-10');
+        await page.locator('[name="end"]').fill('2025-12-15');
         await page.locator('[name="name"]').fill('Test User');
         await page.locator('[name="email"]').fill('test@example.com');
         await page.locator('[name="phone"]').fill('099555555');
@@ -175,7 +176,7 @@ test.describe('Test Cases para Requerimientos RF001-01, RF002-01, RF003-01', () 
         const submitButton = page.getByRole('button', { name: /request rental/i });
         await submitButton.waitFor({ state: 'visible', timeout: 10000 });
         await submitButton.click();
-        await page.waitForURL(/.*success/);    
+        await page.waitForURL(/.*success/); 
 
         // Paso 2: Loguearse en el panel de Admin
         await homePage.goto();

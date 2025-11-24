@@ -1,6 +1,9 @@
 import { Page, Locator, expect } from '@playwright/test';
 
 export class AdminDashboardPage {
+
+    private lastCancelledId: string | null = null;
+
     constructor(private page: Page) { }
 
     private layout = this.page.locator('[data-testid="admin-dashboard"], main, #admin');
@@ -58,25 +61,40 @@ export class AdminDashboardPage {
         }
 
         const firstRow = rows.first();
-        const cancelButton = firstRow.getByRole('button', { name: /cancel/i });
+        const rentalId = await firstRow.locator('td').nth(0).innerText();
+
+        const table = await this.scheduledRentalsTable();
+        const rowWithId = table.locator(
+            `tbody tr:has(td:text-is("${rentalId}"))`
+        );
+
+        const cancelButton = rowWithId.getByRole('button', { name: /cancel/i });
 
         // Esperar a que el botón exista y esté visible
-        await expect(cancelButton).toBeVisible({ timeout: 5000 });
+        await expect(cancelButton).toBeVisible({ timeout: 15000 });
 
         await cancelButton.click();
 
-        await expect(firstRow.locator('td').nth(4)).toContainText(/canceled/i, { timeout: 15000 });
+        await expect(rowWithId.locator('td').nth(4)).toContainText(/canceled/i, { timeout: 15000 });
+
+        // Guardar el ID para validación
+        this.lastCancelledId = rentalId;
     }
 
     async assertFirstReservationWasCancelled() {
-        const table = await this.scheduledRentalsTable();
-        const firstRow = table.locator('tbody tr').first();
-
-        if (await firstRow.count() === 0) {
-            throw new Error('No reservation rows found to assert cancellation.');
+        if (!this.lastCancelledId) {
+            throw new Error("No reservation ID stored to assert cancellation.");
         }
 
-        const state = firstRow.locator('td').nth(4);
+        const table = await this.scheduledRentalsTable();
+
+        const rowWithId = table.locator(
+            `tbody tr:has(td:text-is("${this.lastCancelledId}"))`
+        );
+
+        await expect(rowWithId).toHaveCount(1);
+
+        const state = rowWithId.locator('td').nth(4);
         await expect(state).toContainText(/canceled/i, { timeout: 5000 });
     }
 
