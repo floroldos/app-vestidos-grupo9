@@ -46,9 +46,12 @@ export class AdminDashboardPage {
         // Esperar a que aparezca la sección de reservas
         await this.page.waitForSelector('h2:has-text("Scheduled rentals")', { timeout: 15000 });
 
-        const activeRows = await this.activeRows();
+        await this.page.waitForFunction(() => {
+            const rows = Array.from(document.querySelectorAll('tbody tr'));
+            return rows.length > 0;
+        }, { timeout: 20000 });
 
-        await expect(activeRows.count()).resolves.toBeGreaterThan(0);
+        const activeRows = await this.activeRows();
         await expect(activeRows.first()).toBeVisible();
     }
 
