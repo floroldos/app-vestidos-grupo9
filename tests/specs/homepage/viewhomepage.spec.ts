@@ -1,0 +1,1 @@
+//Elementos básicos + redirects
