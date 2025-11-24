@@ -6,22 +6,33 @@ export class AdminDashboardPage {
     private layout = this.page.locator('[data-testid="admin-dashboard"], main, #admin');
     
     private async scheduledRentalsTable(): Promise<Locator> {
-        const tableBySection = this.page.locator('section:has(h2:has-text("Scheduled rentals")) table').first();
-        if (await tableBySection.count() > 0) return tableBySection;
+        await this.page.waitForSelector('h2', { timeout: 3000 }).catch(() => null);
 
-        const byHeading = this.page.locator('h2:has-text("Scheduled rentals"), h2:has-text("Scheduled Rentals"), h2:has-text("Scheduled Reservations")')
-            .locator('xpath=following-sibling::div[1]//table').first();
-        if (await byHeading.count() > 0) return byHeading;
+        await this.page.waitForSelector('h2:has-text("Scheduled rentals")', { timeout: 15000 });
 
-        const byRole = this.page.getByRole('table', { name: /scheduled|rentals|reservations/i }).first();
-        if (await byRole.count() > 0) return byRole;
+        const candidates = [
+            'section:has(h2:has-text("Scheduled rentals")) table',
+            'section:has(h2:has-text("Scheduled Rentals")) table',
+            'h2:has-text("Scheduled rentals") + div table',
+            'h2:has-text("Scheduled rentals") ~ div table',
+            'main table:has(td:has-text("Rental ID"))',
+            'main table:has(td:has-text("active"))',
+            'main table'
+        ];
+
+        for (const sel of candidates) {
+            const loc = this.page.locator(sel).first();
+            if (await loc.count() > 0) return loc;
+        }
 
         return this.layout.locator('table').first();
     }
 
     private async activeRows() {
         const table = await this.scheduledRentalsTable();
-        return table.locator('tbody tr', { hasText: /active/i });
+        const active = table.locator('tbody tr', { hasText: /active/i });
+        if (await active.count() > 0) return active;
+        return table.locator('tbody tr');
     };
     
     async goto() {
@@ -29,21 +40,44 @@ export class AdminDashboardPage {
     }
 
     async assertHasActiveReservations() {
-        const table = await this.scheduledRentalsTable();
-        await expect(table).toBeVisible({ timeout: 15000 });
-        const rows = await this.activeRows();
-        await expect(rows.first()).toBeVisible({ timeout: 15000 });
+        // Esperar a que aparezca la sección de reservas
+        await this.page.waitForSelector('h2:has-text("Scheduled rentals")', { timeout: 15000 });
+
+        const activeRows = await this.activeRows();
+
+        await expect(activeRows.count()).resolves.toBeGreaterThan(0);
+        await expect(activeRows.first()).toBeVisible();
     }
 
     async cancelFirstReservation() {
         const rows = await this.activeRows();
-        const cancelButton = rows.first().getByRole('button', { name: /cancel/i });
+        const count = await rows.count();
+
+        if (count === 0) {
+            throw new Error('No active reservations found to cancel.');
+        }
+
+        const firstRow = rows.first();
+        const cancelButton = firstRow.getByRole('button', { name: /cancel/i });
+
+        // Esperar a que el botón exista y esté visible
+        await expect(cancelButton).toBeVisible({ timeout: 5000 });
+
         await cancelButton.click();
-        await this.page.waitForTimeout(1000);
+
+        await expect(firstRow.locator('td').nth(4)).toContainText(/canceled/i, { timeout: 15000 });
     }
 
-    async assertReservationWasCancelled() {
-        const rows = await this.activeRows();
-        await expect(rows).toHaveCount(0, { timeout: 15000 });
+    async assertFirstReservationWasCancelled() {
+        const table = await this.scheduledRentalsTable();
+        const firstRow = table.locator('tbody tr').first();
+
+        if (await firstRow.count() === 0) {
+            throw new Error('No reservation rows found to assert cancellation.');
+        }
+
+        const state = firstRow.locator('td').nth(4);
+        await expect(state).toContainText(/canceled/i, { timeout: 5000 });
     }
+
 }

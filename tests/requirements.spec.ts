@@ -131,15 +131,17 @@ test.describe('Test Cases para Requerimientos RF001-01, RF002-01, RF003-01', () 
     });
 
     /**
-     * CT-RF007-01: Cancelacion de alquiler
-     * Objetivo: Validar que al cancelar una reserva se libere la fecha en calendario
+     * CT-RF007-01 y CT-RF007-02: Cancelacion de alquiler
+     * Objetivo: Validar que al cancelar una reserva se libere la fecha en calendario en la pagina 
+     * de admin y se actualice el estado a canceled apenas tocar el boton
      * Prioridad: Alta
      */
-    test('CT-RF007-01: Cancellation releases booked date in admin', async ({ page , users}) => {
+    test('CT-RF007-01: Cancellation releases booked date in admin', async ({ page }) => {
 
         const catalogPage = new CatalogPage(page);
         const loginPage = new LoginPage(page);
         const adminPage = new AdminDashboardPage(page);
+        const homePage = new HomePage(page);
         
         // Paso 1: Ir al catalogo y reservar un producto
         await catalogPage.goto();
@@ -160,15 +162,12 @@ test.describe('Test Cases para Requerimientos RF001-01, RF002-01, RF003-01', () 
         await expect(page.locator('[name="phone"]')).toBeVisible();
     
         // Llenar el formulario
-        const startDate = '01/12/2025';
-        const endDate = '05/12/2025';
-
+        await page.locator('[name="start"]').fill('2025-12-08');
+        await page.locator('[name="end"]').fill('2025-12-12');
         await page.locator('[name="name"]').fill('Test User');
         await page.locator('[name="email"]').fill('test@example.com');
         await page.locator('[name="phone"]').fill('099555555');
-        await page.locator('[name="start"]').fill(startDate);
-        await page.locator('[name="end"]').fill(endDate);
-
+        
         const size = page.locator('[name="size"]').first();
         await size.check();
 
@@ -176,12 +175,13 @@ test.describe('Test Cases para Requerimientos RF001-01, RF002-01, RF003-01', () 
         const submitButton = page.getByRole('button', { name: /request rental/i });
         await submitButton.waitFor({ state: 'visible', timeout: 10000 });
         await submitButton.click();
-
-        await page.waitForLoadState('networkidle');        
+        await page.waitForURL(/.*success/);    
 
         // Paso 2: Loguearse en el panel de Admin
+        await homePage.goto();
+        await homePage.assertBasicUI();
         await loginPage.goto();
-        await loginPage.login(users.admin.user, users.admin.pass);
+        await loginPage.login('admin', 'admin123');
 
         // Paso 3: Verificar que la reserva aparece activa
         await adminPage.assertHasActiveReservations();
@@ -190,7 +190,7 @@ test.describe('Test Cases para Requerimientos RF001-01, RF002-01, RF003-01', () 
         await adminPage.cancelFirstReservation();  
 
         // Paso 5: Verificar que la reserva cancelada
-        await adminPage.assertReservationWasCancelled();
+        await adminPage.assertFirstReservationWasCancelled();
 
     });
 
