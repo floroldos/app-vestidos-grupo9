@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures/base';
+import { test, expect } from '../fixtures/base';
 
 test.use({ baseURL: 'http://localhost:3000' });
 
