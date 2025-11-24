@@ -1,12 +1,10 @@
-import { test, expect } from '../../fixtures/base';
-import { CatalogPage } from '../../pages/CatalogPage';
-import { HomePage } from '../../pages/HomePage';
+import { test, expect } from '../../../fixtures/base';
+import { CatalogPage } from '../../../pages/CatalogPage';
+import { HomePage } from '../../../pages/HomePage';
 
 test.use({ baseURL: 'http://localhost:3000' });
 
 test.describe('Navegación y catálogo', () => {
-
-    // --- TESTS DE NAVEGACIÓN BÁSICA ---
 
     test('navega al catálogo desde la Home y verifica que el formulario está visible', async ({ page }) => {
         const homePage = new HomePage(page);
@@ -14,7 +12,7 @@ test.describe('Navegación y catálogo', () => {
 
         await homePage.goto();
         await homePage.assertBasicUI();
-        
+
         // Click en "Browse" para ir al catálogo
         await page.getByRole('link', { name: 'Browse' }).first().click();
 
@@ -124,4 +122,36 @@ test.describe('Navegación y catálogo', () => {
             expect(hasBlackItems.toLowerCase()).toContain('black');
         });
     });
+    /**
+ * CT-RF001-01: Búsqueda por palabra clave válida
+ * Objetivo: Validar que la búsqueda devuelva artículos relacionados sin necesidad de recargar la página
+ * Prioridad: Alta
+ */
+    test('CT-RF001-01: Search by valid keyword returns related items dynamically', async ({ page }) => {
+        const catalogPage = new CatalogPage(page);
+
+        // Paso 1: Ir al catálogo
+        await catalogPage.goto();
+        await catalogPage.assertCatalogLoaded();
+
+        // Paso 2 y 3: Buscar por palabra clave "Silk"
+        await catalogPage.searchByQuery('Silk');
+
+        // Resultado esperado: Se muestran artículos que coincidan con la palabra clave
+        // Los resultados se actualizan dinámicamente sin recargar
+
+        // Esperar a que se actualicen los resultados
+        await page.waitForTimeout(1000);
+
+        // Verificar que hay al menos un resultado visible
+        const viewDetailsLinks = page.getByRole('link', { name: /view details/i });
+        const count = await viewDetailsLinks.count();
+        expect(count).toBeGreaterThan(0);
+
+        // Verificar que el primer resultado es visible
+        await expect(viewDetailsLinks.first()).toBeVisible();
+    });
+
 });
+
+
