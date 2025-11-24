@@ -6,7 +6,7 @@ import { AdminDashboardPage } from './pages/AdminDashboardPage';
 
 test.use({ baseURL: 'http://localhost:3000' });
 
-test.describe.serial('Test Cases para Requerimientos RF001-01, RF002-01, RF003-01', () => {
+test.describe('Test Cases para Requerimientos RF001-01, RF002-01, RF003-01', () => {
 
     /**
      * CT-RF001-01: Búsqueda por palabra clave válida
@@ -163,8 +163,18 @@ test.describe.serial('Test Cases para Requerimientos RF001-01, RF002-01, RF003-0
         await expect(page.locator('[name="phone"]')).toBeVisible();
 
         // Llenar el formulario
-        await page.locator('[name="start"]').fill('2025-12-10');
-        await page.locator('[name="end"]').fill('2025-12-15');
+        const today = new Date();
+        const startDate = new Date(today);
+        startDate.setDate(startDate.getDate() + 1);
+
+        const endDate = new Date();
+        endDate.setDate(startDate.getDate() + 5);
+
+        const formatDate = (date: Date) =>
+        date.toISOString().split('T')[0];
+
+        await page.locator('[name="start"]').fill(formatDate(startDate));
+        await page.locator('[name="end"]').fill(formatDate(endDate));
         await page.locator('[name="name"]').fill('Test User');
         await page.locator('[name="email"]').fill('test@example.com');
         await page.locator('[name="phone"]').fill('099555555');
