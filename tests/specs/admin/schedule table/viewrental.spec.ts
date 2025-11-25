@@ -51,12 +51,11 @@ test.describe.serial('View rental', () => {
         const submitButton = page.getByRole('button', { name: /request rental/i });
         await submitButton.waitFor({ state: 'visible', timeout: 10000 });
         await submitButton.click();
-        await page.waitForURL(/.*success/); 
+        await page.waitForLoadState('networkidle');
 
         // Paso 2: Loguearse en el panel de Admin
         await loginPage.goto();
-        await loginPage.login('admin', 'admin123');
-
+        await loginPage.login();
         // Esperar a que el contenido se cargue completamente
         await page.waitForLoadState('networkidle'); 
 

@@ -57,7 +57,7 @@ test.describe.serial('Cancel rental', () => {
 
         // Paso 2: Loguearse en el panel de Admin
         await loginPage.goto();
-        await loginPage.login('admin', 'admin123');
+        await loginPage.login();
 
         // Esperar a que el contenido se cargue completamente
         await page.waitForLoadState('networkidle'); 
