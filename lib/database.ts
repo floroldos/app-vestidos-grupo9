@@ -1,5 +1,5 @@
 import 'server-only';
-import type { Item, Rental } from './RentalManagementSystem';
+import type { Item, Rental, Category } from './RentalManagementSystem';
 
 // Importación dinámica solo en servidor
 let Database: unknown = null;
@@ -11,17 +11,14 @@ type DatabaseInstance = {
         all: (...args: unknown[]) => unknown[];
     };
     exec: (query: string) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     transaction: <T extends (...args: any[]) => any>(fn: T) => T;
 };
 
-// Usar globalThis para persistir la BD entre HMR en desarrollo
 declare global {
     var __db: DatabaseInstance | undefined;
 }
 
 export function initDatabase() {
-    // Solo ejecutar en servidor
     if (typeof window !== 'undefined') {
         throw new Error('Database can only be initialized on the server');
     }
@@ -31,18 +28,15 @@ export function initDatabase() {
     // Cargar better-sqlite3 dinámicamente
     if (!Database) {
         try {
-            // eslint-disable-next-line @typescript-eslint/no-require-imports
             Database = require('better-sqlite3');
         } catch (error) {
-            console.warn('⚠️  better-sqlite3 not available, using mock database');
-            // Retornar un objeto mock para que no falle en CI
+            console.warn('better-sqlite3 not available, using mock database');
             globalThis.__db = createMockDatabase();
             return globalThis.__db;
         }
     }
 
     // Crear BD en memoria
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     globalThis.__db = new (Database as any)(':memory:') as DatabaseInstance;
 
     // Crear tablas
@@ -77,7 +71,7 @@ export function initDatabase() {
     CREATE INDEX IF NOT EXISTS idx_rentals_status ON rentals(status);
   `);
 
-    console.log('✅ Base de datos en memoria inicializada');
+    console.log('Base de datos en memoria inicializada');
 
     return globalThis.__db;
 }
@@ -96,7 +90,7 @@ export function seedInitialData(items: Item[]) {
     // Verificar si ya hay datos
     const count = database.prepare('SELECT COUNT(*) as count FROM items').get() as { count: number };
     if (count.count > 0) {
-        console.log(`ℹ️  BD ya tiene ${count.count} items, saltando seed`);
+        console.log(`BD ya tiene ${count.count} items, saltando seed`);
         return;
     }
 
@@ -123,39 +117,39 @@ export function seedInitialData(items: Item[]) {
     });
 
     insertMany(items);
-    console.log(`✅ ${items.length} items cargados en la BD`);
+    console.log(`${items.length} items cargados en la BD`);
 }
 
 // Helper para convertir row de BD a Item
 export function rowToItem(row: Record<string, unknown>): Item {
     return {
-        id: row.id,
-        name: row.name,
-        category: row.category,
-        pricePerDay: row.pricePerDay,
-        sizes: JSON.parse(row.sizes),
-        color: row.color,
-        style: row.style,
-        description: row.description,
-        images: JSON.parse(row.images),
-        alt: row.alt,
+        id: row.id as number,
+        name: row.name as string,
+        category: row.category as Category,
+        pricePerDay: row.pricePerDay as number,
+        sizes: JSON.parse(row.sizes as string),
+        color: row.color as string,
+        style: row.style as string | undefined,
+        description: row.description as string,
+        images: JSON.parse(row.images as string),
+        alt: row.alt as string,
     };
 }
 
 // Helper para convertir row de BD a Rental
 export function rowToRental(row: Record<string, unknown>): Rental {
     return {
-        id: row.id,
-        itemId: row.itemId,
-        start: row.start,
-        end: row.end,
+        id: row.id as string,
+        itemId: row.itemId as number,
+        start: row.start as string,
+        end: row.end as string,
         customer: {
-            name: row.customerName,
-            email: row.customerEmail,
-            phone: row.customerPhone,
+            name: row.customerName as string,
+            email: row.customerEmail as string,
+            phone: row.customerPhone as string,
         },
-        createdAt: row.createdAt,
-        status: row.status,
+        createdAt: row.createdAt as string,
+        status: (row.status === "active" || row.status === "canceled" ? row.status : "active") as "active" | "canceled",
     };
 }
 
