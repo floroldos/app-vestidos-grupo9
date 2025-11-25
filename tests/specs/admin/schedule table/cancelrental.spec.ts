@@ -5,7 +5,7 @@ import { AdminDashboardPage } from '../../../pages/AdminDashboardPage';
 
 test.use({ baseURL: 'http://localhost:3000' });
 
-test.describe('Cancel rental', () => {
+test.describe.serial('Cancel rental', () => {
 
     /**
      * CT-RF007-01 y CT-RF007-02: Cancelacion de alquiler
@@ -13,7 +13,7 @@ test.describe('Cancel rental', () => {
      * de admin y se actualice el estado a canceled apenas tocar el boton
      * Prioridad: Alta
      */
-    test('CT-RF007-01: Cancellation releases booked date in admin', async ({ page }) => {
+    test('CT-RF007-01: Cancel rental in admin', async ({ page }) => {
 
         test.setTimeout(90000);
 

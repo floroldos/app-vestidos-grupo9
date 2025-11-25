@@ -63,8 +63,6 @@ export class AdminDashboardPage {
             throw new Error('No active reservations found to cancel.');
         }
 
-        this.assertHasActiveReservations();
-
         const firstRow = rows.first();
         const rentalId = await firstRow.locator('td').nth(0).innerText();
 
@@ -101,6 +99,35 @@ export class AdminDashboardPage {
 
         const state = rowWithId.locator('td').nth(4);
         await expect(state).toContainText(/canceled/i, { timeout: 5000 });
+    }
+
+    async assertReservationDetails() {
+        const rows = await this.activeRows();
+        const count = await rows.count();
+
+        if (count === 0) {
+            throw new Error('No active reservations found to cancel.');
+        }
+
+        const firstRow = rows.first();
+        const rId = await firstRow.locator('td').nth(0).innerText();
+
+        const table = await this.scheduledRentalsTable();
+        const rowWithId = table.locator(
+            `tbody tr:has(td:text-is("${rId}"))`
+        );
+
+        // Verificar que la fila sea visible
+        await expect(rowWithId).toBeVisible();
+
+        const cells = rowWithId.locator('td');
+        const cellCount = await cells.count();
+
+        for (let i = 0; i < cellCount; i++) {
+            const cell = cells.nth(i);
+            await expect(cell).not.toBeEmpty();
+        }
+
     }
 
 }
