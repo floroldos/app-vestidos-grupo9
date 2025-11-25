@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("Rental Form – Validaciones y comportamiento reales", () => {
+test.describe("Validaciones Rental Form", () => {
 
     // -------------------------------
     // CT-RF004-01: Mostrar error al enviar vacío
