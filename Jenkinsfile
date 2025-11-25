@@ -1,11 +1,6 @@
 pipeline {
-    agent {
-        docker {
-            image 'node:22-bullseye'   
-            args '-u root'            
-        }
-    }
-
+    agent any
+    
     triggers {
         pollSCM('* * * * *') // poll every minute
     }
@@ -22,10 +17,10 @@ pipeline {
             steps {
                 echo 'Installing project dependencies...'
                 sh '''
+                    echo "Node version:"
                     node -v
+                    echo "NPM version:"
                     npm -v
-                    apt-get update
-                    apt-get install -y build-essential python3
 
                     npm ci
                 '''
