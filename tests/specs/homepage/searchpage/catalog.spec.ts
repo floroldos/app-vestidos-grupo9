@@ -137,9 +137,6 @@ test.describe('Navegación y catálogo', () => {
         // Paso 2 y 3: Buscar por palabra clave "Silk"
         await catalogPage.searchByQuery('Silk');
 
-        // Resultado esperado: Se muestran artículos que coincidan con la palabra clave
-        // Los resultados se actualizan dinámicamente sin recargar
-
         // Esperar a que se actualicen los resultados
         await page.waitForTimeout(1000);
 

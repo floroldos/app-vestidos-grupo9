@@ -54,7 +54,6 @@ export class AdminDashboardPage {
         await expect(activeRows.first()).toBeVisible();
     }
 
-
     async cancelFirstReservation() {
         const rows = await this.activeRows();
         const count = await rows.count();
