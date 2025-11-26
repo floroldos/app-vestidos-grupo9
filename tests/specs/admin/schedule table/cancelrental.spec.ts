@@ -13,7 +13,7 @@ test.describe.serial('Cancel rental', () => {
      * de admin y se actualice el estado a canceled apenas tocar el boton
      * Prioridad: Alta
      */
-    test('CT-RF007-01: Cancel rental in admin', async ({ page }) => {
+    test('CT-RF007-01: Cancel rental in admin', async ({ page, users }) => {
 
         test.setTimeout(90000);
 
@@ -57,7 +57,7 @@ test.describe.serial('Cancel rental', () => {
 
         // Paso 2: Loguearse en el panel de Admin
         await loginPage.goto();
-        await loginPage.login();
+        await loginPage.login(users.admin.user, users.admin.pass);
 
         // Esperar a que el contenido se cargue completamente
         await page.waitForLoadState('networkidle'); 
