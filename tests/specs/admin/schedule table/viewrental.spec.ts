@@ -11,7 +11,7 @@ test.describe.serial('View rental', () => {
      * Objetivo: Validar que el administrador pueda ver los alquileres confirmados
      * Prioridad: Alta
      */
-    test('CT-RF006-01: View rental in admin', async ({ page, browser }) => {
+    test('CT-RF006-01: View rental in admin', async ({ page, users }) => {
 
         test.setTimeout(90000);
 
@@ -55,7 +55,7 @@ test.describe.serial('View rental', () => {
 
         // Paso 2: Loguearse en el panel de Admin
         await loginPage.goto();
-        await loginPage.login();
+        await loginPage.login(users.admin.user, users.admin.pass);
         // Esperar a que el contenido se cargue completamente
         await page.waitForLoadState('networkidle'); 
 
