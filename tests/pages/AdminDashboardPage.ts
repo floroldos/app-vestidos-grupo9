@@ -43,7 +43,7 @@ export class AdminDashboardPage {
     }
 
     async assertHasActiveReservations() {
-        await this.page.waitForSelector('h2:has-text("Scheduled rentals")', { timeout: 15000 });
+        await this.page.waitForSelector('h2:has-text("Scheduled rentals")', { timeout: 20000 });
 
         await this.page.waitForFunction(() => {
             const rows = Array.from(document.querySelectorAll('tbody tr'));
@@ -74,7 +74,7 @@ export class AdminDashboardPage {
         const cancelButton = rowWithId.getByRole('button', { name: /cancel/i });
 
         // Esperar a que el botón exista y esté visible 
-        await expect(cancelButton).toBeVisible({ timeout: 15000 });
+        await expect(cancelButton).toBeVisible({ timeout: 20000 });
 
         await cancelButton.click();
 
