@@ -16,45 +16,31 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 echo 'Installing project dependencies...'
-                script {
-                    if (isUnix()) {
-                        sh 'npm ci'
-                    } else {
-                        bat 'npm ci'
-                    }
-                }
+                sh '''
+                    echo "Node version:"
+                    node -v
+                    echo "NPM version:"
+                    npm -v
+
+                    npm ci
+                '''
             }
         }
 
         stage('Build') {
             steps {
                 echo 'Building application...'
-                script {
-                    if (isUnix()) {
-                        sh 'npm run build'
-                    } else {
-                        bat 'npm run build'
-                    }
-                }
+                sh 'npm run build'
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Running Playwright E2E tests...'
-                script {
-                    if (isUnix()) {
-                        sh '''
-                            npx playwright install chromium
-                            npm run test:e2e -- --project=chromium --reporter=list
-                        '''
-                    } else {
-                        bat '''
-                            npx playwright install chromium
-                            npm run test:e2e -- --project=chromium --reporter=list
-                        '''
-                    }
-                }
+                sh '''
+                    npx playwright install chromium
+                    npm run test:e2e -- --project=chromium --reporter=list
+                '''
             }
         }
     }

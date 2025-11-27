@@ -2,24 +2,24 @@ import { Page, Locator, expect } from '@playwright/test';
 
 export class AdminDashboardPage {
 
-    constructor(private page: Page) {}
+    private lastCancelledId: string | null = null;
 
-    private lastDeletedInventoryId: string | null = null;
+    constructor(private page: Page) { }
 
     private layout = this.page.locator('[data-testid="admin-dashboard"], main, #admin');
     
-    private async inventoryTable(): Promise<Locator> {
+    private async scheduledRentalsTable(): Promise<Locator> {
+        await this.page.waitForSelector('h2', { timeout: 3000 }).catch(() => null);
 
-        // Esperar a que exista el título "Inventory"
-        await this.page.waitForSelector('h2:has-text("Inventory")', { timeout: 15000 });
+        await this.page.waitForSelector('h2:has-text("Scheduled rentals")', { timeout: 15000 });
 
-        // Posibles ubicaciones de la tabla
         const candidates = [
-            'section:has(h2:has-text("Inventory")) table',
-            'h2:has-text("Inventory") + div table',
-            'h2:has-text("Inventory") ~ div table',
-            'main table:has(th:has-text("Name"))',
-            'main table:has(td:has-text("$"))',
+            'section:has(h2:has-text("Scheduled rentals")) table',
+            'section:has(h2:has-text("Scheduled Rentals")) table',
+            'h2:has-text("Scheduled rentals") + div table',
+            'h2:has-text("Scheduled rentals") ~ div table',
+            'main table:has(td:has-text("Rental ID"))',
+            'main table:has(td:has-text("active"))',
             'main table'
         ];
 
@@ -31,55 +31,74 @@ export class AdminDashboardPage {
         return this.layout.locator('table').first();
     }
 
+    private async activeRows() {
+        const table = await this.scheduledRentalsTable();
+        const active = table.locator('tbody tr', { hasText: /active/i });
+        if (await active.count() > 0) return active;
+        return table.locator('tbody tr');
+    };
+    
     async goto() {
         await this.page.goto('/admin');
     }
 
-    async deleteFirstInventoryItem() {
+    async assertHasActiveReservations() {
+        // Esperar a que aparezca la sección de reservas
+        await this.page.waitForSelector('h2:has-text("Scheduled rentals")', { timeout: 15000 });
 
-        const table = await this.inventoryTable();
+        await this.page.waitForFunction(() => {
+            const rows = Array.from(document.querySelectorAll('tbody tr'));
+            return rows.length > 0;
+        }, { timeout: 20000 });
 
-        // Obtener la primera fila
-        const firstRow = table.locator('tbody tr').first();
-        await expect(firstRow).toBeVisible({ timeout: 5000 });
-
-        // Guardar el ID de la primera columna
-        const itemId = await firstRow.locator('td').nth(0).innerText();
-
-        const rowWithId = table.locator(
-            `tbody tr:has(td:text-is("${itemId}"))`
-        );
-
-        const deleteButton = rowWithId.getByRole('button', { name: /delete/i });
-
-        await expect(deleteButton).toBeVisible({ timeout: 15000 });
-
-        this.page.once('dialog', async dialog => {
-            await dialog.accept();
-        });
-
-        await deleteButton.click();
-
-        this.lastDeletedInventoryId = itemId;
-
-        await expect(rowWithId).toHaveCount(0, { timeout: 15000 });
+        const activeRows = await this.activeRows();
+        await expect(activeRows.first()).toBeVisible();
     }
 
-    async assertItemWasDeleted() {
+    async cancelFirstReservation() {
+        const rows = await this.activeRows();
+        const count = await rows.count();
 
-        if (!this.lastDeletedInventoryId) {
-            throw new Error("No inventory item ID stored to assert deletion.");
+        if (count === 0) {
+            throw new Error('No active reservations found to cancel.');
         }
 
-        const table = await this.inventoryTable();
+        const firstRow = rows.first();
+        const rentalId = await firstRow.locator('td').nth(0).innerText();
 
+        const table = await this.scheduledRentalsTable();
         const rowWithId = table.locator(
-            `tbody tr:has(td:text-is("${this.lastDeletedInventoryId}"))`
+            `tbody tr:has(td:text-is("${rentalId}"))`
         );
 
-        // Verificar que no existe
-        await expect(rowWithId).toHaveCount(0);
+        const cancelButton = rowWithId.getByRole('button', { name: /cancel/i });
+
+        // Esperar a que el botón exista y esté visible
+        await expect(cancelButton).toBeVisible({ timeout: 15000 });
+
+        await cancelButton.click();
+
+        await expect(rowWithId.locator('td').nth(4)).toContainText(/canceled/i, { timeout: 15000 });
+
+        // Guardar el ID para validación
+        this.lastCancelledId = rentalId;
     }
 
+    async assertFirstReservationWasCancelled() {
+        if (!this.lastCancelledId) {
+            throw new Error("No reservation ID stored to assert cancellation.");
+        }
+
+        const table = await this.scheduledRentalsTable();
+
+        const rowWithId = table.locator(
+            `tbody tr:has(td:text-is("${this.lastCancelledId}"))`
+        );
+
+        await expect(rowWithId).toHaveCount(1);
+
+        const state = rowWithId.locator('td').nth(4);
+        await expect(state).toContainText(/canceled/i, { timeout: 5000 });
+    }
 
 }
