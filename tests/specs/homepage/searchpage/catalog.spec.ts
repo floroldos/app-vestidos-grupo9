@@ -16,6 +16,9 @@ test.describe('Navegación y catálogo', () => {
         // Click en "Browse" para ir al catálogo
         await page.getByRole('link', { name: 'Browse' }).first().click();
 
+        // Esperar a que cargue la página
+        await page.waitForLoadState('networkidle');
+
         await expect(page).toHaveURL(/.*search/);
         await catalogPage.assertCatalogLoaded();
 

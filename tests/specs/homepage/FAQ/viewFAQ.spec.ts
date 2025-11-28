@@ -18,10 +18,17 @@ test.describe('FAQ page', () => {
         // Paso 1: Abrir Home
         await homePage.goto();
         await homePage.assertBasicUI();
+
+        // Esperar a que cargue la página
+        await page.waitForLoadState('networkidle');
         
        // Paso 2: Seleccionar FAQ desde el menú superior
         const faqLink = page.getByText('FAQ', { exact: false });
         await faqLink.click();
+
+         // Esperar a que cargue la página
+        await page.waitForURL(/\/faq/);
+
 
         // Resultado esperado: Se abre la página FAQ
         await expect(page).toHaveURL(/\/faq/);
