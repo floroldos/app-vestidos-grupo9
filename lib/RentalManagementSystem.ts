@@ -1,5 +1,5 @@
 import 'server-only';
-import { initDatabase, getDatabase, seedInitialData, rowToItem, rowToRental } from './database';
+import { initDatabase, getDatabase, seedInitialData, seedInitialRentals, rowToItem, rowToRental } from './database';
 
 export type Category = "dress" | "shoes" | "bag" | "jacket";
 
@@ -160,6 +160,37 @@ const initialItems: Item[] = [
   },
 ];
 
+
+const initialRentals: Rental[] = [
+  {
+    id: crypto.randomUUID(),
+    itemId: 1,
+    start: "2025-12-01",
+    end: "2025-12-05",
+    customer: { name: "Romina Hernandez", email: "romina@example.com", phone: "099123456" },
+    createdAt: new Date().toISOString(),
+    status: "active",
+  },
+  {
+    id: crypto.randomUUID(),
+    itemId: 2,
+    start: "2025-12-03",
+    end: "2025-12-07",
+    customer: { name: "Camila Perez", email: "camila@example.com", phone: "098123456" },
+    createdAt: new Date().toISOString(),
+    status: "active",
+  },
+  {
+    id: crypto.randomUUID(),
+    itemId: 2,
+    start: "2025-12-10",
+    end: "2025-12-12",
+    customer: { name: "Tamara Rodriguez", email: "tamara@example.com", phone: "097123456" },
+    createdAt: new Date().toISOString(),
+    status: "active",
+  },
+];
+
 // Inicializar BD al cargar el módulo
 declare global {
   var __dbInitialized: boolean | undefined;
@@ -169,6 +200,7 @@ function ensureDatabase() {
   if (!globalThis.__dbInitialized) {
     initDatabase();
     seedInitialData(initialItems);
+    seedInitialRentals(initialRentals);
     globalThis.__dbInitialized = true;
   }
 }
