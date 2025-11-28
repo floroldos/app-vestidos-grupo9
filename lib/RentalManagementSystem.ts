@@ -16,6 +16,8 @@ export type Item = {
   alt: string;
 };
 
+
+
 export type Rental = {
   id: string;
   itemId: number;
@@ -79,6 +81,70 @@ const initialItems: Item[] = [
   {
     id: 4,
     name: "Velvet Cocktail Dress",
+    category: "dress",
+    pricePerDay: 59,
+    sizes: ["S", "M", "L"],
+    color: "burgundy",
+    style: "cocktail",
+    description: "Rich velvet cocktail dress in deep tones.",
+    images: [
+      "/images/dresses/velvet-cocktail-dress.jpg",
+      "/images/dresses/velvet-cocktail-dress-2.jpg",
+      "/images/dresses/velvet-cocktail-dress-3.jpg",
+    ],
+    alt: "Velvet cocktail dress in deep tones",
+  },
+  {
+  id: 5,
+    name: "Silk Evening Gown 2",
+    category: "dress",
+    pricePerDay: 79,
+    sizes: ["XS", "S", "M", "L"],
+    color: "champagne",
+    style: "evening",
+    description: "Luxurious silk gown with flattering silhouette.",
+    images: [
+      "/images/dresses/silk-evening-gown.jpg",
+      "/images/dresses/silk-evening-gown-2.jpg",
+      "/images/dresses/silk-evening-gown-3.jpg",
+    ],
+    alt: "Model wearing a champagne silk evening gown",
+  },
+  {
+    id: 6,
+    name: "Black Tie Dress 2",
+    category: "dress",
+    pricePerDay: 99,
+    sizes: ["S", "M", "L", "XL"],
+    color: "black",
+    style: "black-tie",
+    description: "Elegant black-tie dress for formal events.",
+    images: [
+      "/images/dresses/black-tie-dress.jpg",
+      "/images/dresses/black-tie-dress-2.jpg",
+      "/images/dresses/black-tie-dress-3.jpg",
+    ],
+    alt: "Elegant black tie dress",
+  },
+  {
+    id: 7,
+    name: "Floral Midi Dress 2",
+    category: "dress",
+    pricePerDay: 49,
+    sizes: ["XS", "S", "M"],
+    color: "floral",
+    style: "daytime",
+    description: "Bright floral midi for daytime events.",
+    images: [
+      "/images/dresses/floral-midi-dress.jpg",
+      "/images/dresses/floral-midi-dress-2.jpg",
+      "/images/dresses/floral-midi-dress-3.jpg",
+    ],
+    alt: "Floral midi dress perfect for daytime events",
+  },
+  {
+    id: 8,
+    name: "Velvet Cocktail Dress 2",
     category: "dress",
     pricePerDay: 59,
     sizes: ["S", "M", "L"],

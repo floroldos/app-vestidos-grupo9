@@ -4,36 +4,34 @@ import { AdminDashboardPage } from '../../../pages/AdminDashboardPage';
 
 test.use({ baseURL: 'http://localhost:3000' });
 
-test.describe.serial('Delete item', () => {
+test.describe('Delete item', () => {
 
     /**
-     * CT-RF005-04: Eliminar articulo
-     * Objetivo: Validar que el admin puede eliminar un articulo del inventario.
-     * Prioridad: Alta
+     * CT-RF005-04: Eliminar artículo con confirmación
+     * Objetivo: Validar que el admin pueda eliminar un item del inventario
+     * Prioridad: Media
      */
-    test('CT-RF005-04: Delete first item from inventory', async ({ page }) => {
-
-        test.setTimeout(90000);
-
+    test('Delete first item from inventory', async ({ page, users }) => {
+        
         const loginPage = new LoginPage(page);
-        const admin = new AdminDashboardPage(page);
+        const adminPage = new AdminDashboardPage(page); 
 
         // Paso 1: Loguearse en el panel de Admin
         await loginPage.goto();
-        await loginPage.login();
-
-        // Esperar a que el contenido se cargue completamente
-        await page.waitForLoadState('networkidle');    
-
-        // Paso 2: Eliminar el primer articulo del inventario
-        await admin.deleteFirstInventoryItem();
+        await page.waitForLoadState('networkidle'); 
+        await loginPage.login(users.admin.user, users.admin.pass);
 
         // Esperar a que el contenido se cargue completamente
         await page.waitForLoadState('networkidle'); 
 
-        // Paso 3: Verificar que el articulo fue eliminado
-        await admin.assertItemWasDeleted();
+        // Paso 2: Eliminar un item del inventario
+        await adminPage.deleteFirstInventoryItem();
 
+        // Esperar a que el contenido se cargue completamente
+        await page.waitForLoadState('networkidle'); 
+
+        // Paso 3: Verificar que el item fue eliminado
+        await adminPage.assertItemWasDeleted();
     });
 
 });
