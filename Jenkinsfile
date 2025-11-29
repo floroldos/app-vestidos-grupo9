@@ -21,6 +21,8 @@ pipeline {
                     node -v
                     echo "NPM version:"
                     npm -v
+                    
+                    apt-get update && apt-get install -y python3 make g++
 
                     npm ci
                 '''
