@@ -17,7 +17,7 @@ export default function AddItemModal({ isOpen, onClose, onSubmit }: AddItemModal
     const [price, setPrice] = useState("");
     const [color, setColor] = useState("");
     const [style, setStyle] = useState("");
-    const [sizes, setSizes] = useState<string[]>([]);
+    const [sizes, setSizes] = useState("");
     const [images, setImages] = useState<File[]>([]);
     const [error, setError] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
@@ -44,11 +44,6 @@ export default function AddItemModal({ isOpen, onClose, onSubmit }: AddItemModal
         setImages((prev) => prev.filter((_, i) => i !== index));
     };
 
-    const handleSizesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const sizesArray = e.target.value.split(",").map(s => s.trim()).filter(s => s);
-        setSizes(sizesArray);
-    };
-
     // Validaciones
     const validate = () => {
         if (!name.trim()) return "Name is required.";
@@ -71,6 +66,9 @@ export default function AddItemModal({ isOpen, onClose, onSubmit }: AddItemModal
             // Convertir imágenes → base64 para JSON
             const base64Images = await Promise.all(images.map((file) => fileToBase64(file)));
 
+            // Convertir sizes string a array
+            const sizesArray = sizes.split(",").map(s => s.trim()).filter(s => s);
+
             await onSubmit({
                 name: name.trim(),
                 category,
@@ -78,7 +76,7 @@ export default function AddItemModal({ isOpen, onClose, onSubmit }: AddItemModal
                 pricePerDay: Number(price),
                 color: color.trim() || undefined,
                 style: style.trim() || undefined,
-                sizes,
+                sizes: sizesArray,
                 images: base64Images,
                 alt: name.trim(),
             });
@@ -87,10 +85,19 @@ export default function AddItemModal({ isOpen, onClose, onSubmit }: AddItemModal
             setSuccessMessage('Item added successfully!');
             setError("");
             
-            // Cerrar modal después de 1.5 segundos
+            // Resetear formulario y cerrar modal después de 10 segundos
             setTimeout(() => {
+                setName("");
+                setCategory("");
+                setDescription("");
+                setPrice("");
+                setColor("");
+                setStyle("");
+                setSizes("");
+                setImages([]);
+                setSuccessMessage("");
                 onClose();
-            }, 1500);
+            }, 4000);
         } catch (err) {
             setError('Failed to add item. Please try again.');
             setSuccessMessage("");
@@ -111,15 +118,8 @@ export default function AddItemModal({ isOpen, onClose, onSubmit }: AddItemModal
 
                 {/* Content with scroll */}
                 <div className="flex-1 overflow-y-auto p-6">
-                    {/* ERROR */}
-                    {error && (
-                        <p className="mb-3 text-red-400 bg-red-950/30 border border-red-800 px-3 py-2 rounded-lg">
-                            {error}
-                        </p>
-                    )}
-
-                {/* Layout en dos columnas */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Layout en dos columnas */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                     {/* LEFT COLUMN - Basic info */}
                     <div className="flex flex-col gap-4">
@@ -188,13 +188,13 @@ export default function AddItemModal({ isOpen, onClose, onSubmit }: AddItemModal
 
                         {/* SIZES */}
                         <div>
-                            <label className="block mb-1 text-sm font-medium">Sizes</label>
+                            <label className="block mb-1 text-sm font-medium">Sizes (separate with commas)</label>
                             <input
                                 type="text"
-                                value={sizes.join(", ")}
-                                onChange={handleSizesChange}
+                                value={sizes}
+                                onChange={(e) => setSizes(e.target.value)}
                                 className="w-full bg-[#1e293b] border border-[#334155] text-[#f1f5f9] rounded-lg p-2 outline-none"
-                                placeholder="e.g: XS, S, M, L, XL"
+                                placeholder="Example: S, M, L, XL"
                             />
                         </div>
 
@@ -258,12 +258,21 @@ export default function AddItemModal({ isOpen, onClose, onSubmit }: AddItemModal
 
                     </div>
 
-                </div>
+                    </div>
                 </div>
 
-                {/* SUCCESS MESSAGE - Fixed at bottom of content */}
+                {/* ERROR MESSAGE - Fixed above footer */}
+                {error && (
+                    <div className="px-6 py-3 border-t border-[#334155]">
+                        <p className="text-red-400 bg-red-950/30 border border-red-800 px-3 py-2 rounded-lg">
+                            ⚠ {error}
+                        </p>
+                    </div>
+                )}
+
+                {/* SUCCESS MESSAGE - Fixed above footer */}
                 {successMessage && (
-                    <div className="px-6 py-3">
+                    <div className="px-6 py-3 border-t border-[#334155]">
                         <p className="text-green-400 bg-green-950/30 border border-green-800 px-3 py-2 rounded-lg">
                             ✓ {successMessage}
                         </p>

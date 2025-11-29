@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
 import EditItemModal from "../../components/EditItemModal";
+import AddItemModal from "../../components/AddItemModal";
 
 type AdminItem = {
   id: number | string;
@@ -28,11 +28,10 @@ type Rental = {
 type CreateForm = {
   name: string;
   category: "dress" | "shoes" | "bag" | "jacket";
-  sizes: string; // comma-separated
+  sizes: string;
   pricePerDay: number;
   color?: string;
   description?: string;
-  // images handled separately via file input
 };
 
 export default function AdminDashboard({ csrf }: { csrf: string }) {
@@ -40,39 +39,9 @@ export default function AdminDashboard({ csrf }: { csrf: string }) {
   const [rentals, setRentals] = useState<Rental[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // UI state
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-
-  // edit state
   const [editItem, setEditItem] = useState<AdminItem | null>(null);
-
-  // images state for create
-  const [createFiles, setCreateFiles] = useState<File[]>([]);
-  const [createPreviews, setCreatePreviews] = useState<string[]>([]);
-  const [imageErrors, setImageErrors] = useState<string | null>(null);
-  const [busyCreate, setBusyCreate] = useState(false);
-
-  // react-hook-form
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-    setError: setFormError,
-    clearErrors,
-  } = useForm<CreateForm>({
-    defaultValues: {
-      name: "",
-      category: "dress",
-      sizes: "",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      pricePerDay: undefined as any,
-      color: "",
-      description: "",
-    },
-  });
 
   useEffect(() => {
     loadAll();
@@ -94,7 +63,6 @@ export default function AdminDashboard({ csrf }: { csrf: string }) {
       setItems(itemsData.items ?? []);
       setRentals(rentalsData.rentals ?? []);
       setError(null);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err?.message ?? "Error");
     } finally {
@@ -114,7 +82,6 @@ export default function AdminDashboard({ csrf }: { csrf: string }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Cancel failed");
       await loadAll();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err?.message ?? "Cancel failed");
     }
@@ -133,7 +100,6 @@ export default function AdminDashboard({ csrf }: { csrf: string }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Delete failed");
       setItems((s) => s.filter((i) => i.id !== id));
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err?.message ?? "Delete failed");
     }
@@ -144,8 +110,7 @@ export default function AdminDashboard({ csrf }: { csrf: string }) {
     setShowEditModal(true);
   }
 
-  // Update item (con soporte de imágenes)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   async function handleUpdateItem(data: any) {
     try {
       const res = await fetch(`/api/admin/items/${data.id}`, {
@@ -169,339 +134,269 @@ export default function AdminDashboard({ csrf }: { csrf: string }) {
       if (!res.ok) throw new Error(responseData.error || "Update failed");
       setItems((s) => s.map((x) => (x.id === responseData.item.id ? responseData.item : x)));
       setError(null);
-      // No cerramos el modal aquí, lo hace el EditItemModal después de mostrar el mensaje
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err?.message ?? "Update failed");
-      throw err; // Re-lanzar para que EditItemModal muestre el error
+      throw err; 
     }
   }
-
-  // Helper: convert File -> base64 dataURL
-  function fileToDataURL(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result));
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
-
-  // Validate image dimensions (>=1080x1350)
-  function validateImageDimensions(file: File): Promise<boolean> {
-    return new Promise((resolve) => {
-      const url = URL.createObjectURL(file);
-      const img = new Image();
-      img.onload = () => {
-        const ok = img.width >= 1080 && img.height >= 1350;
-        URL.revokeObjectURL(url);
-        resolve(ok);
-      };
-      img.onerror = () => {
-        URL.revokeObjectURL(url);
-        resolve(false);
-      };
-      img.src = url;
-    });
-  }
-
-  // Handle file input change (create)
-  async function handleCreateFilesChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setImageErrors(null);
-    clearErrors("name"); // just to remove generic errors if any
-    const files = Array.from(e.target.files ?? []);
-    setCreateFiles(files);
-    setCreatePreviews(files.map((f) => URL.createObjectURL(f)));
-  }
-
-  // Create item
-  const onCreate = handleSubmit(async (vals) => {
-    setImageErrors(null);
-
-    // basic form validation (react-hook-form does most)
-    // check images count
-    if (createFiles.length < 3) {
-      setImageErrors("You must upload at least 3 images.");
-      return;
-    }
-
-    setBusyCreate(true);
-
-    // validate dimensions for each file
-    for (const f of createFiles) {
-      const ok = await validateImageDimensions(f);
-      if (!ok) {
-        setImageErrors("All images must be at least 1080×1350 px.");
-        setBusyCreate(false);
-        return;
-      }
-    }
-
+  async function handleCreateItem(data: any) {
     try {
-      // convert images to data-URL
-      const imagesData = await Promise.all(createFiles.map((f) => fileToDataURL(f)));
-
-      const sizes = vals.sizes.split(",").map((s) => s.trim()).filter(Boolean);
-
       const res = await fetch("/api/admin/items", {
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           csrf,
-          name: vals.name,
-          category: vals.category,
-          sizes,
-          pricePerDay: Number(vals.pricePerDay),
-          color: vals.color,
-          description: vals.description,
-          images: imagesData, // data-URL array
+          name: data.name,
+          category: data.category,
+          sizes: data.sizes,
+          pricePerDay: data.pricePerDay,
+          color: data.color,
+          style: data.style,
+          description: data.description,
+          images: data.images,
+          alt: data.alt,
         }),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to create");
+      const responseData = await res.json();
+      if (!res.ok) throw new Error(responseData.error || "Failed to create");
 
-      // prepend item
-      setItems((s) => [data.item, ...s]);
-
-      // cleanup
-      reset();
-      setCreateFiles([]);
-      createPreviews.forEach((p) => URL.revokeObjectURL(p));
-      setCreatePreviews([]);
-      setShowCreateModal(false);
-      setImageErrors(null);
+      setItems((s) => [...s, responseData.item]);
+      setError(null);
+      // No cerramos el modal aquí, lo hace el AddItemModal después de mostrar el mensaje
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err?.message ?? "Create failed");
-    } finally {
-      setBusyCreate(false);
+      throw err;
     }
-  });
-
-  // Close create modal
-  function closeCreateForm() {
-    setShowCreateModal(false);
-    reset();
-    setCreateFiles([]);
-    createPreviews.forEach((p) => URL.revokeObjectURL(p));
-    setCreatePreviews([]);
-    setImageErrors(null);
   }
 
-  // Small UI helpers for styling
-  const fieldClass =
-    "w-full rounded-xl border px-3 py-2 text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-fuchsia-500";
-
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 text-slate-900 dark:text-slate-100">
+    <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 dark:from-slate-950 dark:to-slate-900 text-slate-900 dark:text-slate-100">
       {/* HEADER */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Admin dashboard</h1>
-        <form action="/api/admin/logout" method="POST">
-          <button className="text-sm rounded-lg border px-3 py-2 bg-white dark:bg-slate-800">Sign out</button>
-        </form>
+      <header className="sticky top-0 z-30 backdrop-blur-md bg-white/80 dark:bg-slate-950/80 border-b border-slate-200/60 dark:border-slate-800 shadow-sm">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-fuchsia-600 to-rose-500 flex items-center justify-center text-white font-bold text-sm shadow-lg">
+              GR
+            </div>
+            <h1 className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-fuchsia-600 to-rose-500 bg-clip-text text-transparent">
+              Admin Dashboard
+            </h1>
+          </div>
+          <form action="/api/admin/logout" method="POST">
+            <button className="text-sm font-medium rounded-lg border border-slate-200 dark:border-slate-700 hover:border-fuchsia-500 dark:hover:border-fuchsia-500 px-4 py-2 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+              Sign out
+            </button>
+          </form>
+        </div>
+      </header>
+
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        {/* ERROR MESSAGE */}
+        {error && (
+          <div className="mb-6 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 p-4">
+            <div className="flex items-start gap-3">
+              <svg className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-red-800 dark:text-red-200">{error}</p>
+              </div>
+              <button 
+                onClick={() => setError(null)}
+                className="text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* LOADING STATE */}
+        {loading && (
+          <div className="flex justify-center items-center py-20">
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-12 h-12 border-4 border-fuchsia-200 dark:border-fuchsia-900 border-t-fuchsia-600 dark:border-t-fuchsia-400 rounded-full animate-spin"></div>
+              <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">Loading dashboard...</p>
+            </div>
+          </div>
+        )}
+
+        {!loading && (
+          <>
+
+        {/* INVENTORY */}
+        <section className="mb-12">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">Inventory</h2>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Manage your catalog of items</p>
+            </div>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="rounded-lg bg-gradient-to-r from-fuchsia-600 to-rose-600 hover:from-fuchsia-700 hover:to-rose-700 text-white px-5 py-2.5 text-sm font-medium shadow-md hover:shadow-lg transition-all"
+            >
+              + Add item
+            </button>
+          </div>
+
+          <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                    <th className="py-3 px-4 text-left font-semibold text-slate-700 dark:text-slate-300">ID</th>
+                    <th className="py-3 px-4 text-left font-semibold text-slate-700 dark:text-slate-300">Name</th>
+                    <th className="py-3 px-4 text-left font-semibold text-slate-700 dark:text-slate-300">Category</th>
+                    <th className="py-3 px-4 text-left font-semibold text-slate-700 dark:text-slate-300">Sizes</th>
+                    <th className="py-3 px-4 text-left font-semibold text-slate-700 dark:text-slate-300">Price</th>
+                    <th className="py-3 px-4 text-right font-semibold text-slate-700 dark:text-slate-300">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((i) => (
+                    <tr key={String(i.id)} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                      <td className="py-3 px-4 text-slate-600 dark:text-slate-400">{i.id}</td>
+                      <td className="py-3 px-4 font-medium">{i.name}</td>
+                      <td className="py-3 px-4 capitalize text-slate-600 dark:text-slate-400">{i.category}</td>
+                      <td className="py-3 px-4 text-slate-600 dark:text-slate-400">{(i.sizes || []).join(", ")}</td>
+                      <td className="py-3 px-4 font-semibold text-fuchsia-600 dark:text-fuchsia-400">${i.pricePerDay}</td>
+                      <td className="py-3 px-4">
+                        <div className="flex gap-2 justify-end">
+                          <button 
+                            onClick={() => openEditModal(i)}
+                            className="rounded-lg border border-slate-200 dark:border-slate-700 hover:border-fuchsia-500 dark:hover:border-fuchsia-500 px-3 py-1.5 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+                          >
+                            Edit
+                          </button>
+                          <button 
+                            onClick={() => handleDelete(i.id)}
+                            className="rounded-lg border border-red-200 dark:border-red-900/50 hover:border-red-500 dark:hover:border-red-500 px-3 py-1.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+
+                  {items.length === 0 && (
+                    <tr>
+                      <td className="py-12 text-center text-slate-500" colSpan={6}>
+                        <div className="flex flex-col items-center gap-2">
+                          <svg className="w-12 h-12 text-slate-300 dark:text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                          </svg>
+                          <p className="font-medium">No items yet</p>
+                          <p className="text-sm">Click "Add item" to create your first product</p>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        {/* RENTALS */}
+        <section>
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold tracking-tight">Scheduled Rentals</h2>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">View and manage upcoming reservations</p>
+          </div>
+
+          <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                    <th className="py-3 px-4 text-left font-semibold text-slate-700 dark:text-slate-300">Rental ID</th>
+                    <th className="py-3 px-4 text-left font-semibold text-slate-700 dark:text-slate-300">Item</th>
+                    <th className="py-3 px-4 text-left font-semibold text-slate-700 dark:text-slate-300">Dates</th>
+                    <th className="py-3 px-4 text-left font-semibold text-slate-700 dark:text-slate-300">Customer</th>
+                    <th className="py-3 px-4 text-left font-semibold text-slate-700 dark:text-slate-300">Status</th>
+                    <th className="py-3 px-4 text-right font-semibold text-slate-700 dark:text-slate-300">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rentals.map((r) => (
+                    <tr key={r.id} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                      <td className="py-3 px-4">
+                        <code className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded font-mono">
+                          {r.id.slice(0, 8)}
+                        </code>
+                      </td>
+                      <td className="py-3 px-4 font-medium text-slate-600 dark:text-slate-400">#{r.itemId}</td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-1 text-slate-600 dark:text-slate-400">
+                          <span>{r.start}</span>
+                          <span className="text-slate-400">→</span>
+                          <span>{r.end}</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="font-medium">{r.customer.name}</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-500 mt-0.5">
+                          {r.customer.email} • {r.customer.phone}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          r.status === "active" 
+                            ? "bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400" 
+                            : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                        }`}>
+                          {r.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        {r.status === "active" ? (
+                          <button
+                            onClick={() => handleCancelRental(r.id)}
+                            className="rounded-lg border border-orange-200 dark:border-orange-900/50 hover:border-orange-500 dark:hover:border-orange-500 px-3 py-1.5 text-sm font-medium text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-all"
+                          >
+                            Cancel
+                          </button>
+                        ) : (
+                          <span className="text-slate-400">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+
+                  {rentals.length === 0 && (
+                    <tr>
+                      <td className="py-12 text-center text-slate-500" colSpan={6}>
+                        <div className="flex flex-col items-center gap-2">
+                          <svg className="w-12 h-12 text-slate-300 dark:text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <p className="font-medium">No rentals yet</p>
+                          <p className="text-sm">Reservations will appear here once customers book items</p>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+        </>
+        )}
       </div>
 
-      {/* INVENTORY */}
-      <section className="mt-8">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="font-semibold">Inventory</h2>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="rounded-lg bg-fuchsia-600 text-white px-4 py-2 text-sm"
-          >
-            + Add item
-          </button>
-        </div>
-
-        <div className="overflow-x-auto rounded-lg border dark:border-slate-700 bg-white/60 dark:bg-slate-900/60">
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="text-left">
-                <th className="py-2 px-3">ID</th>
-                <th className="py-2 px-3">Name</th>
-                <th className="py-2 px-3">Category</th>
-                <th className="py-2 px-3">Sizes</th>
-                <th className="py-2 px-3">Price</th>
-                <th className="py-2 px-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((i) => (
-                <tr key={String(i.id)} className="border-t dark:border-slate-700">
-                  <td className="py-2 px-3">{i.id}</td>
-                  <td className="py-2 px-3">{i.name}</td>
-                  <td className="py-2 px-3">{i.category}</td>
-                  <td className="py-2 px-3">{(i.sizes || []).join(", ")}</td>
-                  <td className="py-2 px-3">${i.pricePerDay}</td>
-                  <td className="py-2 px-3">
-                    <div className="flex gap-2">
-                      <button className="border rounded px-2 py-1" onClick={() => openEditModal(i)}>
-                        Edit
-                      </button>
-                      <button className="border rounded px-2 py-1" onClick={() => handleDelete(i.id)}>
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-
-              {items.length === 0 && (
-                <tr>
-                  <td className="py-4 text-slate-500" colSpan={6}>
-                    No items yet.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* SPACER */}
-      <div className="h-12" />
-
-      {/* RENTALS */}
-      <section>
-        <h2 className="font-semibold">Scheduled rentals</h2>
-
-        <div className="mt-3 overflow-x-auto rounded-lg border dark:border-slate-700 bg-white/60 dark:bg-slate-900/60">
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="text-left">
-                <th className="py-2 px-3">Rental ID</th>
-                <th className="py-2 px-3">Item</th>
-                <th className="py-2 px-3">Dates</th>
-                <th className="py-2 px-3">Customer</th>
-                <th className="py-2 px-3">Status</th>
-                <th className="py-2 px-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rentals.map((r) => (
-                <tr key={r.id} className="border-t dark:border-slate-700">
-                  <td className="py-2 px-3">{r.id.slice(0, 8)}</td>
-                  <td className="py-2 px-3">{r.itemId}</td>
-                  <td className="py-2 px-3">
-                    {r.start} → {r.end}
-                  </td>
-                  <td className="py-2 px-3">
-                    {r.customer.name}
-                    <div className="text-xs text-slate-500">
-                      {r.customer.email} • {r.customer.phone}
-                    </div>
-                  </td>
-                  <td className="py-2 px-3 capitalize">{r.status}</td>
-                  <td className="py-2 px-3">
-                    {r.status === "active" ? (
-                      <button
-                        onClick={() => handleCancelRental(r.id)}
-                        className="border rounded px-2 py-1"
-                      >
-                        Cancel
-                      </button>
-                    ) : (
-                      <span className="text-slate-400">—</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-
-              {rentals.length === 0 && (
-                <tr>
-                  <td className="py-4 text-slate-500" colSpan={6}>
-                    No rentals yet.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* CREATE MODAL */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-start md:items-center justify-center p-6">
-          <div className="relative w-full max-w-2xl">
-            <form
-              onSubmit={onCreate}
-              className="bg-white dark:bg-slate-900 rounded-lg p-6 border shadow-lg"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <h3 className="font-medium text-lg">Add new item</h3>
-                <button
-                  type="button"
-                  onClick={closeCreateForm}
-                  className="text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-                >
-                  Close
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-                <div className="col-span-1 md:col-span-2">
-                  <label className="block text-xs mb-1">Name</label>
-                  <input
-                    {...register("name", { required: "Name is required", minLength: { value: 2, message: "Too short" } })}
-                    className="w-full rounded-md border px-3 py-2"
-                  />
-                  {errors.name && <p className="text-xs text-rose-600 mt-1">{errors.name.message}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-xs mb-1">Category</label>
-                  <select {...register("category", { required: true })} className="w-full rounded-md border px-3 py-2">
-                    <option value="dress" className="bg-slate-900">dress</option>
-                    <option value="shoes" className="bg-slate-900">shoes</option>
-                    <option value="bag" className="bg-slate-900">bag</option>
-                    <option value="jacket" className="bg-slate-900">jacket</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs mb-1">Sizes (comma separated)</label>
-                  <input {...register("sizes", { required: "At least one size" })} className="w-full rounded-md border px-3 py-2" placeholder="S, M, L" />
-                  {errors.sizes && <p className="text-xs text-rose-600 mt-1">{errors.sizes.message}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-xs mb-1">Price / day (UYU)</label>
-                  <input {...register("pricePerDay", { required: "Price required", min: { value: 1, message: "Price must be > 0" } })} type="number" step="0.01" className="w-full rounded-md border px-3 py-2" />
-                  {errors.pricePerDay && <p className="text-xs text-rose-600 mt-1">{errors.pricePerDay.message}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-xs mb-1">Color</label>
-                  <input {...register("color")} className="w-full rounded-md border px-3 py-2" />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-xs mb-1">Description (50–500 chars)</label>
-                  <textarea {...register("description", { required: "Description required", minLength: { value: 50, message: "Min 50 chars" }, maxLength: { value: 500, message: "Max 500 chars" } })} className="w-full rounded-md border px-3 py-2 h-28" />
-                  {errors.description && <p className="text-xs text-rose-600 mt-1">{errors.description.message}</p>}
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-xs mb-1">Images (min 3) — min 1080×1350 px</label>
-                  <input type="file" accept="image/*" multiple onChange={handleCreateFilesChange} className="w-full rounded-md border px-3 py-2 text-sm cursor-pointer file:bg-fuchsia-600 file:text-white file:border-0 file:rounded-md file:px-3 file:py-1 file:cursor-pointer" />
-                  {imageErrors && <p className="text-xs text-rose-600 mt-1">{imageErrors}</p>}
-
-                </div>
-              </div>
-
-              <div className="mt-4 flex justify-end gap-2">
-                <button type="button" onClick={closeCreateForm} className="border rounded px-3 py-1">Cancel</button>
-                <button type="submit" disabled={busyCreate} className="bg-fuchsia-600 text-white rounded px-3 py-1">
-                  {busyCreate ? "Creating..." : "Create"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* ADD ITEM MODAL */}
+      <AddItemModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSubmit={handleCreateItem}
+      />
 
       {/* EDIT MODAL */}
       <EditItemModal

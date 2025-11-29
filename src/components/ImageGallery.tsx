@@ -23,7 +23,7 @@ export function ImageGallery({ images, alt, itemName }: ImageGalleryProps) {
   return (
     <div>
       {/* Main Image */}
-      <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 group">
+      <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg group">
         <Image
           src={images[selectedIndex]}
           alt={`${alt} - View ${selectedIndex + 1}`}
@@ -34,7 +34,7 @@ export function ImageGallery({ images, alt, itemName }: ImageGalleryProps) {
         />
         
         {/* Image counter badge */}
-        <div className="absolute top-4 right-4 bg-black/60 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm">
+        <div className="absolute top-4 right-4 bg-black/70 text-white text-xs px-3 py-1.5 rounded-full backdrop-blur-sm shadow-md">
           {selectedIndex + 1} / {images.length}
         </div>
 
