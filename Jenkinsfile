@@ -1,6 +1,13 @@
 pipeline {
     agent any
     
+    environment {
+        SESSION_SECRET = 'clave_segura'
+        ADMIN_USER = 'admin'
+        ADMIN_PASSWORD = 'supersegura123'
+        NEXT_PUBLIC_BASE_URL = 'http://localhost:3000'
+    }
+    
     triggers {
         pollSCM('* * * * *') // poll every minute
     }
