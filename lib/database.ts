@@ -11,6 +11,7 @@ type DatabaseInstance = {
         all: (...args: unknown[]) => unknown[];
     };
     exec: (query: string) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     transaction: <T extends (...args: any[]) => any>(fn: T) => T;
 };
 
@@ -28,6 +29,7 @@ export function initDatabase() {
     // Cargar better-sqlite3 dinámicamente
     if (!Database) {
         try {
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
             Database = require('better-sqlite3');
         } catch (error) {
             console.warn('better-sqlite3 not available, using mock database');
@@ -37,7 +39,7 @@ export function initDatabase() {
     }
 
     // Crear BD en memoria
-    globalThis.__db = new (Database as any)(':memory:') as DatabaseInstance;
+    globalThis.__db = new (Database as unknown as new (filename: string) => DatabaseInstance)(':memory:');
 
     // Crear tablas
     globalThis.__db.exec(`

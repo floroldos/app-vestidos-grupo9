@@ -1,6 +1,13 @@
 pipeline {
     agent any
     
+    environment {
+        SESSION_SECRET = 'clave_segura'
+        ADMIN_USER = 'admin'
+        ADMIN_PASSWORD = 'supersegura123'
+        NEXT_PUBLIC_BASE_URL = 'http://localhost:3000'
+    }
+    
     triggers {
         pollSCM('* * * * *') // poll every minute
     }
@@ -21,6 +28,8 @@ pipeline {
                     node -v
                     echo "NPM version:"
                     npm -v
+                    
+                    apt-get update && apt-get install -y python3 make g++
 
                     npm ci
                 '''
