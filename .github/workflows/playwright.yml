@@ -18,6 +18,10 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     - name: Run Playwright tests
+      env:
+        SESSION_SECRET: test-secret-key-for-ci
+        ADMIN_USER: admin
+        ADMIN_PASSWORD: admin123
       run: npx playwright test
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}

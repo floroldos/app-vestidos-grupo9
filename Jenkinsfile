@@ -1,6 +1,13 @@
 pipeline {
     agent any
     
+    environment {
+        SESSION_SECRET = 'clave_segura'
+        ADMIN_USER = 'admin'
+        ADMIN_PASSWORD = 'supersegura123'
+        NEXT_PUBLIC_BASE_URL = 'http://localhost:3000'
+    }
+    
     triggers {
         pollSCM('* * * * *') // poll every minute
     }
@@ -16,45 +23,33 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 echo 'Installing project dependencies...'
-                script {
-                    if (isUnix()) {
-                        sh 'npm ci'
-                    } else {
-                        bat 'npm ci'
-                    }
-                }
+                sh '''
+                    echo "Node version:"
+                    node -v
+                    echo "NPM version:"
+                    npm -v
+                    
+                    apt-get update && apt-get install -y python3 make g++
+
+                    npm ci
+                '''
             }
         }
 
         stage('Build') {
             steps {
                 echo 'Building application...'
-                script {
-                    if (isUnix()) {
-                        sh 'npm run build'
-                    } else {
-                        bat 'npm run build'
-                    }
-                }
+                sh 'npm run build'
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Running Playwright E2E tests...'
-                script {
-                    if (isUnix()) {
-                        sh '''
-                            npx playwright install chromium
-                            npm run test:e2e -- --project=chromium --reporter=list
-                        '''
-                    } else {
-                        bat '''
-                            npx playwright install chromium
-                            npm run test:e2e -- --project=chromium --reporter=list
-                        '''
-                    }
-                }
+                sh '''
+                    npx playwright install chromium
+                    npm run test:e2e -- --project=chromium --reporter=list
+                '''
             }
         }
     }

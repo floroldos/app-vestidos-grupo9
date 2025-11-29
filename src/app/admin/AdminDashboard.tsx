@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import EditItemModal from "../../components/EditItemModal";
 
 type AdminItem = {
   id: number | string;
@@ -143,33 +144,36 @@ export default function AdminDashboard({ csrf }: { csrf: string }) {
     setShowEditModal(true);
   }
 
-  // Update item (simple PUT)
-  async function handleUpdate(e: React.FormEvent) {
-    e.preventDefault();
-    if (!editItem) return;
+  // Update item (con soporte de imágenes)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async function handleUpdateItem(data: any) {
     try {
-      const res = await fetch(`/api/admin/items/${editItem.id}`, {
+      const res = await fetch(`/api/admin/items/${data.id}`, {
         method: "PUT",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           csrf,
-          name: editItem.name,
-          category: editItem.category,
-          sizes: editItem.sizes,
-          pricePerDay: editItem.pricePerDay,
-          color: editItem.color,
-          description: editItem.description,
+          name: data.name,
+          category: data.category,
+          sizes: data.sizes,
+          pricePerDay: data.pricePerDay,
+          color: data.color,
+          style: data.style,
+          description: data.description,
+          images: data.images,
+          alt: data.alt,
         }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Update failed");
-      setItems((s) => s.map((x) => (x.id === data.item.id ? data.item : x)));
-      setShowEditModal(false);
-      setEditItem(null);
+      const responseData = await res.json();
+      if (!res.ok) throw new Error(responseData.error || "Update failed");
+      setItems((s) => s.map((x) => (x.id === responseData.item.id ? responseData.item : x)));
+      setError(null);
+      // No cerramos el modal aquí, lo hace el EditItemModal después de mostrar el mensaje
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err?.message ?? "Update failed");
+      throw err; // Re-lanzar para que EditItemModal muestre el error
     }
   }
 
@@ -500,49 +504,15 @@ export default function AdminDashboard({ csrf }: { csrf: string }) {
       )}
 
       {/* EDIT MODAL */}
-      {showEditModal && editItem && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-start md:items-center justify-center p-6">
-          <div className="relative w-full max-w-md">
-            <form onSubmit={handleUpdate} className="bg-white dark:bg-slate-900 rounded-lg p-6 border shadow-lg">
-              <div className="flex items-center justify-between">
-                <h3 className="font-medium">Edit item #{editItem.id}</h3>
-                <button type="button" onClick={() => { setShowEditModal(false); setEditItem(null); }} className="text-sm text-slate-500">Close</button>
-              </div>
-
-              <div className="mt-3">
-                <label className="block text-xs mb-1">Name</label>
-                <input value={editItem.name} onChange={(e) => setEditItem({ ...editItem, name: e.target.value })} className="w-full rounded-md border px-3 py-2 mb-2" />
-
-                <label className="block text-xs mb-1">Category</label>
-                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                <select value={editItem.category} onChange={(e) => setEditItem({ ...editItem, category: e.target.value as any })} className="w-full rounded-md border px-3 py-2 mb-2 dark:bg-slate-800 text-slate-900">
-                  <option value="dress">dress</option>
-                  <option value="shoes">shoes</option>
-                  <option value="bag">bag</option>
-                  <option value="jacket">jacket</option>
-                </select>
-
-                <label className="block text-xs mb-1">Sizes</label>
-                <input value={(editItem.sizes || []).join(", ")} onChange={(e) => setEditItem({ ...editItem, sizes: e.target.value.split(",").map(s => s.trim()) })} className="w-full rounded-md border px-3 py-2 mb-2" />
-
-                <label className="block text-xs mb-1">Price</label>
-                <input type="number" value={editItem.pricePerDay} onChange={(e) => setEditItem({ ...editItem, pricePerDay: Number(e.target.value) })} className="w-full rounded-md border px-3 py-2 mb-2" />
-
-                <label className="block text-xs mb-1">Color</label>
-                <input value={editItem.color ?? ""} onChange={(e) => setEditItem({ ...editItem, color: e.target.value })} className="w-full rounded-md border px-3 py-2 mb-2" />
-
-                <label className="block text-xs mb-1">Description</label>
-                <textarea value={editItem.description ?? ""} onChange={(e) => setEditItem({ ...editItem, description: e.target.value })} className="w-full rounded-md border px-3 py-2 mb-4" />
-              </div>
-
-              <div className="flex justify-end gap-2">
-                <button type="button" className="border rounded px-3 py-1" onClick={() => setShowEditModal(false)}>Cancel</button>
-                <button className="bg-fuchsia-600 text-white rounded px-3 py-1">Save</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <EditItemModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditItem(null);
+        }}
+        item={editItem}
+        onSubmit={handleUpdateItem}
+      />
     </div>
   );
 }
