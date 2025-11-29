@@ -1,16 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 
-interface AddItemModalProps {
+interface EditItemModalProps {
     isOpen: boolean;
     onClose: () => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    item: any; // Item a editar
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onSubmit: (data: any) => Promise<void>;
 }
 
-export default function AddItemModal({ isOpen, onClose, onSubmit }: AddItemModalProps) {
+export default function EditItemModal({ isOpen, onClose, item, onSubmit }: EditItemModalProps) {
     const [name, setName] = useState("");
     const [category, setCategory] = useState("");
     const [description, setDescription] = useState("");
@@ -19,8 +21,26 @@ export default function AddItemModal({ isOpen, onClose, onSubmit }: AddItemModal
     const [style, setStyle] = useState("");
     const [sizes, setSizes] = useState<string[]>([]);
     const [images, setImages] = useState<File[]>([]);
+    const [existingImages, setExistingImages] = useState<string[]>([]);
     const [error, setError] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
+
+    // Cargar datos del item cuando cambia
+    useEffect(() => {
+        if (item) {
+            setName(item.name || "");
+            setCategory(item.category || "");
+            setDescription(item.description || "");
+            setPrice(item.pricePerDay?.toString() || "");
+            setColor(item.color || "");
+            setStyle(item.style || "");
+            setSizes(item.sizes || []);
+            setExistingImages(item.images || []);
+            setImages([]);
+            setError("");
+            setSuccessMessage("");
+        }
+    }, [item]);
 
     if (!isOpen) return null;
 
@@ -44,9 +64,8 @@ export default function AddItemModal({ isOpen, onClose, onSubmit }: AddItemModal
         setImages((prev) => prev.filter((_, i) => i !== index));
     };
 
-    const handleSizesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const sizesArray = e.target.value.split(",").map(s => s.trim()).filter(s => s);
-        setSizes(sizesArray);
+    const removeExistingImage = (index: number) => {
+        setExistingImages((prev) => prev.filter((_, i) => i !== index));
     };
 
     // Validaciones
@@ -56,7 +75,10 @@ export default function AddItemModal({ isOpen, onClose, onSubmit }: AddItemModal
         if (description.length < 50) return "Description must be at least 50 characters.";
         if (description.length > 500) return "Description cannot exceed 500 characters.";
         if (!price || Number(price) <= 0) return "Price must be greater than 0.";
-        if (images.length < 3) return "You must upload at least 3 images.";
+        
+        const totalImages = existingImages.length + images.length;
+        if (totalImages < 3) return "You must have at least 3 images in total.";
+        
         return "";
     };
 
@@ -68,10 +90,14 @@ export default function AddItemModal({ isOpen, onClose, onSubmit }: AddItemModal
         }
 
         try {
-            // Convertir imágenes → base64 para JSON
-            const base64Images = await Promise.all(images.map((file) => fileToBase64(file)));
+            // Convertir nuevas imágenes a base64
+            const newBase64Images = await Promise.all(images.map((file) => fileToBase64(file)));
+            
+            // Combinar imágenes existentes con las nuevas
+            const allImages = [...existingImages, ...newBase64Images];
 
             await onSubmit({
+                id: item.id,
                 name: name.trim(),
                 category,
                 description,
@@ -79,12 +105,12 @@ export default function AddItemModal({ isOpen, onClose, onSubmit }: AddItemModal
                 color: color.trim() || undefined,
                 style: style.trim() || undefined,
                 sizes,
-                images: base64Images,
-                alt: name.trim(),
+                images: allImages,
+                alt: name.trim(), // Usar el nombre como alt
             });
 
             // Mostrar confirmación de éxito
-            setSuccessMessage('Item added successfully!');
+            setSuccessMessage('Item updated successfully!');
             setError("");
             
             // Cerrar modal después de 1.5 segundos
@@ -92,9 +118,14 @@ export default function AddItemModal({ isOpen, onClose, onSubmit }: AddItemModal
                 onClose();
             }, 1500);
         } catch (err) {
-            setError('Failed to add item. Please try again.');
+            setError('Failed to update item. Please try again.');
             setSuccessMessage("");
         }
+    };
+
+    const handleSizesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const sizesArray = e.target.value.split(",").map(s => s.trim()).filter(s => s);
+        setSizes(sizesArray);
     };
 
     return (
@@ -103,7 +134,7 @@ export default function AddItemModal({ isOpen, onClose, onSubmit }: AddItemModal
 
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 pb-4 border-b border-[#334155]">
-                    <h2 className="text-xl font-semibold">Add new item</h2>
+                    <h2 className="text-xl font-semibold">Edit item #{item?.id}</h2>
                     <button onClick={onClose}>
                         <X className="w-6 h-6 text-gray-300 hover:text-white" />
                     </button>
@@ -218,14 +249,41 @@ export default function AddItemModal({ isOpen, onClose, onSubmit }: AddItemModal
                         <div>
                             <h3 className="text-sm font-medium mb-3">Image management</h3>
                             <p className="text-xs text-gray-400 mb-3">
-                                Total: {images.length} / minimum 3
+                                Total: {existingImages.length + images.length} / minimum 3
                             </p>
                         </div>
+
+                        {/* EXISTING IMAGES */}
+                        {existingImages.length > 0 && (
+                            <div>
+                                <label className="block mb-2 text-sm font-medium">Current images</label>
+                                <div className="max-h-48 overflow-y-auto space-y-2">
+                                    {existingImages.map((img, i) => (
+                                        <div
+                                            key={i}
+                                            className="flex justify-between items-center bg-[#1e293b] px-3 py-2 rounded-lg border border-[#334155]"
+                                        >
+                                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                {img.startsWith('data:image') ? (
+                                                    <img src={img} alt="" className="w-10 h-10 object-cover rounded" />
+                                                ) : (
+                                                    <div className="w-10 h-10 bg-gray-700 rounded flex items-center justify-center text-xs">IMG</div>
+                                                )}
+                                                <span className="text-sm truncate">Image {i + 1}</span>
+                                            </div>
+                                            <button onClick={() => removeExistingImage(i)} type="button">
+                                                <X className="w-4 h-4 text-red-400 hover:text-red-200" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
                         {/* NEW IMAGES UPLOAD */}
                         <div>
                             <label className="block mb-2 text-sm font-medium">
-                                Add new images {images.length < 3 && `(missing ${3 - images.length})`}
+                                Add new images {existingImages.length + images.length < 3 && `(missing ${3 - existingImages.length - images.length})`}
                             </label>
 
                             <label className="cursor-pointer bg-purple-600 hover:bg-purple-700 transition text-white px-4 py-2 rounded-lg inline-block text-sm">

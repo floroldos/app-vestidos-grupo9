@@ -17,20 +17,21 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   const existed = getItemById(Number(id));
   if (!existed) return NextResponse.json({ error: "Item not found" }, { status: 404 });
 
-  const updates = {
-    name: data.name,
-    category: data.category,
-    pricePerDay: data.pricePerDay !== undefined ? Number(data.pricePerDay) : undefined,
-    sizes: Array.isArray(data.sizes) ? data.sizes : undefined,
-    color: data.color,
-    style: data.style,
-    description: data.description,
-    images: data.images,
-    alt: data.alt,
-  };
-
+  // Solo incluir campos que están definidos en el request
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updated = updateItem(id, updates as any);
+  const updates: any = {};
+  
+  if (data.name !== undefined) updates.name = data.name;
+  if (data.category !== undefined) updates.category = data.category;
+  if (data.pricePerDay !== undefined) updates.pricePerDay = Number(data.pricePerDay);
+  if (data.sizes !== undefined) updates.sizes = Array.isArray(data.sizes) ? data.sizes : [];
+  if (data.color !== undefined) updates.color = data.color;
+  if (data.style !== undefined) updates.style = data.style;
+  if (data.description !== undefined) updates.description = data.description;
+  if (data.images !== undefined) updates.images = data.images;
+  if (data.alt !== undefined) updates.alt = data.alt;
+
+  const updated = updateItem(id, updates);
   if (!updated) return NextResponse.json({ error: "Update failed" }, { status: 500 });
 
   return NextResponse.json({ item: updated });
