@@ -156,7 +156,7 @@ export function RentalForm({ itemId, csrf: initialCsrf, availableSizes = [] }: R
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-3 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 sm:p-5">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <input type="hidden" name="itemId" value={itemId} />
         <input type="hidden" name="csrf" value={csrf} />
 

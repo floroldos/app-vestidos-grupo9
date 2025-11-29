@@ -19,7 +19,7 @@ export default function EditItemModal({ isOpen, onClose, item, onSubmit }: EditI
     const [price, setPrice] = useState("");
     const [color, setColor] = useState("");
     const [style, setStyle] = useState("");
-    const [sizes, setSizes] = useState<string[]>([]);
+    const [sizes, setSizes] = useState("");
     const [images, setImages] = useState<File[]>([]);
     const [existingImages, setExistingImages] = useState<string[]>([]);
     const [error, setError] = useState("");
@@ -34,7 +34,7 @@ export default function EditItemModal({ isOpen, onClose, item, onSubmit }: EditI
             setPrice(item.pricePerDay?.toString() || "");
             setColor(item.color || "");
             setStyle(item.style || "");
-            setSizes(item.sizes || []);
+            setSizes(Array.isArray(item.sizes) ? item.sizes.join(", ") : "");
             setExistingImages(item.images || []);
             setImages([]);
             setError("");
@@ -96,6 +96,9 @@ export default function EditItemModal({ isOpen, onClose, item, onSubmit }: EditI
             // Combinar imágenes existentes con las nuevas
             const allImages = [...existingImages, ...newBase64Images];
 
+            // Convertir sizes string a array
+            const sizesArray = sizes.split(",").map(s => s.trim()).filter(s => s);
+
             await onSubmit({
                 id: item.id,
                 name: name.trim(),
@@ -104,7 +107,7 @@ export default function EditItemModal({ isOpen, onClose, item, onSubmit }: EditI
                 pricePerDay: Number(price),
                 color: color.trim() || undefined,
                 style: style.trim() || undefined,
-                sizes,
+                sizes: sizesArray,
                 images: allImages,
                 alt: name.trim(), // Usar el nombre como alt
             });
@@ -121,11 +124,6 @@ export default function EditItemModal({ isOpen, onClose, item, onSubmit }: EditI
             setError('Failed to update item. Please try again.');
             setSuccessMessage("");
         }
-    };
-
-    const handleSizesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const sizesArray = e.target.value.split(",").map(s => s.trim()).filter(s => s);
-        setSizes(sizesArray);
     };
 
     return (
@@ -219,13 +217,13 @@ export default function EditItemModal({ isOpen, onClose, item, onSubmit }: EditI
 
                         {/* SIZES */}
                         <div>
-                            <label className="block mb-1 text-sm font-medium">Sizes</label>
+                            <label className="block mb-1 text-sm font-medium">Sizes (separate with commas)</label>
                             <input
                                 type="text"
-                                value={sizes.join(", ")}
-                                onChange={handleSizesChange}
+                                value={sizes}
+                                onChange={(e) => setSizes(e.target.value)}
                                 className="w-full bg-[#1e293b] border border-[#334155] text-[#f1f5f9] rounded-lg p-2 outline-none"
-                                placeholder="e.g: XS, S, M, L, XL"
+                                placeholder="Example: S, M, L, XL"
                             />
                         </div>
 
