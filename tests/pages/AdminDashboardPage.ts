@@ -4,6 +4,8 @@ export class AdminDashboardPage {
 
     private lastCancelledId: string | null = null;
     private lastDeletedInventoryId: string | null = null;
+    private lastEditedInventoryId: string | null = null;
+    private editPrice: string | null = null;
 
     constructor(private page: Page) { }
 
@@ -73,6 +75,72 @@ export class AdminDashboardPage {
         // Verificar que la fila ya no existe
         await expect(rowWithId).toHaveCount(0, { timeout: 15000 });
     }
+
+    async editFirstInventoryItem() {
+
+        const table = await this.inventoryTable();
+
+        // Obtener la primer fila
+        const firstRow = table.locator('tbody tr').first();
+        
+        // Guardar el id para validar luego
+        const itemId = await firstRow.locator('td').nth(0).innerText();
+        this.lastEditedInventoryId = itemId;
+
+        // Obtener precio antiguo
+        const priceText = await firstRow.locator('td').nth(4).innerText();
+        const oldPrice = parseFloat(priceText.replace('$', '').trim());
+
+        // Botón edit
+        const editButton = firstRow.getByRole('button', { name: /edit/i });              
+
+        // Esperar a que el botón exista y esté visible
+        await expect(editButton).toBeVisible({ timeout: 15000 });
+        await editButton.click();
+
+        // Esperar a que aparezca el modal
+        const modal = this.page.locator('form:has-text("Edit item")');
+        await expect(modal).toBeVisible({ timeout: 15000 });
+
+        // Nuevo precio
+        const newPrice = (oldPrice + 1).toFixed(2);
+        const priceInput = modal.locator('label:has-text("Price") + input');
+        await priceInput.fill(newPrice);
+
+        // Guardar nuevo precio para validar luego
+        this.editPrice = newPrice;
+
+        // Botón Save
+        const saveButton = modal.getByRole('button', { name: /save/i });
+
+        // Esperar a que el botón exista y esté visible
+        await expect(editButton).toBeVisible({ timeout: 15000 });
+        await saveButton.click();
+    }
+
+    async assertItemWasEdited() {
+        if (!this.lastEditedInventoryId) {
+            throw new Error("No item ID stored to assert edited.");
+        }
+
+        if (!this.editPrice) {
+            throw new Error("No edited price stored for validation.");
+        }
+
+        const table = await this.inventoryTable();
+
+        const rowWithId = table.locator(
+            `tbody tr:has(td:text-is("${this.lastEditedInventoryId}"))`
+        );
+
+        await expect(rowWithId).toHaveCount(1);
+
+        // Validar precio nuevo
+        const priceText = await rowWithId.locator('td').nth(4).innerText();
+        const cleanedPrice = priceText.replace('$', '').trim();
+        await expect(cleanedPrice).toBe(this.editPrice);
+    }
+
 
     //Metodos Schedule Table
 
