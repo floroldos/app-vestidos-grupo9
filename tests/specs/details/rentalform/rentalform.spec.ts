@@ -2,6 +2,11 @@ import { test } from "@playwright/test";
 import { ProductDetailPage } from "../../../pages/ProductDetailPage";
 
 test.describe("Validaciones Rental Form", () => {
+    test.beforeEach(({ browserName }) => {
+        test.skip(browserName === "firefox" || browserName === "webkit",
+            "Esta suite no corre en Firefox ni Safari"
+        );
+    });
 
     const valid = {
         name: "Test",
