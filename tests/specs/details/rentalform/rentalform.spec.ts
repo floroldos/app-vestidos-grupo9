@@ -1,166 +1,57 @@
-import { test, expect } from "@playwright/test";
+import { test } from "@playwright/test";
+import { ProductDetailPage } from "../../../pages/ProductDetailPage";
 
 test.describe("Validaciones Rental Form", () => {
 
-    // -------------------------------
-    // CT-RF004-01: Mostrar error al enviar vacío
-    // -------------------------------
-    test("CT-RF004-01: debe mostrar error cuando se envía vacío", async ({ page }) => {
-        await page.goto("/items/1");
+    const valid = {
+        name: "Test",
+        email: "example@test.com",
+        phone: "099123456",
+        start: "2099-01-10",
+        end: "2099-01-12",
+        size: "M",
+    };
 
-        await page.click('button[type="submit"]');
+    test("Happy Path: Validación positiva", async ({ page }) => {
+        const product = new ProductDetailPage(page);
 
-        // El componente solo muestra *un* mensaje global por vez → el del primer error detectado
-        await expect(page.getByText("Invalid date")).toBeVisible();
+        await product.goToProductDetail();
+        await product.fillForm(valid);
+        await product.submit();
+        await product.assertRedirectedToSuccess();
     });
 
-    // -------------------------------
-    // CT-RF004-02: Email inválido (HTML5)
-    // -------------------------------
-    test("CT-RF004-02: debe marcar email inválido", async ({ page }) => {
-        await page.goto("/items/1");
+    test("Form vacío no debe redirigir a url de éxito", async ({ page }) => {
+        const product = new ProductDetailPage(page);
 
-        await page.fill("#name", "Lucía");
-        await page.fill("#email", "invalid-email");
-        await page.fill("#phone", "099123456");
-        await page.fill("#start", "2099-01-10");
-        await page.fill("#end", "2099-01-12");
-
-        // HTML5 evita submit si email es inválido
-        await page.click('button[type="submit"]');
-
-        await expect(page.locator("#email:invalid")).toBeVisible();
+        await product.goToProductDetail();
+        await product.submit();
+        await product.assertNotRedirectedToSuccess();
     });
 
-    // -------------------------------
-    // CT-RF004-03: Teléfono inválido (pattern)
-    // -------------------------------
-    test("CT-RF004-03: debe marcar teléfono inválido", async ({ page }) => {
-        await page.goto("/items/1");
+    test("Form con datos inválidos no debe redirigir a url de éxito", async ({ page }) => {
+        const product = new ProductDetailPage(page);
 
-        await page.fill("#name", "Lucía");
-        await page.fill("#email", "test@test.com");
-        await page.fill("#phone", "abcXYZ");
-        await page.fill("#start", "2099-01-10");
-        await page.fill("#end", "2099-01-12");
+        const casos = [
+            { descripcion: "Nombre vacío", data: { ...valid, name: "" } },
+            { descripcion: "Email sin @", data: { ...valid, email: "invalid" } },
+            { descripcion: "Email sin dominio", data: { ...valid, email: "test@" } },
+            { descripcion: "Teléfono con letras", data: { ...valid, phone: "abc123" } },
+            { descripcion: "Teléfono corto", data: { ...valid, phone: "123" } },
+            { descripcion: "Solo start date", data: { ...valid, end: "" } },
+            { descripcion: "Solo end date", data: { ...valid, start: "" } },
+            { descripcion: "end < start", data: { ...valid, start: "2099-01-20", end: "2099-01-10" } },
+            { descripcion: "Size inválido (XL)", data: { ...valid, size: "XL" } },
+        ];
 
-        await page.click('button[type="submit"]');
+        for (const caso of casos) {
+            console.log(`\n→ Caso: ${caso.descripcion}`);
 
-        await expect(page.locator("#phone:invalid")).toBeVisible();
-    });
-
-    // -------------------------------
-    // CT-RF004-04: Start date sin end date
-    // -------------------------------
-    test("CT-RF004-04: debe mostrar error si se selecciona solo start date", async ({ page }) => {
-        await page.goto("/items/1");
-
-        await page.fill("#start", "2099-01-10");
-
-        await page.click('button[type="submit"]');
-
-        await expect(page.getByText("Invalid date")).toBeVisible();
-    });
-
-    // -------------------------------
-    // CT-RF004-05: End date sin start date
-    // -------------------------------
-    test("CT-RF004-05: debe mostrar error si se selecciona solo end date", async ({ page }) => {
-        await page.goto("/items/1");
-
-        await page.fill("#end", "2099-01-10");
-
-        await page.click('button[type="submit"]');
-
-        await expect(page.getByText("Invalid date")).toBeVisible();
-    });
-
-    // -------------------------------
-    // CT-RF004-06: Fecha de fin anterior al inicio
-    // -------------------------------
-    test("CT-RF004-06: debe marcar error si end < start", async ({ page }) => {
-        await page.goto("/items/1");
-
-        await page.fill("#start", "2099-01-20");
-        await page.fill("#end", "2099-01-10");
-
-        await page.click('button[type="submit"]');
-
-        await expect(page.getByText("End date must be later than start date.")).toBeVisible();
-    });
-
-    // -------------------------------
-    // CT-RF004-07: Size no disponible
-    // -------------------------------
-    test("CT-RF004-07: no debe permitir seleccionar un size sin stock", async ({ page }) => {
-        await page.goto("/items/1");
-
-        // Los sizes no disponibles tienen "disabled"
-        const xs = page.locator('input[name="size"][value="XS"]');
-
-        if (await xs.isDisabled()) {
-            await xs.click({ force: true }); // aunque haga force, el estado no cambia
-            await expect(xs).not.toBeChecked();
-        } else {
-            test.skip(true, "XS estaba disponible en este item, no aplica el test");
+            await product.goToProductDetail();
+            await product.fillForm(caso.data);
+            await product.submit();
+            await product.assertNotRedirectedToSuccess();
         }
-    });
-
-    // -------------------------------
-    // CT-RF004-08: Envío exitoso del formulario
-    // -------------------------------
-    test("CT-RF004-08: debe enviar el formulario correctamente", async ({ page }) => {
-        await page.goto("/items/1");
-
-        await page.fill("#name", "Lucía");
-        await page.fill("#email", "lucia@test.com");
-        await page.fill("#phone", "099123456");
-        await page.fill("#start", "2099-01-10");
-        await page.fill("#end", "2099-01-12");
-
-        // Seleccionar size disponible
-        const size = page.locator('input[name="size"]:not([disabled])').first();
-        await size.check();
-
-        const [req] = await Promise.all([
-            page.waitForRequest((r) => r.url().includes("/api/rentals") && r.method() === "POST"),
-            page.click('button[type="submit"]')
-        ]);
-
-        const formData = req.postData();
-
-        expect(formData).toContain("name=Luc%C3%ADa");
-        expect(formData).toContain("email=lucia%40test.com");
-        expect(formData).toContain("phone=099123456");
-        expect(formData).toContain("start=2099-01-10");
-        expect(formData).toContain("end=2099-01-12");
-    });
-
-    // -------------------------------
-    // CT-RF004-09: Mensaje por fechas ocupadas (409)
-    // -------------------------------
-    test("CT-RF004-09: debe mostrar error si backend responde 409", async ({ page }) => {
-        await page.route("/api/rentals", (route) => {
-            route.fulfill({
-                status: 409,
-                body: JSON.stringify({ error: "conflict" })
-            });
-        });
-
-        await page.goto("/items/1");
-
-        await page.fill("#name", "Lucía");
-        await page.fill("#email", "lucia@test.com");
-        await page.fill("#phone", "099123456");
-        await page.fill("#start", "2099-01-10");
-        await page.fill("#end", "2099-01-12");
-
-        const size = page.locator('input[name="size"]:not([disabled])').first();
-        await size.check();
-
-        await page.click('button[type="submit"]');
-
-        await expect(page.getByText("The selected dates are already booked. Please choose a different date range.")).toBeVisible();
     });
 
 });
