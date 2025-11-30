@@ -32,6 +32,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
+  const description = (data.description || "").toString();
+  if (description) {
+    const len = description.length;
+    if (len < 50 || len > 500) {
+      return NextResponse.json({ error: 'Description must be between 50 and 500 characters' }, { status: 400 });
+    }
+  }
+
   const item = addItem({ name, category, sizes, pricePerDay, color: data.color, style: data.style, description: data.description, images: data.images, alt: data.alt });
 
   return NextResponse.json({ item }, { status: 201 });
