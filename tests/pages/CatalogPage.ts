@@ -15,7 +15,7 @@ export class CatalogPage {
     private noItemsMessage = this.page.getByText('No dresses found');
 
     async goto() {
-        await this.page.goto('/search');
+        await this.page.goto('http://localhost:3000/search');
     }
 
     async assertCatalogLoaded() {
