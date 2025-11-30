@@ -26,7 +26,12 @@ test.describe('Edit item', () => {
         // Editar item
         await adminPage.editFirstInventoryItem();
 
-        await page.waitForLoadState('networkidle');
+        // Esperar a que el modal cierre
+        await expect(
+            page.getByRole('heading', { name: /Edit item/i })
+                .locator('..')
+                .locator('..')
+        ).toBeHidden({ timeout: 15000 });
 
         // Validar edición
         await adminPage.assertItemWasEdited();

@@ -25,7 +25,7 @@ test.describe('Delete item', () => {
         await page.waitForLoadState('networkidle'); 
 
         // Paso 2: Eliminar un item del inventario
-        await adminPage.deleteFirstInventoryItem();
+        await adminPage.deleteLastInventoryItem();
 
         // Esperar a que el contenido se cargue completamente
         await page.waitForLoadState('networkidle'); 

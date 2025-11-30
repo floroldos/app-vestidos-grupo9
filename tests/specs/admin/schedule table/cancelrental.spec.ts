@@ -29,6 +29,9 @@ test.describe('Cancel rental', () => {
         // Paso 4: Cancelar la reserva
         await adminPage.cancelFirstReservation();  
 
+        // Esperar a que el contenido se cargue completamente
+        await page.waitForLoadState('networkidle'); 
+
         // Paso 3: Verificar que la reserva cancelada
         await adminPage.assertFirstReservationWasCancelled();
 

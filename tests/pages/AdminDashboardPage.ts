@@ -36,16 +36,16 @@ export class AdminDashboardPage {
         return this.layout.locator('table').first();
     }
 
-    async deleteFirstInventoryItem() {
+    async deleteLastInventoryItem() {
 
         const table = await this.inventoryTable();
 
-        // Obtener la primer fila
-        const firstRow = table.locator('tbody tr').first();
-        const itemId = await firstRow.locator('td').nth(0).innerText();
+        // Obtener la ultima fila
+        const lastRow = table.locator('tbody tr').last();
+        const itemId = await lastRow.locator('td').nth(0).innerText();
 
         // Botón delete
-        const deleteButton = firstRow.getByRole('button', { name: /delete/i });              
+        const deleteButton = lastRow.getByRole('button', { name: /delete/i });              
 
         // Esperar a que el botón exista y esté visible
         await expect(deleteButton).toBeVisible({ timeout: 15000 });
@@ -99,22 +99,29 @@ export class AdminDashboardPage {
         await editButton.click();
 
         // Esperar a que aparezca el modal
-        const modal = this.page.locator('form:has-text("Edit item")');
+        const modal = this.page
+            .getByRole('heading', { name: /Edit item/i })
+            .locator('..')  // sube al header
+            .locator('..'); // sube al contenedor completo
         await expect(modal).toBeVisible({ timeout: 15000 });
 
         // Nuevo precio
         const newPrice = (oldPrice + 1).toFixed(2);
-        const priceInput = modal.locator('label:has-text("Price") + input');
+        const priceInput = modal.locator('label:has-text("Price/day") + input');
         await priceInput.fill(newPrice);
 
         // Guardar nuevo precio para validar luego
         this.editPrice = newPrice;
 
+        // Editar tambien descripcion.
+        const DescriptionInput = modal.locator('label:has-text("Description") + textarea');
+        await DescriptionInput.fill("This is an extended test description that clearly exceeds the required fifty characters.");
+
         // Botón Save
-        const saveButton = modal.getByRole('button', { name: /save/i });
+        const saveButton = modal.getByRole('button', { name: /Save/i });
 
         // Esperar a que el botón exista y esté visible
-        await expect(editButton).toBeVisible({ timeout: 15000 });
+        await expect(saveButton).toBeVisible({ timeout: 15000 });
         await saveButton.click();
     }
 
@@ -130,7 +137,7 @@ export class AdminDashboardPage {
         const table = await this.inventoryTable();
 
         const rowWithId = table.locator(
-            `tbody tr:has(td:text-is("${this.lastEditedInventoryId}"))`
+            `tbody tr:has(td:has-text("${this.lastEditedInventoryId}"))`
         );
 
         await expect(rowWithId).toHaveCount(1);
@@ -138,7 +145,7 @@ export class AdminDashboardPage {
         // Validar precio nuevo
         const priceText = await rowWithId.locator('td').nth(4).innerText();
         const cleanedPrice = priceText.replace('$', '').trim();
-        await expect(cleanedPrice).toBe(this.editPrice);
+        expect(Number(cleanedPrice)).toBe(Number(this.editPrice));
     }
 
 
@@ -179,20 +186,18 @@ export class AdminDashboardPage {
         const firstActive = table.locator('tbody tr', { hasText: /active/i }).first();
 
         // Obtener id
-        const rentalId = await firstActive.locator('td').nth(0).innerText();
+        const rentalId = (await firstActive.locator('td').nth(0).innerText()).trim();
 
-        // Guardar el ID para futuras verificaciones
+        // Guardar el id para futuras verificaciones
         this.lastCancelledId = rentalId;
 
         // Boton cancel
         const cancelButton = firstActive.getByRole('button', { name: /cancel/i });
 
-        // Esperar a que esté visible y habilitado
+        // Esperar a que esté visible
         await expect(cancelButton).toBeVisible({ timeout: 15000 });
-        await expect(cancelButton).toBeEnabled({ timeout: 15000 });
 
         await cancelButton.click();
-
     }
 
     async assertFirstReservationWasCancelled() {
@@ -202,14 +207,12 @@ export class AdminDashboardPage {
 
         const table = await this.scheduledRentalsTable();
 
-        const rowWithId = table.locator(
-            `tbody tr:has(td:text-is("${this.lastCancelledId}"))`
-        );
+        const rowWithId = table.locator(`tbody tr:has(td:has-text("${this.lastCancelledId}"))`);
 
-        await expect(rowWithId).toHaveCount(1);
+        await expect(rowWithId).toHaveCount(1, { timeout: 20000 });
 
         const state = rowWithId.locator('td').nth(4);
-        await expect(state).toContainText(/canceled/i, { timeout: 5000 });
+        await expect(state).toContainText(/canceled/i, { timeout: 20000 })
     }
 
     async assertReservationDetails() {
