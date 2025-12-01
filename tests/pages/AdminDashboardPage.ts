@@ -59,12 +59,19 @@ export class AdminDashboardPage {
         // Esperar a que el botón exista y esté visible
         await expect(deleteButton).toBeVisible({ timeout: 15000 });
 
-        // Antes de hacer click, estar listo para capturar el alert
-        this.page.once('dialog', async dialog => {
-            await dialog.accept();  // confirme
+        // Configurar listener para auto-aceptar el dialog cuando aparezca
+        const dialogPromise = new Promise<void>((resolve) => {
+            this.page.once('dialog', async (dialog) => {
+                await dialog.accept();
+                resolve();
+            });
         });
-
+        
+        // Click en el botón (esto triggerea el dialog)
         await deleteButton.click();
+
+        // Esperar a que el dialog se haya manejado
+        await dialogPromise;
 
         // Guardar el ID para futuras verificaciones
         this.lastDeletedInventoryId = itemId;
@@ -203,8 +210,15 @@ export class AdminDashboardPage {
         //Obtener la primer fila activa
         const firstActive = table.locator('tbody tr', { hasText: /active/i }).first();
 
-        // Obtener id
-        const rentalId = (await firstActive.locator('td').nth(0).innerText()).trim();
+        // Verificar que existe al menos una fila activa
+        const count = await firstActive.count();
+        if (count === 0) {
+            throw new Error('No active rentals found to cancel');
+        }
+
+        // Obtener id (texto completo del code tag)
+        const rentalIdCode = await firstActive.locator('td').nth(0).locator('code').innerText();
+        const rentalId = rentalIdCode.trim();
 
         // Guardar el id para futuras verificaciones
         this.lastCancelledId = rentalId;
@@ -216,6 +230,21 @@ export class AdminDashboardPage {
         await expect(cancelButton).toBeVisible({ timeout: 15000 });
 
         await cancelButton.click();
+
+        // Esperar a que el status cambie a "canceled" (la fila puede recargarse, así que buscamos de nuevo)
+        // Usar el page locator en lugar de table para que pueda encontrar la fila después del reload
+        await this.page.waitForFunction(
+            (searchId) => {
+                const rows = Array.from(document.querySelectorAll('tbody tr'));
+                return rows.some(row => {
+                    const code = row.querySelector('code');
+                    const status = row.querySelectorAll('td')[4]?.textContent || '';
+                    return code && code.textContent === searchId && /canceled/i.test(status);
+                });
+            },
+            rentalId,
+            { timeout: 20000 }
+        );
     }
 
     async assertFirstReservationWasCancelled() {
