@@ -207,7 +207,7 @@ export class AdminDashboardPage {
     //Metodos Schedule Table
 
     private async scheduledRentalsTable(): Promise<Locator> {
-        await this.page.waitForSelector('h2', { timeout: 3000 }).catch(() => null);
+        await this.page.waitForSelector('h2', { timeout: 15000 }).catch(() => null);
 
         await this.page.waitForSelector('h2:has-text("Scheduled rentals")', { timeout: 20000 });
 
