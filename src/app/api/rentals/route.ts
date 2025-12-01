@@ -16,23 +16,41 @@ function isRealDate(dateString: string) {
 }
 
 export async function POST(req: Request) {
-  const form = await req.formData();
+  const contentType = req.headers.get("content-type") || "";
+  let data: any;
+
+  // Soportar tanto FormData (formulario web) como JSON (tests API)
+  if (contentType.includes("application/json")) {
+    data = await req.json();
+  } else {
+    const form = await req.formData();
+    data = {
+      csrf: form.get("csrf")?.toString() ?? null,
+      itemId: form.get("itemId"),
+      name: form.get("name"),
+      email: form.get("email"),
+      phone: form.get("phone"),
+      size: form.get("size"),
+      start: form.get("start"),
+      end: form.get("end"),
+    };
+  }
 
   // --- CSRF ---
-  const csrf = form.get("csrf")?.toString() ?? null;
+  const csrf = data.csrf?.toString() ?? null;
   if (!verifyCsrfToken(csrf)) {
     return NextResponse.json({ error: "Invalid CSRF token" }, { status: 400 });
   }
 
   // --- CAMPOS ---
-  const itemId = Number(form.get("itemId") || NaN);
-  const name = (form.get("name") || "").toString().trim();
-  const email = (form.get("email") || "").toString().trim();
-  const phone = (form.get("phone") || "").toString().trim();
-  const size = (form.get("size") || "").toString().trim();
+  const itemId = Number(data.itemId || NaN);
+  const name = (data.name || "").toString().trim();
+  const email = (data.email || "").toString().trim();
+  const phone = (data.phone || "").toString().trim();
+  const size = (data.size || "").toString().trim();
 
-  const start = normalizeDate((form.get("start") || "").toString());
-  const end = normalizeDate((form.get("end") || "").toString());
+  const start = normalizeDate((data.start || "").toString());
+  const end = normalizeDate((data.end || "").toString());
 
   // --- VALIDACIÓN DE CAMPOS VACÍOS ---
   if (!itemId || !name || !email || !phone || !start || !end || !size) {
