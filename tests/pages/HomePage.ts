@@ -9,10 +9,10 @@ export class HomePage {
             .or(this.page.getByRole('button', { name: /browse|explorar/i }))
             .or(this.page.getByText(/browse|explorar/i));
 
-    private firstViewDetails = this.page.getByRole('button', { name: /view details|ver detalles/i }).first();
+    private firstProductLink = this.page.locator('a[href^="/items/"], button[data-testid="view-details"]').first();
 
     async goto() {
-        await this.page.goto('http://localhost:3000/');
+        await this.page.goto('/');
     }
 
     async assertBasicUI() {
@@ -20,16 +20,20 @@ export class HomePage {
     }
 
     async goToCatalog() {
-        if (await this.browse.first().isVisible().catch(() => false)) {
-            await this.browse.first().click();
+        // Buscar el link "Browse" que apunta a /search
+        const browseLink = this.page.locator('a[href="/search"]').first();
+        if (await browseLink.isVisible({ timeout: 5000 }).catch(() => false)) {
+            await browseLink.click();
+            await this.page.waitForURL(/.*search/);
         } else {
-            await this.page.goto('/browse');
+            // Fallback: navegar directo a /search
+            await this.page.goto('/search');
         }
     }
 
     async openFirstProductIfVisible(): Promise<boolean> {
-        if (await this.firstViewDetails.isVisible().catch(() => false)) {
-            await this.firstViewDetails.click();
+        if (await this.firstProductLink.isVisible().catch(() => false)) {
+            await this.firstProductLink.click();
             return true;
         }
         return false;

@@ -1,10 +1,9 @@
-import { test, expect } from '../../fixtures/base';
+import { test, expect } from '../../fixtures/api-fixture';
 
 test.use({ baseURL: 'http://localhost:3000' });
 
 test.describe('RF002 - Item Detail & Description Validation (CT-RF002)', () => {
 
-  // Helper: Login como admin (reutilizado de items.spec.ts)
   async function loginAsAdmin(page: any, users: any) {
     await page.goto('/admin/login');
 
@@ -56,7 +55,7 @@ test.describe('RF002 - Item Detail & Description Validation (CT-RF002)', () => {
         sizes: ['M'],
         pricePerDay: 10,
         description: desc,
-        images: ['https://example.com/x.jpg'],
+        images: ['/images/placeholder.jpg'],
         alt: 'test',
         csrf,
       } as any;
@@ -71,6 +70,99 @@ test.describe('RF002 - Item Detail & Description Validation (CT-RF002)', () => {
         expect(body.item).toBeDefined();
       }
     }
+  });
+
+  test('CT-RF002-03: Selector de talle sin stock (disponibilidad)', async ({ page }) => {
+    // Para evitar interferencias entre tests paralelos, crear un item nuevo como admin
+    await loginAsAdmin(page, { admin: { username: 'admin', password: 'supersegura123' } });
+    const csrfAdminResp = await page.request.get('/api/csrf');
+    expect(csrfAdminResp.ok()).toBeTruthy();
+    const csrfAdmin = (await csrfAdminResp.json()).csrf;
+
+    const newItemPayload = {
+      name: `TestItem-RF002-03-${Date.now()}`,
+      category: 'dress',
+      sizes: ['M'],
+      pricePerDay: 10,
+      description: 'x'.repeat(60),
+      images: ['/images/placeholder.jpg'],
+      alt: 'test',
+      csrf: csrfAdmin,
+    } as any;
+
+    const createRes = await page.request.post('/api/admin/items', { data: newItemPayload });
+    expect(createRes.status()).toBe(201);
+    const createdBody = await createRes.json();
+    const item = createdBody.item;
+    const itemId = item.id;
+
+    // Comprobar availability inicial
+    const avail0 = await page.request.get(`/api/items/${itemId}/availability`);
+    expect(avail0.ok()).toBeTruthy();
+    const availBody0 = await avail0.json();
+    expect(availBody0.metadata).toBeDefined();
+    const meta0 = availBody0.metadata;
+    expect(meta0.totalUnits).toBeDefined();
+    expect(typeof meta0.totalUnits).toBe('number');
+
+    // Buscar un intervalo libre (hasta 30 días hacia adelante) antes de crear rental
+    const availBefore = await page.request.get(`/api/items/${itemId}/availability`);
+    expect(availBefore.ok()).toBeTruthy();
+    const availBodyBefore = await availBefore.json();
+    const existing = (availBodyBefore.rentals || []).map((r: any) => ({
+      start: new Date(r.start),
+      end: new Date(r.end),
+    }));
+
+    // Encontrar una ventana de 2 días que no solape con rentals existentes
+    const today = new Date();
+    const fmt = (d: Date) => d.toISOString().split('T')[0];
+    let chosenStart: Date | null = null;
+    let chosenEnd: Date | null = null;
+    for (let offset = 1; offset <= 30; offset++) {
+      const candStart = new Date(today.getFullYear(), today.getMonth(), today.getDate() + offset);
+      const candEnd = new Date(candStart.getFullYear(), candStart.getMonth(), candStart.getDate() + 1);
+      const overlap = existing.some((r: { start: Date; end: Date; }) => !(candEnd.getTime() < r.start.getTime() || candStart.getTime() > r.end.getTime()));
+      if (!overlap) {
+        chosenStart = candStart;
+        chosenEnd = candEnd;
+        break;
+      }
+    }
+
+    if (!chosenStart || !chosenEnd) {
+      throw new Error('No free date window found for the next 30 days to run the availability test');
+    }
+
+    // Obtener CSRF token (public endpoint sets cookie)
+    const csrfResp = await page.request.get('/api/csrf');
+    expect(csrfResp.ok()).toBeTruthy();
+    const csrfData = await csrfResp.json();
+    const csrf = csrfData.csrf;
+
+    // Crear rental para ocupar la unidad en el intervalo encontrado
+    const form = {
+      itemId: String(itemId),
+      name: 'Test User',
+      email: 'test@example.com',
+      phone: '12345678',
+      size: item.sizes && item.sizes[0] ? String(item.sizes[0]) : 'M',
+      start: fmt(chosenStart),
+      end: fmt(chosenEnd),
+      csrf,
+    };
+
+    const rentRes = await page.request.post('/api/rentals', { form });
+    expect(rentRes.status()).toBe(201);
+
+    // Consultar availability después y verificar incremento de activeRentals
+    const avail1 = await page.request.get(`/api/items/${itemId}/availability`);
+    expect(avail1.ok()).toBeTruthy();
+    const availBody1 = await avail1.json();
+    const meta1 = availBody1.metadata;
+    expect(meta1.activeRentals).toBeGreaterThanOrEqual((availBodyBefore.metadata?.activeRentals || 0) + 1);
+    // Si totalUnits == activeRentals entonces el selector de talles debería marcar agotado en la UI
+    expect(meta1.totalUnits).toBeDefined();
   });
 
   test('CT-RF002-04: Precio mostrado correctamente (campo API)', async ({ page }) => {

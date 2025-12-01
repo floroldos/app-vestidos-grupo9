@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../fixtures/api-fixture';
 
 const BASE = process.env.BASE_URL || 'http://localhost:3000';
 
@@ -47,15 +47,15 @@ test.describe('RF001 API Tests de búsqueda (CT-RF001)', () => {
         expect(items.length).toBe(0);
     });
 
-    test('CT-RF001-04: Búsqueda por talle', async ({ request }) => {
-        // Filtro por talle M — los datos iniciales tienen ítems con talle M
+    test('CT-RF001-04: Búsqueda por talle (size filter)', async ({ request }) => {
+        // Filter by size M — seeded data has items with size M
         const res = await request.get(`${BASE}/api/items`, { params: { q: 'dress', size: 'M' } });
         expect(res.status()).toBe(200);
         const body = await res.json();
         const items = Array.isArray(body) ? body : body?.items ?? [];
         expect(Array.isArray(items)).toBe(true);
 
-        // Si se devuelven ítems, cada uno debe incluir el talle solicitado
+        // If items are returned, each must include the requested size
         for (const it of items) {
             expect(Array.isArray(it.sizes) || typeof it.sizes === 'string').toBeTruthy();
             const sizes = Array.isArray(it.sizes) ? it.sizes : JSON.parse(it.sizes || '[]');
@@ -64,7 +64,7 @@ test.describe('RF001 API Tests de búsqueda (CT-RF001)', () => {
     });
 
     test('CT-RF001-05: Búsqueda con caracteres especiales', async ({ request }) => {
-        // Query con caracteres inseguros
+        // Query with potentially unsafe characters should not crash the API
         const q = '<script>test</script>';
         const res = await request.get(`${BASE}/api/items`, { params: { q } });
         expect(res.status()).toBe(200);
@@ -76,16 +76,13 @@ test.describe('RF001 API Tests de búsqueda (CT-RF001)', () => {
     test('CT-RF001-06: Búsqueda case-insensitive', async ({ request }) => {
         const r1 = await request.get(`${BASE}/api/items`, { params: { q: 'DRESS' } });
         const r2 = await request.get(`${BASE}/api/items`, { params: { q: 'dress' } });
-
         expect(r1.status()).toBe(200);
         expect(r2.status()).toBe(200);
-
         const b1 = await r1.json();
         const b2 = await r2.json();
-
         const items1 = Array.isArray(b1) ? b1 : b1?.items ?? [];
         const items2 = Array.isArray(b2) ? b2 : b2?.items ?? [];
-
+        // Compare lengths and ids set
         const ids1 = items1.map((i: any) => i.id).sort();
         const ids2 = items2.map((i: any) => i.id).sort();
         expect(ids1).toEqual(ids2);
@@ -94,16 +91,12 @@ test.describe('RF001 API Tests de búsqueda (CT-RF001)', () => {
     test('CT-RF001-07: Búsqueda con espacios al inicio/final (trim)', async ({ request }) => {
         const r1 = await request.get(`${BASE}/api/items`, { params: { q: '  dress  ' } });
         const r2 = await request.get(`${BASE}/api/items`, { params: { q: 'dress' } });
-
         expect(r1.status()).toBe(200);
         expect(r2.status()).toBe(200);
-
         const b1 = await r1.json();
         const b2 = await r2.json();
-
         const items1 = Array.isArray(b1) ? b1 : b1?.items ?? [];
         const items2 = Array.isArray(b2) ? b2 : b2?.items ?? [];
-
         const ids1 = items1.map((i: any) => i.id).sort();
         const ids2 = items2.map((i: any) => i.id).sort();
         expect(ids1).toEqual(ids2);
@@ -114,10 +107,8 @@ test.describe('RF001 API Tests de búsqueda (CT-RF001)', () => {
         expect(res.status()).toBe(200);
         const body = await res.json();
         const items = Array.isArray(body) ? body : body?.items ?? [];
-        
         expect(Array.isArray(items)).toBe(true);
-
-        // Se espera al menos los 4 ítems iniciales
+        // Expect at least the 4 seeded items to be present
         expect(items.length).toBeGreaterThanOrEqual(4);
     });
 });

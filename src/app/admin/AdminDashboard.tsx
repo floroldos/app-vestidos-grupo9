@@ -164,8 +164,6 @@ export default function AdminDashboard({ csrf }: { csrf: string }) {
 
       setItems((s) => [...s, responseData.item]);
       setError(null);
-      // No cerramos el modal aquí, lo hace el AddItemModal después de mostrar el mensaje
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err?.message ?? "Create failed");
       throw err;
