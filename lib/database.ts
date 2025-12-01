@@ -122,6 +122,42 @@ export function seedInitialData(items: Item[]) {
     console.log(`${items.length} items cargados en la BD`);
 }
 
+export function seedInitialRentals(rentals: Rental[]) {
+    const database = getDatabase();
+
+    // Verificar si ya hay datos
+    const count = database.prepare('SELECT COUNT(*) as count FROM rentals').get() as { count: number };
+    if (count.count > 0) {
+        console.log(`BD ya tiene ${count.count} rentals, saltando seed`);
+        return;
+    }
+
+    const insertRental = database.prepare(`
+        INSERT INTO rentals (id, itemId, start, end, customerName, customerEmail, customerPhone, createdAt, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    const insertMany = database.transaction((rentals: Rental[]) => {
+        for (const r of rentals) {
+            insertRental.run(
+                r.id,
+                r.itemId,
+                r.start,
+                r.end,
+                r.customer.name,
+                r.customer.email,
+                r.customer.phone,
+                r.createdAt,
+                r.status
+            );
+        }
+    });
+
+    insertMany(rentals);
+    console.log(`${rentals.length} rentals cargados en la BD`);
+}
+
+
 // Helper para convertir row de BD a Item
 export function rowToItem(row: Record<string, unknown>): Item {
     return {

@@ -21,9 +21,9 @@ export class LoginPage {
         return await this.submit.isVisible().catch(() => false);
     }
 
-    async login(username: string, password: string) {
-        await this.user.fill(username);
-        await this.pass.fill(password);
+    async login(username?: string, password?: string) {
+        await this.user.fill(username || process.env.ADMIN_USERNAME!);
+        await this.pass.fill(password || process.env.ADMIN_PASSWORD!);
         await this.submit.click();
     }
 }

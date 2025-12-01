@@ -16,7 +16,13 @@ test.describe('Navegación y catálogo', () => {
 
         await homePage.goto();
         await homePage.assertBasicUI();
-        await homePage.goToCatalog();
+
+        // Click en "Browse" para ir al catálogo
+        await page.getByRole('link', { name: 'Browse' }).first().click();
+
+        // Esperar a que cargue la página
+        await page.waitForLoadState('networkidle');
+
         await expect(page).toHaveURL(/.*search/);
         await catalogPage.assertCatalogLoaded();
         await expect(page.getByRole('button', { name: 'Search' })).toBeVisible();

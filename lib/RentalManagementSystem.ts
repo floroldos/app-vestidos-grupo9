@@ -1,5 +1,5 @@
 import 'server-only';
-import { initDatabase, getDatabase, seedInitialData, rowToItem, rowToRental } from './database';
+import { initDatabase, getDatabase, seedInitialData, seedInitialRentals, rowToItem, rowToRental } from './database';
 
 // Limpia todos los datos de test (items y rentals)
 export function clearTestData() {
@@ -23,6 +23,8 @@ export type Item = {
   images: string[];
   alt: string;
 };
+
+
 
 export type Rental = {
   id: string;
@@ -100,6 +102,101 @@ const initialItems: Item[] = [
     ],
     alt: "Velvet cocktail dress in deep tones",
   },
+  {
+  id: 5,
+    name: "Silk Evening Gown 2",
+    category: "dress",
+    pricePerDay: 79,
+    sizes: ["XS", "S", "M", "L"],
+    color: "champagne",
+    style: "evening",
+    description: "Luxurious silk gown with flattering silhouette.",
+    images: [
+      "/images/dresses/silk-evening-gown.jpg",
+      "/images/dresses/silk-evening-gown-2.jpg",
+      "/images/dresses/silk-evening-gown-3.jpg",
+    ],
+    alt: "Model wearing a champagne silk evening gown",
+  },
+  {
+    id: 6,
+    name: "Black Tie Dress 2",
+    category: "dress",
+    pricePerDay: 99,
+    sizes: ["S", "M", "L", "XL"],
+    color: "black",
+    style: "black-tie",
+    description: "Elegant black-tie dress for formal events.",
+    images: [
+      "/images/dresses/black-tie-dress.jpg",
+      "/images/dresses/black-tie-dress-2.jpg",
+      "/images/dresses/black-tie-dress-3.jpg",
+    ],
+    alt: "Elegant black tie dress",
+  },
+  {
+    id: 7,
+    name: "Floral Midi Dress 2",
+    category: "dress",
+    pricePerDay: 49,
+    sizes: ["XS", "S", "M"],
+    color: "floral",
+    style: "daytime",
+    description: "Bright floral midi for daytime events.",
+    images: [
+      "/images/dresses/floral-midi-dress.jpg",
+      "/images/dresses/floral-midi-dress-2.jpg",
+      "/images/dresses/floral-midi-dress-3.jpg",
+    ],
+    alt: "Floral midi dress perfect for daytime events",
+  },
+  {
+    id: 8,
+    name: "Velvet Cocktail Dress 2",
+    category: "dress",
+    pricePerDay: 59,
+    sizes: ["S", "M", "L"],
+    color: "burgundy",
+    style: "cocktail",
+    description: "Rich velvet cocktail dress in deep tones.",
+    images: [
+      "/images/dresses/velvet-cocktail-dress.jpg",
+      "/images/dresses/velvet-cocktail-dress-2.jpg",
+      "/images/dresses/velvet-cocktail-dress-3.jpg",
+    ],
+    alt: "Velvet cocktail dress in deep tones",
+  },
+];
+
+
+const initialRentals: Rental[] = [
+  {
+    id: crypto.randomUUID(),
+    itemId: 1,
+    start: "2025-12-01",
+    end: "2025-12-05",
+    customer: { name: "Romina Hernandez", email: "romina@example.com", phone: "099123456" },
+    createdAt: new Date().toISOString(),
+    status: "active",
+  },
+  {
+    id: crypto.randomUUID(),
+    itemId: 2,
+    start: "2025-12-03",
+    end: "2025-12-07",
+    customer: { name: "Camila Perez", email: "camila@example.com", phone: "098123456" },
+    createdAt: new Date().toISOString(),
+    status: "active",
+  },
+  {
+    id: crypto.randomUUID(),
+    itemId: 2,
+    start: "2025-12-10",
+    end: "2025-12-12",
+    customer: { name: "Tamara Rodriguez", email: "tamara@example.com", phone: "097123456" },
+    createdAt: new Date().toISOString(),
+    status: "active",
+  },
 ];
 
 // Inicializar BD al cargar el módulo
@@ -111,6 +208,7 @@ function ensureDatabase() {
   if (!globalThis.__dbInitialized) {
     initDatabase();
     seedInitialData(initialItems);
+    seedInitialRentals(initialRentals);
     globalThis.__dbInitialized = true;
   }
 }

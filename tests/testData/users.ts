@@ -1,6 +1,6 @@
 export const users = {
     admin: {
-        username: process.env.ADMIN_USER ?? 'admin',
-        password: process.env.ADMIN_PASSWORD ?? 'supersegura123'
+        user: process.env.ADMIN_USER!,
+        pass: process.env.ADMIN_PASS!
     }
 };
