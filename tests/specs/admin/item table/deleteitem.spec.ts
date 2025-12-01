@@ -11,7 +11,7 @@ test.describe('Delete item', () => {
      * Objetivo: Validar que el admin pueda eliminar un item del inventario
      * Prioridad: Media
      */
-    test('Delete first item from inventory', async ({ page, users }) => {
+    test('Delete last item from inventory', async ({ page, users }) => {
         
         const loginPage = new LoginPage(page);
         const adminPage = new AdminDashboardPage(page); 
