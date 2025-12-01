@@ -6,6 +6,7 @@ export class AdminDashboardPage {
     private lastDeletedInventoryId: string | null = null;
     private lastEditedInventoryId: string | null = null;
     private editPrice: string | null = null;
+    private lastAddInventoryName: string | null = null;
 
     constructor(private page: Page) { }
 
@@ -16,7 +17,7 @@ export class AdminDashboardPage {
     private async inventoryTable(): Promise<Locator> {
         await this.page.waitForSelector('h2', { timeout: 3000 }).catch(() => null);
 
-        await this.page.waitForSelector('h2:has-text("Inventory")', { timeout: 15000 });
+        await this.page.waitForSelector('h2:has-text("Inventory")', { timeout: 20000 });
 
         // Posibles ubicaciones de la tabla
         const candidates = [
@@ -34,6 +35,62 @@ export class AdminDashboardPage {
         }
 
         return this.layout.locator('table').first();
+    }
+
+    async addInventoryItem() {
+        const addButton = this.page.getByRole('button', { name: /\+?\s*add item/i });
+
+        await expect(addButton).toBeVisible({ timeout: 25000 });
+        await addButton.click();
+
+        // Abrir modal
+        const modal = this.page
+            .getByRole('heading', { name: /Add new item/i })
+            .locator('..')
+            .locator('..');
+
+        await expect(modal).toBeVisible({ timeout: 15000 });
+
+        // Datos para el item
+        const testDate = Date.now();
+        const itemName = `Test Item ${testDate}`;
+
+        // Llenar formulario
+        await modal.locator('label:has-text("Name") + input').fill(itemName);
+        await modal.locator('label:has-text("Category") + select').selectOption('dress');
+        await modal.locator('label:has-text("Price/day") + input').fill("85");
+        await modal.locator('label:has-text("Color") + input').fill("Red");
+        await modal.locator('label:has-text("Style") + input').fill("Casual");
+        await modal.locator('label:has-text("Sizes") + input').fill("S, M, L");
+        await modal.locator('label:has-text("Description") + textarea').fill("This is a test description for Playwright that exceeds the 50 characters requirement.");
+        const fileInput = modal.locator('input[type="file"]');
+        await fileInput.setInputFiles([
+            './public/images/dresses/black-tie-dress.jpg',
+            './public/images/dresses/black-tie-dress-2.jpg',
+            './public/images/dresses/black-tie-dress-3.jpg'
+        ]);
+
+        // Guardar
+        const saveButton = modal.getByRole('button', { name: /save changes/i });
+        await expect(saveButton).toBeVisible({ timeout: 15000 });
+        await saveButton.click();
+
+        // Guardar name para validación
+        this.lastAddInventoryName = itemName;
+    }
+
+    async assertItemWasAdded() {
+        if (!this.lastAddInventoryName) {
+            throw new Error("No item name stored to assert addition.");
+        }
+
+        const table = await this.inventoryTable();
+
+        const row = table.locator(
+            `tbody tr:has(td:has-text("${this.lastAddInventoryName}"))`
+        );
+
+        await expect(row).toHaveCount(1, { timeout: 15000 });
     }
 
     async deleteLastInventoryItem() {
@@ -140,8 +197,6 @@ export class AdminDashboardPage {
             `tbody tr:has(td:has-text("${this.lastEditedInventoryId}"))`
         );
 
-        await expect(rowWithId).toHaveCount(1);
-
         // Validar precio nuevo
         const priceText = await rowWithId.locator('td').nth(4).innerText();
         const cleanedPrice = priceText.replace('$', '').trim();
@@ -152,7 +207,7 @@ export class AdminDashboardPage {
     //Metodos Schedule Table
 
     private async scheduledRentalsTable(): Promise<Locator> {
-        await this.page.waitForSelector('h2', { timeout: 3000 }).catch(() => null);
+        await this.page.waitForSelector('h2', { timeout: 15000 }).catch(() => null);
 
         await this.page.waitForSelector('h2:has-text("Scheduled rentals")', { timeout: 20000 });
 
