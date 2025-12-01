@@ -68,6 +68,12 @@ export class AdminDashboardPage {
 
         // Guardar el ID para futuras verificaciones
         this.lastDeletedInventoryId = itemId;
+
+        // Esperar a que la fila desaparezca de la tabla
+        const rowWithId = table.locator(
+            `tbody tr:has(td:text-is("${itemId}"))`
+        );
+        await expect(rowWithId).toHaveCount(0, { timeout: 15000 });
     }
 
     async assertItemWasDeleted() {
@@ -132,6 +138,9 @@ export class AdminDashboardPage {
         // Esperar a que el botón exista y esté visible
         await expect(saveButton).toBeVisible({ timeout: 15000 });
         await saveButton.click();
+
+        // Esperar a que el modal desaparezca
+        await expect(modal).not.toBeVisible({ timeout: 15000 });
     }
 
     async assertItemWasEdited() {
@@ -146,7 +155,7 @@ export class AdminDashboardPage {
         const table = await this.inventoryTable();
 
         const rowWithId = table.locator(
-            `tbody tr:has(td:has-text("${this.lastEditedInventoryId}"))`
+            `tbody tr:has(td:text-is("${this.lastEditedInventoryId}"))`
         );
 
         await expect(rowWithId).toHaveCount(1);
