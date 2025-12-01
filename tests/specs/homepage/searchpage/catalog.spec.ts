@@ -18,7 +18,10 @@ test.describe('Navegación y catálogo', () => {
         await homePage.assertBasicUI();
 
         // Click en "Browse" para ir al catálogo
-        await page.getByRole('link', { name: 'Browse' }).first().click();
+        await Promise.all([
+            page.waitForURL(/.*search/, { timeout: 10000 }),
+            page.getByRole('link', { name: 'Browse' }).first().click()
+        ]);
 
         // Esperar a que cargue la página
         await page.waitForLoadState('networkidle');
