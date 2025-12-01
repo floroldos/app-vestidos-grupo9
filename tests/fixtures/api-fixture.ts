@@ -11,6 +11,13 @@ export const test = base.extend<UserFixture>({
   },
 });
 
-
+// Cleanup antes de cada test de API
+test.beforeEach(async ({ request }) => {
+  try {
+    await request.post('http://localhost:3000/api/test/cleanup');
+  } catch (e) {
+    // ignorar errores durante la limpieza
+  }
+});
 
 export const expect = test.expect;

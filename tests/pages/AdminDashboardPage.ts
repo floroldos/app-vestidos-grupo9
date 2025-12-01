@@ -11,12 +11,21 @@ export class AdminDashboardPage {
 
     private layout = this.page.locator('[data-testid="admin-dashboard"], main, #admin');
 
+    // Wait for dashboard to finish loading
+    async waitForDashboardReady() {
+        // Wait for loading spinner to disappear
+        await this.page.waitForSelector('text=Loading dashboard...', { state: 'hidden', timeout: 30000 }).catch(() => null);
+        
+        // Wait for either Inventory or Scheduled Rentals section to appear
+        await this.page.waitForSelector('h2:has-text("Inventory"), h2:has-text("Scheduled Rentals")', { timeout: 30000 });
+    }
+
     // Metodos Item Table
 
     private async inventoryTable(): Promise<Locator> {
-        await this.page.waitForSelector('h2', { timeout: 3000 }).catch(() => null);
+        await this.waitForDashboardReady();
 
-        await this.page.waitForSelector('h2:has-text("Inventory")', { timeout: 15000 });
+        await this.page.waitForSelector('h2:has-text("Inventory")', { timeout: 5000 });
 
         // Posibles ubicaciones de la tabla
         const candidates = [
@@ -152,7 +161,7 @@ export class AdminDashboardPage {
     //Metodos Schedule Table
 
     private async scheduledRentalsTable(): Promise<Locator> {
-        await this.page.waitForSelector('h2', { timeout: 3000 }).catch(() => null);
+        await this.waitForDashboardReady();
 
         await this.page.waitForSelector('h2:has-text("Scheduled rentals")', { timeout: 20000 });
 

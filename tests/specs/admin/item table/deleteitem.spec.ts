@@ -9,7 +9,6 @@ test.describe('Delete item', () => {
     /**
      * CT-RF005-04: Eliminar artículo con confirmación
      * Objetivo: Validar que el admin pueda eliminar un item del inventario
-     * Prioridad: Media
      */
     test('Delete first item from inventory', async ({ page, users }) => {
 
