@@ -28,51 +28,42 @@ test.describe('API - Login Admin', () => {
         expect(responseBody.error).toMatch(/invalid credentials/i);
     });
 
-    test('CT-RF005-06: Acceso a panel admin sin autenticación', async ({ page }) => {
-        // Paso 1: Navegar directamente a /admin sin estar autenticado
-        const response = await page.goto('/admin');
+    test('CT-RF005-06: Acceso a API admin sin autenticación', async ({ page }) => {
+        // Paso 1: Intentar acceder a endpoint admin sin autenticación
+        const itemsResponse = await page.request.get('/api/admin/items');
 
-        // Resultado esperado: Redirección automática a /admin/login
-        await page.waitForURL(/\/admin\/login/);
-        expect(page.url()).toMatch(/\/admin\/login/);
-
-        // Verificar que estamos en la página de login
-        await expect(page.locator('form')).toBeVisible();
-        await expect(page.locator('[name="username"]')).toBeVisible();
-        await expect(page.locator('[name="password"]')).toBeVisible();
+        // Resultado esperado: Error 401 Unauthorized
+        expect(itemsResponse.status()).toBe(401);
+        const responseBody = await itemsResponse.json();
+        expect(responseBody.error).toBeDefined();
     });
 
-    test('CT-RF005-07: Logout exitoso', async ({ page, users }) => {
-        // Paso 1: Hacer login primero
-        await page.goto('/admin/login');
-        
-        // Esperar token CSRF
-        await page.waitForFunction(() => {
-            const csrf = document.querySelector<HTMLInputElement>('[name="csrf"]');
-            return csrf && csrf.value !== '';
+    test('CT-RF005-07: Logout exitoso via API', async ({ page, users }) => {
+        // Paso 1: Login via API
+        const csrfResponse = await page.request.get('/api/csrf');
+        expect(csrfResponse.ok()).toBeTruthy();
+        const csrfData = await csrfResponse.json();
+        const csrfToken = csrfData.csrf;
+
+        const loginResponse = await page.request.post('/api/admin/login', {
+            form: {
+                username: users.admin.user,
+                password: users.admin.pass,
+                csrf: csrfToken
+            }
         });
+        expect(loginResponse.status()).toBe(200);
 
-        // Login con credenciales correctas
-        await page.locator('[name="username"]').fill(users.admin.user);
-        await page.locator('[name="password"]').fill(users.admin.pass);
-        await page.getByRole('button', { name: /sign in/i }).click();
-        
-        // Esperar estar autenticado en /admin
-        await page.waitForURL('/admin');
-        expect(page.url()).toContain('/admin');
+        // Paso 2: Verificar que puede acceder a endpoints admin
+        const itemsResponse = await page.request.get('/api/admin/items');
+        expect(itemsResponse.status()).toBe(200);
 
-        // Paso 2: Hacer click en Sign out
-        await page.getByRole('button', { name: /sign out/i }).click();
+        // Paso 3: Hacer logout via API
+        const logoutResponse = await page.request.post('/api/admin/logout');
+        expect(logoutResponse.status()).toBe(200);
 
-        // Paso 3: Verificar redirección a /admin/login
-        await page.waitForURL(/\/admin\/login/);
-        expect(page.url()).toMatch(/\/admin\/login/);
-
-        // Paso 4: Intentar volver a /admin sin login
-        await page.goto('/admin');
-        
-        // Resultado esperado: Redirección a /admin/login (no puede acceder sin login nuevamente)
-        await page.waitForURL(/\/admin\/login/);
-        expect(page.url()).toMatch(/\/admin\/login/);
+        // Paso 4: Verificar que ya no puede acceder a endpoints admin
+        const itemsResponse2 = await page.request.get('/api/admin/items');
+        expect(itemsResponse2.status()).toBe(401);
     });
 });

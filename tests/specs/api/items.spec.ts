@@ -5,17 +5,21 @@ test.use({ baseURL: 'http://localhost:3000' });
 test.describe('RF002 - Item Detail & Description Validation (CT-RF002)', () => {
 
   async function loginAsAdmin(page: any, users: any) {
-    await page.goto('/admin/login');
+    const csrfResponse = await page.request.get('/api/csrf');
+    const csrfData = await csrfResponse.json();
+    const csrfToken = csrfData.csrf;
 
-    await page.waitForFunction(() => {
-      const csrf = document.querySelector<HTMLInputElement>('[name="csrf"]');
-      return csrf && csrf.value !== '';
+    const loginResponse = await page.request.post('/api/admin/login', {
+        form: {
+            username: users.admin.user,
+            password: users.admin.pass,
+            csrf: csrfToken
+        }
     });
 
-    await page.locator('[name="username"]').fill(users.admin.user);
-    await page.locator('[name="password"]').fill(users.admin.pass);
-    await page.getByRole('button', { name: /sign in/i }).click();
-    await page.waitForURL('/admin');
+    if (loginResponse.status() !== 200) {
+        throw new Error(`Login failed with status ${loginResponse.status()}`);
+    }
   }
 
   test('CT-RF002-01: Página de detalle (campos obligatorios)', async ({ page }) => {

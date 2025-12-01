@@ -3,15 +3,21 @@ import { test, expect } from '../../fixtures/api-fixture';
 
 // Helpers generales
 async function loginAsAdmin(page: any, users: any) {
-    await page.goto('/admin/login');
-    await page.waitForFunction(() => {
-        const csrf = document.querySelector<HTMLInputElement>('[name="csrf"]');
-        return csrf && csrf.value !== '';
+    const csrfResponse = await page.request.get('/api/csrf');
+    const csrfData = await csrfResponse.json();
+    const csrfToken = csrfData.csrf;
+
+    const loginResponse = await page.request.post('/api/admin/login', {
+        form: {
+            username: users.admin.user,
+            password: users.admin.pass,
+            csrf: csrfToken
+        }
     });
-    await page.locator('[name="username"]').fill(users.admin.user);
-    await page.locator('[name="password"]').fill(users.admin.pass);
-    await page.getByRole('button', { name: /sign in/i }).click();
-    await page.waitForURL('/admin');
+
+    if (loginResponse.status() !== 200) {
+        throw new Error(`Login failed with status ${loginResponse.status()}`);
+    }
 }
 
 async function getCsrf(page: any): Promise<string> {
@@ -41,19 +47,6 @@ async function createItem(page: any, csrf: string, overrides: any = {}) {
 test.use({ baseURL: 'http://localhost:3000' });
 
 test.describe('API - Gestión de Artículos', () => {
-        async function loginAsAdmin(page: any, users: any) {
-        await page.goto('/admin/login');
-        
-        await page.waitForFunction(() => {
-            const csrf = document.querySelector<HTMLInputElement>('[name="csrf"]');
-            return csrf && csrf.value !== '';
-        });
-
-        await page.locator('[name="username"]').fill(users.admin.user);
-        await page.locator('[name="password"]').fill(users.admin.pass);
-        await page.getByRole('button', { name: /sign in/i }).click();
-        await page.waitForURL('/admin');
-    }
 
     test('CT-RF005-01: Creación de artículo con datos completos', async ({ page, users }) => {
         await loginAsAdmin(page, users);

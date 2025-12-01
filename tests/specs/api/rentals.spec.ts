@@ -19,18 +19,19 @@ test.describe('API - Gestión de Alquileres', () => {
     });
 
     test('CT-RF007-03b: Cancelar alquiler autenticado pero rental inexistente', async ({ page, users }) => {
-        // Paso 1: Login como admin
-        await page.goto('/admin/login');
-        
-        await page.waitForFunction(() => {
-            const csrf = document.querySelector<HTMLInputElement>('[name="csrf"]');
-            return csrf && csrf.value !== '';
-        });
+        // Paso 1: Login como admin via API
+        const csrfResponse = await page.request.get('/api/csrf');
+        const csrfData = await csrfResponse.json();
+        const csrfToken = csrfData.csrf;
 
-        await page.locator('[name="username"]').fill(users.admin.user);
-        await page.locator('[name="password"]').fill(users.admin.pass);
-        await page.getByRole('button', { name: /sign in/i }).click();
-        await page.waitForURL('/admin');
+        const loginResponse = await page.request.post('/api/admin/login', {
+            form: {
+                username: users.admin.user,
+                password: users.admin.pass,
+                csrf: csrfToken
+            }
+        });
+        expect(loginResponse.status()).toBe(200);
 
         // Paso 2: Intentar cancelar un rental que no existe
         const nonExistentRentalId = 99999;
