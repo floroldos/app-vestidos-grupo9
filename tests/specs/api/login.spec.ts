@@ -14,7 +14,7 @@ test.describe('API - Login Admin', () => {
         // Paso 2: Intentar login con credenciales incorrectas usando FormData
         const loginResponse = await page.request.post('/api/admin/login', {
             form: {
-                username: users.admin.username,
+                username: users.admin.user,
                 password: 'wrong123',
                 csrf: csrfToken
             }
@@ -53,8 +53,8 @@ test.describe('API - Login Admin', () => {
         });
 
         // Login con credenciales correctas
-        await page.locator('[name="username"]').fill(users.admin.username);
-        await page.locator('[name="password"]').fill(users.admin.password);
+        await page.locator('[name="username"]').fill(users.admin.user);
+        await page.locator('[name="password"]').fill(users.admin.pass);
         await page.getByRole('button', { name: /sign in/i }).click();
         
         // Esperar estar autenticado en /admin

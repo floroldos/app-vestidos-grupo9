@@ -12,8 +12,8 @@ test.describe('RF002 - Item Detail & Description Validation (CT-RF002)', () => {
       return csrf && csrf.value !== '';
     });
 
-    await page.locator('[name="username"]').fill(users.admin.username);
-    await page.locator('[name="password"]').fill(users.admin.password);
+    await page.locator('[name="username"]').fill(users.admin.user);
+    await page.locator('[name="password"]').fill(users.admin.pass);
     await page.getByRole('button', { name: /sign in/i }).click();
     await page.waitForURL('/admin');
   }
@@ -72,9 +72,9 @@ test.describe('RF002 - Item Detail & Description Validation (CT-RF002)', () => {
     }
   });
 
-  test('CT-RF002-03: Selector de talle sin stock (disponibilidad)', async ({ page }) => {
+  test('CT-RF002-03: Selector de talle sin stock (disponibilidad)', async ({ page, users }) => {
     // Para evitar interferencias entre tests paralelos, crear un item nuevo como admin
-    await loginAsAdmin(page, { admin: { username: 'admin', password: 'supersegura123' } });
+    await loginAsAdmin(page, users);
     const csrfAdminResp = await page.request.get('/api/csrf');
     expect(csrfAdminResp.ok()).toBeTruthy();
     const csrfAdmin = (await csrfAdminResp.json()).csrf;

@@ -10,7 +10,7 @@ export async function POST(req: Request) {
   const username = (form.get("username") || "").toString();
   const password = (form.get("password") || "").toString();
 
-  const expected = process.env.ADMIN_PASSWORD || "supersegura123"; // set securely in env
+  const expected = process.env.ADMIN_PASS || "supersegura123";
   if (!username || password !== expected) {
     return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
   }

@@ -6,7 +6,6 @@ test.describe('API - Gestión de Alquileres', () => {
 
     test('CT-RF007-03: Cancelar alquiler sin autenticación de admin', async ({ page }) => {
         // Paso 1: Intentar cancelar un alquiler sin estar autenticado como admin
-        // Usamos un ID de rental que podría existir o no (ej: 1)
         const rentalId = 1;
 
         const cancelResponse = await page.request.post(`/api/admin/rentals/${rentalId}/cancel`);
@@ -28,8 +27,8 @@ test.describe('API - Gestión de Alquileres', () => {
             return csrf && csrf.value !== '';
         });
 
-        await page.locator('[name="username"]').fill(users.admin.username);
-        await page.locator('[name="password"]').fill(users.admin.password);
+        await page.locator('[name="username"]').fill(users.admin.user);
+        await page.locator('[name="password"]').fill(users.admin.pass);
         await page.getByRole('button', { name: /sign in/i }).click();
         await page.waitForURL('/admin');
 

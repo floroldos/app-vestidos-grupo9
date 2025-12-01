@@ -4,8 +4,8 @@ import { test, expect } from '../../fixtures/api-fixture';
 // Helpers generales para clean code
 async function loginAsAdmin(page: any, users: any) {
     await page.goto('/admin/login');
-    await page.locator('[name="username"]').fill(users.admin.username);
-    await page.locator('[name="password"]').fill(users.admin.password);
+    await page.locator('[name="username"]').fill(users.admin.user);
+    await page.locator('[name="password"]').fill(users.admin.pass);
     await page.getByRole('button', { name: /sign in/i }).click();
     await page.waitForURL('/admin');
 }
