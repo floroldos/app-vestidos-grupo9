@@ -34,29 +34,27 @@ test.describe("Validaciones Rental Form", () => {
         await product.assertNotRedirectedToSuccess();
     });
 
-    test("Form con datos inválidos no debe redirigir a url de éxito", async ({ page }) => {
-        const product = new ProductDetailPage(page);
+    const casos = [
+        { descripcion: "Nombre vacío", data: { ...valid, name: "" } },
+        { descripcion: "Email sin @", data: { ...valid, email: "invalid" } },
+        { descripcion: "Email sin dominio", data: { ...valid, email: "test@" } },
+        { descripcion: "Teléfono con letras", data: { ...valid, phone: "abc123" } },
+        { descripcion: "Teléfono corto", data: { ...valid, phone: "123" } },
+        { descripcion: "Solo start date", data: { ...valid, end: "" } },
+        { descripcion: "Solo end date", data: { ...valid, start: "" } },
+        { descripcion: "end < start", data: { ...valid, start: "2099-01-20", end: "2099-01-10" } },
+        { descripcion: "Size inválido (XL)", data: { ...valid, size: "XL" } },
+    ];
 
-        const casos = [
-            { descripcion: "Nombre vacío", data: { ...valid, name: "" } },
-            { descripcion: "Email sin @", data: { ...valid, email: "invalid" } },
-            { descripcion: "Email sin dominio", data: { ...valid, email: "test@" } },
-            { descripcion: "Teléfono con letras", data: { ...valid, phone: "abc123" } },
-            { descripcion: "Teléfono corto", data: { ...valid, phone: "123" } },
-            { descripcion: "Solo start date", data: { ...valid, end: "" } },
-            { descripcion: "Solo end date", data: { ...valid, start: "" } },
-            { descripcion: "end < start", data: { ...valid, start: "2099-01-20", end: "2099-01-10" } },
-            { descripcion: "Size inválido (XL)", data: { ...valid, size: "XL" } },
-        ];
-
-        for (const caso of casos) {
-            console.log(`\n→ Caso: ${caso.descripcion}`);
+    for (const caso of casos) {
+        test(`Validación negativa: ${caso.descripcion}`, async ({ page }) => {
+            const product = new ProductDetailPage(page);
 
             await product.goToProductDetail();
             await product.fillForm(caso.data);
             await product.submit();
             await product.assertNotRedirectedToSuccess();
-        }
-    });
+        });
+    }
 
 });
