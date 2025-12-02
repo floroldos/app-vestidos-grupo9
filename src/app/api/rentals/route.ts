@@ -22,8 +22,21 @@ export async function POST(req: Request) {
   // Soportar JSON (tests API), FormData (formulario web), y URL-encoded (tests API)
   if (contentType.includes("application/json")) {
     data = await req.json();
-  } else if (contentType.includes("application/x-www-form-urlencoded")) {
-    // Datos URL-encoded (de tests con { form })
+  } else if (contentType.includes("multipart/form-data")) {
+    // FormData (multipart/form-data del formulario web)
+    const form = await req.formData();
+    data = {
+      csrf: form.get("csrf")?.toString() ?? null,
+      itemId: form.get("itemId"),
+      name: form.get("name"),
+      email: form.get("email"),
+      phone: form.get("phone"),
+      size: form.get("size"),
+      start: form.get("start"),
+      end: form.get("end"),
+    };
+  } else {
+    // Por defecto: URL-encoded (de tests con { form })
     const text = await req.text();
     const params = new URLSearchParams(text);
     data = {
@@ -35,19 +48,6 @@ export async function POST(req: Request) {
       size: params.get("size"),
       start: params.get("start"),
       end: params.get("end"),
-    };
-  } else {
-    // FormData (multipart/form-data)
-    const form = await req.formData();
-    data = {
-      csrf: form.get("csrf")?.toString() ?? null,
-      itemId: form.get("itemId"),
-      name: form.get("name"),
-      email: form.get("email"),
-      phone: form.get("phone"),
-      size: form.get("size"),
-      start: form.get("start"),
-      end: form.get("end"),
     };
   }
 
