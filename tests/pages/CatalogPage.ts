@@ -25,7 +25,7 @@ export class CatalogPage {
 
     async openFirstProduct() {
         await this.firstViewDetails.click();
-        await expect(this.page).toHaveURL(/\/items\/\d+/);//.*items\/.+/);
+        await expect(this.page).toHaveURL(/\/items\/\d+/);
 
     }
 
