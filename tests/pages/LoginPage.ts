@@ -22,8 +22,14 @@ export class LoginPage {
     }
 
     async login(username?: string, password?: string) {
-        await this.user.fill(username || process.env.ADMIN_USERNAME!);
-        await this.pass.fill(password || process.env.ADMIN_PASSWORD!);
+        // Esperar a que el token CSRF se cargue
+        await this.page.waitForFunction(() => {
+            const csrfInput = document.querySelector('input[name="csrf"]') as HTMLInputElement;
+            return csrfInput && csrfInput.value && csrfInput.value.length > 0;
+        }, { timeout: 10000 });
+        
+        await this.user.fill(username || process.env.ADMIN_USER!);
+        await this.pass.fill(password || process.env.ADMIN_PASS!);
         await this.submit.click();
     }
 }

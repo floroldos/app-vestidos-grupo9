@@ -1,17 +1,16 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      // Excluir better-sqlite3 del bundle del cliente
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        'better-sqlite3': false,
-      };
-    }
-    return config;
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'example.com',
+      },
+    ],
   },
+  // Excluir better-sqlite3 del bundle del cliente (compatible con Turbopack)
+  serverExternalPackages: ['better-sqlite3'],
 };
 
 export default nextConfig;

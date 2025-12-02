@@ -21,7 +21,7 @@ jobs:
       env:
         SESSION_SECRET: test-secret-key-for-ci
         ADMIN_USER: admin
-        ADMIN_PASSWORD: admin123
+        ADMIN_PASS: supersegura123
       run: npx playwright test
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}

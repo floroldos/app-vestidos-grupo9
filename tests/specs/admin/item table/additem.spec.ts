@@ -26,7 +26,6 @@ test.describe('Add item', () => {
         // Agregar item
         await adminPage.addInventoryItem();
 
-        // Esperar que cualquier modal se cierre
         await expect(page.getByRole('heading', { name: /Add new item/i })).toHaveCount(0, { timeout: 20000 });
 
         // Validar que el item aparece en la tabla

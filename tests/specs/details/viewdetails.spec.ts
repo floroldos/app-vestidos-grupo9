@@ -9,7 +9,6 @@ test.describe('Test Cases para Requerimientos RF001-01, RF002-01, RF003-01', () 
     /**
      * CT-RF002-01: Página de detalle del artículo
      * Objetivo: Validar que el sistema muestre información completa en la página de detalle
-     * Prioridad: Alta
      */
     test('CT-RF002-01: Product detail page shows all required information', async ({ page }) => {
         const catalogPage = new CatalogPage(page);
@@ -97,4 +96,4 @@ test.describe('Test Cases para Requerimientos RF001-01, RF002-01, RF003-01', () 
         await expect(page).toHaveURL(/.*items\/\d+$/);
         await expect(page).not.toHaveURL(/.*success=1/);
     });
-})
+});

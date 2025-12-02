@@ -10,7 +10,6 @@ test.describe('Cancel rental', () => {
      * CT-RF007-01 y CT-RF007-02: Cancelacion de alquiler
      * Objetivo: Validar que al cancelar una reserva se libere la fecha en calendario en la pagina 
      * de admin y se actualice el estado a canceled apenas tocar el boton
-     * Prioridad: Alta
      */
     test('CT-RF007-01: Cancel rental in admin', async ({ page, users }) => {
 

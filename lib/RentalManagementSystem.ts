@@ -1,6 +1,14 @@
 import 'server-only';
 import { initDatabase, getDatabase, seedInitialData, seedInitialRentals, rowToItem, rowToRental } from './database';
 
+// Limpia todos los datos de test (items y rentals)
+export function clearTestData() {
+  ensureDatabase();
+  const db = getDatabase();
+  db.exec('DELETE FROM rentals');
+  db.exec('DELETE FROM items');
+}
+
 export type Category = "dress" | "shoes" | "bag" | "jacket";
 
 export type Item = {

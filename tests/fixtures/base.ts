@@ -24,4 +24,13 @@ export const test = base.extend<Fixtures>({
     users: async ({ }, use) => use(users),
 });
 
+// Cleanup antes de cada test E2E
+test.beforeEach(async ({ request }) => {
+    try {
+        await request.post('http://localhost:3000/api/test/cleanup');
+    } catch (e) {
+        // ignorar errores durante la limpieza
+    }
+});
+
 export const expect = test.expect;

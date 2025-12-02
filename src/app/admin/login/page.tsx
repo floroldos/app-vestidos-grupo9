@@ -30,7 +30,7 @@ export default async function AdminLogin({
     const password = formData.get("password")?.toString() || "";
 
     const envUser = process.env.ADMIN_USER || "admin";
-    const envPass = process.env.ADMIN_PASSWORD || "admin123";
+    const envPass = process.env.ADMIN_PASS || "admin123";
 
     const validUser = username === envUser;
     const validPass = password === envPass;

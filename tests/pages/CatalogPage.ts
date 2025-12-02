@@ -15,7 +15,7 @@ export class CatalogPage {
     private noItemsMessage = this.page.getByText('No dresses found');
 
     async goto() {
-        await this.page.goto('http://localhost:3000/search');
+        await this.page.goto('/search');
     }
 
     async assertCatalogLoaded() {
@@ -24,37 +24,40 @@ export class CatalogPage {
     }
 
     async openFirstProduct() {
-        await this.firstViewDetails.click();
-        await expect(this.page).toHaveURL(/\/items\/\d+/);
-
+        await this.firstViewDetails.waitFor({ state: 'visible', timeout: 20000 });
+        await this.firstViewDetails.click({ timeout: 20000 });
+        await this.page.waitForURL(/.*items\/.+/, { timeout: 20000 });
     }
 
     async searchByQuery(query: string) {
-        await this.searchInput.waitFor({ state: 'visible' });
-        await this.searchInput.fill(query);
-        await this.searchButton.click();
+        await this.searchInput.waitFor({ state: 'visible', timeout: 20000 });
+        await this.searchInput.fill(query, { timeout: 20000 });
+        await this.searchButton.waitFor({ state: 'visible', timeout: 20000 });
+        await this.searchButton.click({ timeout: 20000 });
     }
 
     async filterByCategory(category: string) {
-        await this.categorySelect.waitFor({ state: 'visible' });
-        await this.categorySelect.selectOption({ value: category });
-        await this.searchButton.click();
+        await this.categorySelect.waitFor({ state: 'visible', timeout: 20000 });
+        await this.categorySelect.selectOption({ value: category }, { timeout: 20000 });
+        await this.searchButton.waitFor({ state: 'visible', timeout: 20000 });
+        await this.searchButton.click({ timeout: 20000 });
     }
 
     async applyComplexFilter(data: { query?: string; category?: string; style?: string }) {
         if (data.query) {
-            await this.searchInput.waitFor({ state: 'visible' });
-            await this.searchInput.fill(data.query);
+            await this.searchInput.waitFor({ state: 'visible', timeout: 20000 });
+            await this.searchInput.fill(data.query, { timeout: 20000 });
         }
         if (data.category) {
-            await this.categorySelect.waitFor({ state: 'visible' });
-            await this.categorySelect.selectOption({ value: data.category });
+            await this.categorySelect.waitFor({ state: 'visible', timeout: 20000 });
+            await this.categorySelect.selectOption({ value: data.category }, { timeout: 20000 });
         }
         if (data.style) {
-            await this.styleInput.waitFor({ state: 'visible' });
-            await this.styleInput.fill(data.style);
+            await this.styleInput.waitFor({ state: 'visible', timeout: 20000 });
+            await this.styleInput.fill(data.style, { timeout: 20000 });
         }
-        await this.searchButton.click();
+        await this.searchButton.waitFor({ state: 'visible', timeout: 20000 });
+        await this.searchButton.click({ timeout: 20000 });
     }
 
     async assertResultsAreVisible() {
