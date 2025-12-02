@@ -108,7 +108,6 @@ test.describe('RF001 API Tests de búsqueda (CT-RF001)', () => {
         const body = await res.json();
         const items = Array.isArray(body) ? body : body?.items ?? [];
         expect(Array.isArray(items)).toBe(true);
-        // Expect at least the 4 seeded items to be present
         expect(items.length).toBeGreaterThanOrEqual(4);
     });
 });

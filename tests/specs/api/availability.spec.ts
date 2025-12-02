@@ -1,53 +1,15 @@
 
 import { test, expect } from '../../fixtures/api-fixture';
+import { loginAsAdmin, getCsrf, createTestItem } from '../../helpers/api-helpers';
+import { formatDate, addDays } from '../../helpers/date-helpers';
 
-// Helpers generales
-async function loginAsAdmin(page: any, users: any) {
-    const csrfResponse = await page.request.get('/api/csrf');
-    const csrfData = await csrfResponse.json();
-    const csrfToken = csrfData.csrf;
-
-    const loginResponse = await page.request.post('/api/admin/login', {
-        form: {
-            username: users.admin.user,
-            password: users.admin.pass,
-            csrf: csrfToken
-        }
-    });
-
-    if (loginResponse.status() !== 200) {
-        throw new Error(`Login failed with status ${loginResponse.status()}`);
-    }
-}
-
-async function getCsrf(page: any) {
-    const csrfResp = await page.request.get('/api/csrf');
-    return (await csrfResp.json()).csrf;
-}
-
+// Helper específico de este archivo
 async function createItem(page: any, csrf: any, name: string = `Item-${Date.now()}`) {
-    const itemPayload = {
-        name,
-        category: 'dress',
-        sizes: ['M'],
-        pricePerDay: 10,
-        description: 'x'.repeat(60),
-            images: ['/images/placeholder.jpg'],
-        alt: 'test',
-        csrf,
-    };
-    const createRes = await page.request.post('/api/admin/items', { data: itemPayload });
-    return (await createRes.json()).item;
+    return await createTestItem(page, csrf, name);
 }
 
 function fmt(date: any): string {
-    return date.toISOString().split('T')[0];
-}
-
-function addDays(date: any, days: any): Date {
-    const d = new Date(date);
-    d.setDate(d.getDate() + days);
-    return d;
+    return formatDate(date);
 }
 
 

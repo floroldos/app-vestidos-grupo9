@@ -47,10 +47,10 @@ test.describe('Navegación y catálogo', () => {
     });
 
     /**
-     * CT-RF002-01: Página de detalle del artículo
+     * CT-RF002-12: Página de detalle del artículo
      * Objetivo: Validar que el sistema muestre información completa en la página de detalle desde la Home
      */
-    test('CT-RF002-01: Página de detalle del artículo desde Home', async ({ page }) => {
+    test('CT-RF002-12: Página de detalle del artículo desde Home', async ({ page }) => {
         const homePage = new HomePage(page);
 
         await homePage.goto();
@@ -118,10 +118,10 @@ test.describe('Navegación y catálogo', () => {
         });
 
         /**
-         * CT-RF001-02: Búsqueda con filtros combinables
+         * CT-RF001-11: Búsqueda con filtros combinables
          * Objetivo: Verificar que los filtros de categoría, estilo y color puedan combinarse
          */
-        test('CT-RF001-02: Combina filtros de vestidos (talla, color, estilo)', async ({ catalog }) => {
+        test('CT-RF001-11: Combina filtros de vestidos (talla, color, estilo)', async ({ catalog }) => {
             await catalog.applyComplexFilter({
                 category: 'dress',
                 style: 'cocktail',
@@ -139,10 +139,10 @@ test.describe('Navegación y catálogo', () => {
         });
 
         /**
-         * CT-RF001-01: Búsqueda por palabra clave válida
+         * CT-RF001-09: Búsqueda por palabra clave válida
          * Objetivo: Validar que los resultados se actualizan dinámicamente al cambiar filtros
          */
-        test('CT-RF001-01: Actualiza resultados dinámicamente al cambiar filtros', async ({ catalog }) => {
+        test('CT-RF001-09: Actualiza resultados dinámicamente al cambiar filtros', async ({ catalog }) => {
             await catalog.goto();
             await catalog.assertCatalogLoaded();
 
@@ -162,11 +162,11 @@ test.describe('Navegación y catálogo', () => {
         });
     });
     /**
-     * CT-RF001-01: Búsqueda por palabra clave válida
+     * CT-RF001-10: Búsqueda por palabra clave válida
      * Objetivo: Validar que la búsqueda devuelva artículos relacionados sin necesidad de recargar la página
      * Prioridad: Alta
      */
-    test('CT-RF001-01: Buscar por palabra clave válida devuelve artículos relacionados dinámicamente', async ({ page }) => {
+    test('CT-RF001-10: Buscar por palabra clave válida devuelve artículos relacionados dinámicamente', async ({ page }) => {
         const catalogPage = new CatalogPage(page);
         // Paso 1: Ir al catálogo
         await catalogPage.goto();
