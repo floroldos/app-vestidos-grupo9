@@ -8,7 +8,6 @@ test.describe('View rental', () => {
     /**
         * CT-RF0006-01: Visualizacion de alquileres en admin
         * Objetivo: Validar que el administrador pueda ver los alquileres confirmados
-        * Prioridad: Alta
         */
     test('CT-RF006-01: View rental in admin', async ({ page, users }) => {
 

@@ -11,8 +11,10 @@ type AdminItem = {
   sizes: string[];
   pricePerDay: number;
   color?: string;
+  style?: string;
   description?: string;
   images?: string[];
+  alt?: string;
 };
 
 type Rental = {
@@ -63,8 +65,8 @@ export default function AdminDashboard({ csrf }: { csrf: string }) {
       setItems(itemsData.items ?? []);
       setRentals(rentalsData.rentals ?? []);
       setError(null);
-    } catch (err: any) {
-      setError(err?.message ?? "Error");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Error");
     } finally {
       setLoading(false);
     }
@@ -82,8 +84,8 @@ export default function AdminDashboard({ csrf }: { csrf: string }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Cancel failed");
       await loadAll();
-    } catch (err: any) {
-      setError(err?.message ?? "Cancel failed");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Cancel failed");
     }
   }
 
@@ -100,8 +102,8 @@ export default function AdminDashboard({ csrf }: { csrf: string }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Delete failed");
       setItems((s) => s.filter((i) => i.id !== id));
-    } catch (err: any) {
-      setError(err?.message ?? "Delete failed");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Delete failed");
     }
   }
 
@@ -111,7 +113,7 @@ export default function AdminDashboard({ csrf }: { csrf: string }) {
   }
 
 
-  async function handleUpdateItem(data: any) {
+  async function handleUpdateItem(data: AdminItem & { csrf?: string }) {
     try {
       const res = await fetch(`/api/admin/items/${data.id}`, {
         method: "PUT",
@@ -134,12 +136,12 @@ export default function AdminDashboard({ csrf }: { csrf: string }) {
       if (!res.ok) throw new Error(responseData.error || "Update failed");
       setItems((s) => s.map((x) => (x.id === responseData.item.id ? responseData.item : x)));
       setError(null);
-    } catch (err: any) {
-      setError(err?.message ?? "Update failed");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Update failed");
       throw err; 
     }
   }
-  async function handleCreateItem(data: any) {
+  async function handleCreateItem(data: Omit<AdminItem, "id"> & { csrf?: string }) {
     try {
       const res = await fetch("/api/admin/items", {
         method: "POST",
@@ -164,8 +166,8 @@ export default function AdminDashboard({ csrf }: { csrf: string }) {
 
       setItems((s) => [...s, responseData.item]);
       setError(null);
-    } catch (err: any) {
-      setError(err?.message ?? "Create failed");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Create failed");
       throw err;
     }
   }

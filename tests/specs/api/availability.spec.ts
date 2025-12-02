@@ -1,7 +1,7 @@
 
 import { test, expect } from '../../fixtures/api-fixture';
 
-// Helpers generales para clean code
+// Helpers generales
 async function loginAsAdmin(page: any, users: any) {
     const csrfResponse = await page.request.get('/api/csrf');
     const csrfData = await csrfResponse.json();

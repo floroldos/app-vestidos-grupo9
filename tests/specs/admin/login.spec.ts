@@ -11,12 +11,10 @@ test.describe('Login (opcional)', () => {
             test.skip(true, 'Admin login page not implemented in this build');
             return;
         }
-
-        // Check if form is visible
         const form = page.locator('form');
         await expect(form).toBeVisible();
 
-        // Check for basic login fields
+        // Cchequear que existen los campos usuario, contraseña y el boton de sign in
         await expect(page.locator('[name="username"]')).toBeVisible();
         await expect(page.locator('[name="password"]')).toBeVisible();
         await expect(page.getByRole('button', { name: /sign in/i })).toBeVisible();

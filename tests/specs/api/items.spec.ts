@@ -77,7 +77,7 @@ test.describe('RF002 - Item Detail & Description Validation (CT-RF002)', () => {
   });
 
   test('CT-RF002-03: Selector de talle sin stock (disponibilidad)', async ({ page, users }) => {
-    // Para evitar interferencias entre tests paralelos, crear un item nuevo como admin
+    // Para evitar interferencias entre tests paralelos crear un item nuevo como admin
     await loginAsAdmin(page, users);
     const csrfAdminResp = await page.request.get('/api/csrf');
     expect(csrfAdminResp.ok()).toBeTruthy();
@@ -109,7 +109,7 @@ test.describe('RF002 - Item Detail & Description Validation (CT-RF002)', () => {
     expect(meta0.totalUnits).toBeDefined();
     expect(typeof meta0.totalUnits).toBe('number');
 
-    // Buscar un intervalo libre (hasta 30 días hacia adelante) antes de crear rental
+    // Buscar un intervalo libre antes de crear rental
     const availBefore = await page.request.get(`/api/items/${itemId}/availability`);
     expect(availBefore.ok()).toBeTruthy();
     const availBodyBefore = await availBefore.json();

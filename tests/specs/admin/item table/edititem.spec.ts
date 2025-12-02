@@ -10,7 +10,6 @@ test.describe('Edit item', () => {
      * CT-RF005-03: Editar artículo
      * Objetivo: Validar que el admin pueda editar un item del inventario
      * cambiando el precio, y confirmar que el precio realmente cambio
-     * Prioridad: Media
      */
     test('Edit first item from inventory', async ({ page, users }) => {
         

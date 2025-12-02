@@ -11,7 +11,7 @@ test.describe('Delete item', () => {
      * Objetivo: Validar que el admin pueda eliminar un item del inventario
      */
     test('Delete first item from inventory', async ({ page, users, browserName }) => {
-        // Skip en Firefox y WebKit debido a problemas con el manejo de dialogs nativos
+        // skipeamos en firefox y safari por problemas de manejo de los dialogs
         test.skip(browserName === 'firefox' || browserName === 'webkit', 'Dialog handling issues in Firefox/WebKit');
 
         const loginPage = new LoginPage(page);

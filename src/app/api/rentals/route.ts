@@ -17,7 +17,7 @@ function isRealDate(dateString: string) {
 
 export async function POST(req: Request) {
   const contentType = req.headers.get("content-type") || "";
-  let data: any;
+  let data: Record<string, unknown>;
 
   if (contentType.includes("application/json")) {
     data = await req.json();

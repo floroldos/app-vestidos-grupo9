@@ -20,19 +20,14 @@ test.describe('Cancel rental', () => {
         await loginPage.goto();
         await page.waitForLoadState('networkidle'); 
         await loginPage.login(users.admin.user, users.admin.pass);
-
         // Esperar a que el contenido se cargue completamente
         await page.waitForLoadState('networkidle'); 
-
         // Paso 4: Cancelar la reserva
         await adminPage.cancelFirstReservation();  
-
         // Esperar a que el contenido se cargue completamente
         await page.waitForLoadState('networkidle'); 
-
         // Paso 3: Verificar que la reserva cancelada
         await adminPage.assertFirstReservationWasCancelled();
-
     });
 
 });

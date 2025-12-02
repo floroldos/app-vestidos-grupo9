@@ -10,7 +10,6 @@ test.describe('Add item', () => {
      * CT-RF005-01: Agregar artículo
      * Objetivo: Validar que el admin pueda agregar un item al inventario
      * y que el item efectivamente aparece en la tabla.
-     * Prioridad: Alta
      */
     test('Add new inventory item', async ({ page, users }) => {
         
