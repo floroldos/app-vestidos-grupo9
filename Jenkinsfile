@@ -4,7 +4,7 @@ pipeline {
     environment {
         SESSION_SECRET = 'clave_segura'
         ADMIN_USER = 'admin'
-        ADMIN_PASSWORD = 'supersegura123'
+        ADMIN_PASS = 'supersegura123'
         NEXT_PUBLIC_BASE_URL = 'http://localhost:3000'
     }
     
@@ -42,13 +42,13 @@ pipeline {
                 sh 'npm run build'
             }
         }
-
+// se ejecutan en chromium para velocidad y estabilidad
         stage('Test') {
             steps {
-                echo 'Running Playwright E2E tests...'
+                echo 'Running all Playwright tests (API + E2E)...'
                 sh '''
                     npx playwright install chromium
-                    npm run test:e2e -- --project=chromium --reporter=list
+                    npx playwright test --project=chromium --reporter=list
                 '''
             }
         }
