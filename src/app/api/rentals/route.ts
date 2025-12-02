@@ -19,10 +19,25 @@ export async function POST(req: Request) {
   const contentType = req.headers.get("content-type") || "";
   let data: any;
 
-  // Soportar tanto FormData (formulario web) como JSON (tests API)
+  // Soportar JSON (tests API), FormData (formulario web), y URL-encoded (tests API)
   if (contentType.includes("application/json")) {
     data = await req.json();
+  } else if (contentType.includes("application/x-www-form-urlencoded")) {
+    // Datos URL-encoded (de tests con { form })
+    const text = await req.text();
+    const params = new URLSearchParams(text);
+    data = {
+      csrf: params.get("csrf"),
+      itemId: params.get("itemId"),
+      name: params.get("name"),
+      email: params.get("email"),
+      phone: params.get("phone"),
+      size: params.get("size"),
+      start: params.get("start"),
+      end: params.get("end"),
+    };
   } else {
+    // FormData (multipart/form-data)
     const form = await req.formData();
     data = {
       csrf: form.get("csrf")?.toString() ?? null,
