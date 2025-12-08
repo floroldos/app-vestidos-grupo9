@@ -118,10 +118,10 @@ test.describe('Navegación y catálogo', () => {
         });
 
         /**
-         * CT-RF001-11: Búsqueda con filtros combinables
+         * CT-RF001-02-E2E: Búsqueda con filtros combinables (UI)
          * Objetivo: Verificar que los filtros de categoría, estilo y color puedan combinarse
          */
-        test('CT-RF001-11: Combina filtros de vestidos (talla, color, estilo)', async ({ catalog }) => {
+        test('CT-RF001-02-E2E: Combina filtros de vestidos (talla, color, estilo)', async ({ catalog }) => {
             await catalog.applyComplexFilter({
                 category: 'dress',
                 style: 'cocktail',
@@ -139,10 +139,10 @@ test.describe('Navegación y catálogo', () => {
         });
 
         /**
-         * CT-RF001-09: Búsqueda por palabra clave válida
+         * CT-RF001-06-E2E: Búsqueda por palabra clave válida (UI dinámica)
          * Objetivo: Validar que los resultados se actualizan dinámicamente al cambiar filtros
          */
-        test('CT-RF001-09: Actualiza resultados dinámicamente al cambiar filtros', async ({ catalog }) => {
+        test('CT-RF001-06-E2E: Actualiza resultados dinámicamente al cambiar filtros', async ({ catalog }) => {
             await catalog.goto();
             await catalog.assertCatalogLoaded();
 
@@ -162,11 +162,11 @@ test.describe('Navegación y catálogo', () => {
         });
     });
     /**
-     * CT-RF001-10: Búsqueda por palabra clave válida
+     * CT-RF001-01-E2E: Búsqueda por palabra clave válida (UI dinámica)
      * Objetivo: Validar que la búsqueda devuelva artículos relacionados sin necesidad de recargar la página
      * Prioridad: Alta
      */
-    test('CT-RF001-10: Buscar por palabra clave válida devuelve artículos relacionados dinámicamente', async ({ page }) => {
+    test('CT-RF001-01-E2E: Buscar por palabra clave válida devuelve artículos relacionados dinámicamente', async ({ page }) => {
         const catalogPage = new CatalogPage(page);
         // Paso 1: Ir al catálogo
         await catalogPage.goto();
