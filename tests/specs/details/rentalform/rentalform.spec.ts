@@ -1,5 +1,6 @@
 import { test } from "@playwright/test";
 import { ProductDetailPage } from "../../../pages/ProductDetailPage";
+import { formatDate, addDays } from "../../../utils/date-helpers";
 
 test.describe("Validaciones Rental Form", () => {
     test.beforeEach(({ browserName }) => {
@@ -8,12 +9,13 @@ test.describe("Validaciones Rental Form", () => {
         );
     });
 
+    const today = new Date();
     const valid = {
         name: "Test",
         email: "example@test.com",
         phone: "099123456",
-        start: "2099-01-10",
-        end: "2099-01-12",
+        start: formatDate(addDays(today, 10)),
+        end: formatDate(addDays(today, 12)),
         size: "M",
     };
 
@@ -45,13 +47,11 @@ test.describe("Validaciones Rental Form", () => {
             { descripcion: "Teléfono corto", data: { ...valid, phone: "123" } },
             { descripcion: "Solo start date", data: { ...valid, end: "" } },
             { descripcion: "Solo end date", data: { ...valid, start: "" } },
-            { descripcion: "end < start", data: { ...valid, start: "2099-01-20", end: "2099-01-10" } },
+            { descripcion: "end < start", data: { ...valid, start: formatDate(addDays(today, 20)), end: formatDate(addDays(today, 10)) } },
             { descripcion: "Size inválido (XL)", data: { ...valid, size: "XL" } },
         ];
 
         for (const caso of casos) {
-            console.log(`\n→ Caso: ${caso.descripcion}`);
-
             await product.goToProductDetail();
             await product.fillForm(caso.data);
             await product.submit();

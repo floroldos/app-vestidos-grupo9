@@ -1,5 +1,6 @@
 import { test, expect } from '../../fixtures/api-fixture';
 import { loginAsAdmin, getCsrf } from '../../utils/api-helpers';
+import { formatDate, addDays } from '../../utils/date-helpers';
 
 async function createItem(page: any, csrf: string, name: string = `TestItem-${Date.now()}`) {
     const itemPayload = {
@@ -15,16 +16,6 @@ async function createItem(page: any, csrf: string, name: string = `TestItem-${Da
     const createRes = await page.request.post('/api/admin/items', { data: itemPayload });
     const body = await createRes.json();
     return body.item;
-}
-
-function formatDate(date: Date): string {
-    return date.toISOString().split('T')[0];
-}
-
-function addDays(date: Date, days: number): Date {
-    const result = new Date(date);
-    result.setDate(result.getDate() + days);
-    return result;
 }
 
 test.use({ baseURL: 'http://localhost:3000' });

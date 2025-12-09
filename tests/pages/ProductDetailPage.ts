@@ -65,16 +65,5 @@ export class ProductDetailPage {
         await catalogPage.openFirstProduct();
         await expect(this.page).toHaveURL("http://localhost:3000/items/1");
     }
-    async debugPrintValues() {
-        console.log("NAME:", await this.nameInput.inputValue());
-        console.log("EMAIL:", await this.emailInput.inputValue());
-        console.log("PHONE:", await this.phoneInput.inputValue());
-        console.log("START:", await this.startInput.inputValue());
-        console.log("END:", await this.endInput.inputValue());
-
-        // Para radio buttons:
-        const selectedSize = await this.page.locator('input[name="size"]:checked').inputValue();
-        console.log("SIZE:", selectedSize);
-    }
 
 }

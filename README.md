@@ -58,6 +58,13 @@ npm run dev
 
 La aplicación estará disponible en: **http://localhost:3000**
 
+## Acceso al panel de Jenkins
+Prerequisito: tener Docker abierto.
+
+1. Ir a http://localhost:8080
+2. Ingresar user: admin-vestidos
+3. Ingresar contraseña: grupo9
+
 ## Tecnologías Utilizadas
 
 - **Framework**: Next.js 15 (App Router)
@@ -140,15 +147,6 @@ npx playwright test tests/specs/api/login.spec.ts
 npx playwright test login
 ```
 
-### Atajos con npm (alternativos)
-
-```bash
-npm run test:e2e           # Ejecuta todos los tests
-npm run test:e2e:ui        # Con interfaz gráfica
-npm run test:e2e:debug     # En modo debug
-npm run test:e2e:report    # Ver reporte
-```
-
 ## Jenkins con Docker
 
 Para ejecutar el pipeline de CI/CD:
@@ -168,6 +166,9 @@ docker run -d -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home jenk
   ```bash
   docker exec <container-id> cat /var/jenkins_home/secrets/initialAdminPassword
   ```
+
+user: admin-vestidos
+contraseña: grupo9
 
 ### 4. Configurar el pipeline
 
@@ -189,6 +190,13 @@ npm start          # Ejecuta build de producción
 npm run lint       # Ejecuta ESLint
 npm run test:e2e   # Ejecuta tests de Playwright
 ```
+
+## Acceso al panel de Jenkins
+Prerequisito: tener Docker abierto.
+
+1. Ir a http://localhost:8080
+2. Ingresar user: admin-vestidos
+3. Ingresar contraseña: grupo9
 
 ## Acceso al Panel de Admin
 

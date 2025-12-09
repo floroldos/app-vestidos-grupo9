@@ -57,8 +57,6 @@ test.describe('Navegación y catálogo', () => {
         const productOpened = await homePage.openFirstProductIfVisible();
         if (productOpened) {
             await expect(page).toHaveURL(/.*items\/[a-zA-Z0-9-]+/);
-        } else {
-            console.log("No se encontraron productos destacados en la Home para probar la apertura de detalles.");
         }
     });
 
