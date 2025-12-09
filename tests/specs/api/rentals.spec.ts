@@ -1,6 +1,6 @@
 import { test, expect } from '../../fixtures/api-fixture';
-import { loginAsAdmin, getCsrf, createTestItem, createRental } from '../../helpers/api-helpers';
-import { formatDate, addDays } from '../../helpers/date-helpers';
+import { loginAsAdmin, getCsrf, createTestItem, createRental } from '../../utils/api-helpers';
+import { formatDate, addDays } from '../../utils/date-helpers';
 
 async function createItem(page: any, csrf: string, name: string = `TestItem-${Date.now()}`) {
     return await createTestItem(page, csrf, name);

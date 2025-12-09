@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { findAvailableDates, formatDate, addDays } from '../helpers/date-helpers';
+import { findAvailableDates, formatDate, addDays } from '../utils/date-helpers';
 
 //Tests unitarios para findAvailableDates
 // valida la lógica de búsqueda de fechas disponibles para alquileres

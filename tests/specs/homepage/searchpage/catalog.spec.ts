@@ -18,12 +18,12 @@ test.describe('Navegación y catálogo', () => {
         await homePage.assertBasicUI();
 
         // Click en "Browse" para ir al catálogo
-        await Promise.all([
-            page.waitForURL(/.*search/, { timeout: 10000 }),
-            page.getByRole('link', { name: 'Browse' }).first().click()
-        ]);
-
-        // Esperar a que cargue la página
+        const browseLink = page.getByRole('link', { name: 'Browse' }).first();
+        await browseLink.waitFor({ state: 'visible', timeout: 5000 });
+        await browseLink.click();
+        
+        // Esperar navegación y carga
+        await page.waitForURL(/.*search/, { timeout: 15000 });
         await page.waitForLoadState('networkidle');
 
         await expect(page).toHaveURL(/.*search/);
@@ -118,7 +118,7 @@ test.describe('Navegación y catálogo', () => {
         });
 
         /**
-         * CT-RF001-02-E2E: Búsqueda con filtros combinables (UI)
+         * CT-RF001-02-E2E: Búsqueda con filtros combinables
          * Objetivo: Verificar que los filtros de categoría, estilo y color puedan combinarse
          */
         test('CT-RF001-02-E2E: Combina filtros de vestidos (talla, color, estilo)', async ({ catalog }) => {

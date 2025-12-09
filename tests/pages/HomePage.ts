@@ -33,7 +33,10 @@ export class HomePage {
 
     async openFirstProductIfVisible(): Promise<boolean> {
         if (await this.firstProductLink.isVisible().catch(() => false)) {
-            await this.firstProductLink.click();
+            await Promise.all([
+                this.page.waitForURL(/.*items\/[a-zA-Z0-9-]+/, { timeout: 10000 }),
+                this.firstProductLink.click()
+            ]);
             return true;
         }
         return false;

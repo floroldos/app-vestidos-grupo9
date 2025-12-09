@@ -1,6 +1,6 @@
 import { test, expect } from '../../fixtures/api-fixture';
-import { loginAsAdmin, getCsrf, createTestItem, getAvailability, createRental } from '../../helpers/api-helpers';
-import { findAvailableDates } from '../../helpers/date-helpers';
+import { loginAsAdmin, getCsrf, createTestItem, getAvailability, createRental } from '../../utils/api-helpers';
+import { findAvailableDates } from '../../utils/date-helpers';
 
 test.use({ baseURL: 'http://localhost:3000' });
 
@@ -71,15 +71,15 @@ test.describe('RF002 - Item Detail & Description Validation (CT-RF002)', () => {
     expect(availBefore.metadata.totalUnits).toBeDefined();
     expect(typeof availBefore.metadata.totalUnits).toBe('number');
     
-    // Encontrar fechas disponibles
+    // Arrange: Encontrar fechas disponibles
     const { start, end } = findAvailableDates(availBefore.rentals || []);
     
-    // crear rental para ocupar la unidad
+    // Act: Crear rental para ocupar la unidad
     const csrfPublic = await getCsrf(page);
     const size = item.sizes && item.sizes[0] ? String(item.sizes[0]) : 'M';
     await createRental(page, item.id, size, start, end, csrfPublic);
     
-    // Verificar incremento de activeRentals
+    // Assert: Verificar incremento de activeRentals
     const availAfter = await getAvailability(page, item.id);
     const activeRentalsBefore = availBefore.metadata?.activeRentals || 0;
     expect(availAfter.metadata.activeRentals).toBeGreaterThanOrEqual(activeRentalsBefore + 1);

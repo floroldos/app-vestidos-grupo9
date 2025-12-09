@@ -1,5 +1,5 @@
 import { test, expect } from '../../fixtures/api-fixture';
-import { loginAsAdmin, getCsrf } from '../../helpers/api-helpers';
+import { loginAsAdmin, getCsrf } from '../../utils/api-helpers';
 
 async function createItem(page: any, csrf: string, name: string = `TestItem-${Date.now()}`) {
     const itemPayload = {

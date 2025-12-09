@@ -1,7 +1,7 @@
 
 import { test, expect } from '../../fixtures/api-fixture';
-import { loginAsAdmin, getCsrf, createTestItem } from '../../helpers/api-helpers';
-import { formatDate, addDays } from '../../helpers/date-helpers';
+import { loginAsAdmin, getCsrf, createTestItem } from '../../utils/api-helpers';
+import { formatDate, addDays } from '../../utils/date-helpers';
 
 // Helper específico de este archivo
 async function createItem(page: any, csrf: any, name: string = `Item-${Date.now()}`) {
@@ -143,7 +143,11 @@ test.describe('RF003 - Disponibilidad y calendario (CT-RF003)', () => {
         const csrf = await getCsrf(page);
         const item = await createItem(page, csrf, `RF003-06-Item-${Date.now()}`);
         const itemId = item.id;
-        const oneDay = '2025-12-01';
+        
+        // Usar fecha dinámica en el futuro
+        const today = new Date();
+        const oneDay = formatDate(addDays(today, 10));
+        
         const rentalForm = {
             itemId: String(itemId),
             name: 'Test User',
@@ -170,7 +174,12 @@ test.describe('RF003 - Disponibilidad y calendario (CT-RF003)', () => {
         const csrf = await getCsrf(page);
         const item = await createItem(page, csrf, `RF003-07-Item-${Date.now()}`);
         const itemId = item.id;
-        const pastDay = '2024-01-01';
+        
+        // Usar fechas dinámicas: start en pasado, end en futuro
+        const today = new Date();
+        const pastDay = formatDate(addDays(today, -10)); // 10 días atrás
+        const futureDay = formatDate(addDays(today, 10)); // 10 días adelante
+        
         const rentalForm = {
             itemId: String(itemId),
             name: 'Test User',
@@ -178,7 +187,7 @@ test.describe('RF003 - Disponibilidad y calendario (CT-RF003)', () => {
             phone: '12345678',
             size: 'M',
             start: pastDay,
-            end: '2025-12-02',
+            end: futureDay,
             csrf,
         };
         const rentRes = await page.request.post('/api/rentals', { form: rentalForm });
@@ -192,14 +201,20 @@ test.describe('RF003 - Disponibilidad y calendario (CT-RF003)', () => {
         const csrf = await getCsrf(page);
         const item = await createItem(page, csrf, `RF003-08-Item-${Date.now()}`);
         const itemId = item.id;
+        
+        // Usar fechas dinámicas en el futuro (end < start)
+        const today = new Date();
+        const startDate = formatDate(addDays(today, 20)); // 20 días en el futuro
+        const endDate = formatDate(addDays(today, 15));   // 15 días (anterior a start)
+        
         const rentalForm = {
             itemId: String(itemId),
             name: 'Test User',
             email: 'test@example.com',
             phone: '12345678',
             size: 'M',
-            start: '2025-12-10',
-            end: '2025-12-05',
+            start: startDate,
+            end: endDate,
             csrf,
         };
         const rentRes = await page.request.post('/api/rentals', { form: rentalForm });
